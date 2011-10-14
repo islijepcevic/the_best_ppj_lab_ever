@@ -1,7 +1,0 @@
-'''This is the input parser for the lexycal analyzer generator
-
-created: 11. 10. 2011
-Ivan Slijepcevic
-'''
-
-class LexycalAnalyzer():
