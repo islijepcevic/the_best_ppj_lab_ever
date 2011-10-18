@@ -9,4 +9,8 @@ Ivan Slijepcevic
 if __name__ == '__main__':
     
     #start the execution
-    pass
+    '''
+    stvori Parser
+    automat = pozovi parser.run()
+    automat.run()
+    '''

@@ -17,3 +17,14 @@ class Parser():
         self.analyzer_states = []
         self.lexical_units = []
         self.analyzer_rules = []
+    
+    
+    def run():
+        '''
+        procitaj ulaznu datoteku
+        ucitaj sve
+        obradi_reg_def
+        stvori automat( reg_def, stanja, lex_unit, niz_pravila )
+        
+        return automat
+        '''

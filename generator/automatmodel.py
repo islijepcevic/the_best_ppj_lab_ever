@@ -11,7 +11,22 @@ class AutomatModel():
     executeable version of the automat - the lexycal analyzer
     '''
     
-    def __init__( self ):
+    def __init__( self, reg_def, stanja, lex, pravila ):
         '''constructor'''
         
+        self.regdef = reg_def
+        
+        
+        broj_stanja = 0
+        prijelazi = {} # key: (stanje, znak); value: [stanja]
+    
+    def run():
+        '''
+        for pravilo in pravila:
+            regex = pravilo.regex
+            (lijevo, desno) = pretvori(regex)
+        '''
+
+
+    def pretvori():
         pass
