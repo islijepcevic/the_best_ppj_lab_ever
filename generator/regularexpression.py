@@ -15,3 +15,6 @@ class RegularExpression():
         '''
         
         pass
+    
+    def get_rid_of_regdef( self, regdef ):
+        pass

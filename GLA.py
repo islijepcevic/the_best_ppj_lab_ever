@@ -8,9 +8,6 @@ Ivan Slijepcevic
 
 if __name__ == '__main__':
     
-    #start the execution
-    '''
-    stvori Parser
-    automat = pozovi parser.run()
-    automat.run()
-    '''
+    #create parser object (with sys.stdin)
+    #automat = parser.run() #parser creates and initializes automatModel
+    #automat.run()  #makes the transition table(s)

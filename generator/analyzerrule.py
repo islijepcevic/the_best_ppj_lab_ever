@@ -13,7 +13,7 @@ class AnalyzerRule():
         
         arguments:
         state_name - the name of the state automat was in before rule is applied
-        regular_expression - the regular expression, for the analyzed program,
+        regular_expression - the regular expression object, for the analyzed program,
             that indicates when rule should be applied
         actions - dictionary of actions to complete, possible keys:
             'lexical_unit'
@@ -25,10 +25,16 @@ class AnalyzerRule():
         
         self.state_name = state_name
         
-        self.regular_expression = '' # create the RegularExpression object
+        self.regular_expression = regular_expression
         
         # possible example of implementation
         self.lexical_unit = None
         self.new_line = False
         self.change_state_to = None
         self.go_back = None
+        
+        # mak, umjesto ovoga gore, trebas pravilno postaviti ove varijable
+        # sam odredi kako i iz cega, jer sam ces poslati argumente iz parsera
+        # kad budes stvarao objekte ove klase
+
+    #mak - slobodno dodaj funkcije koje ti trebaju u ovu klasu.
