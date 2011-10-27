@@ -1,0 +1,18 @@
+# linije moraju redom pocinjati sa 'R' pa sa 'A' za svaki automat/izraz, 'I' za abecedu
+# 'R' slijedi regularni izraz
+# 'A' slijedi dict prijelaznog automata. stanja su integeri, abeceda cijela,
+#     pocetno stanje je podrazumijevano 0, prihvatljivo 1, dict je oblika:
+#     { (stanje, znak): [stanja] }
+# 
+
+# brojevi
+R '(0|1|2|3)(0|1|2|3)*'
+A { (0, '0'): [1], (0, '1'): [1], (0, '2'): [1], (0, '3'): [1], (1, '0'): [1], (1, '1'): [1], (1, '2'): [1], (1, '3'): [1] }
+I '01234'
+
+# primjer iz utr knjige
+R '01*|1'
+A { (0, '$'): [3, 9], (9, '1'): [2], (2, '$'): [1], (3, '0'): [4], (4, '$'): [7], (7, '$'): [5, 8], (5, '1'): [6], (6, '$'): [5, 8], (8, '$'): [1] }
+I '01'
+
+
