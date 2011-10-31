@@ -4,7 +4,7 @@ created: 14. 10. 2011
 Ivan Slijepcevic
 '''
 
-class CodeParser():
+class AutomatParser():
     '''the implementation of CodeParser
     '''
     
@@ -22,7 +22,7 @@ class CodeParser():
     def parse( self ):
         '''function that parses the code'''
         
-        transition_stream = open( self.lex_analyzer.transition_table, 'r' )
+        transition_stream = open( self.lex_analyzer.transition_table_path, 'r' )
         transition_table = transition_stream.read().split()
         transition_stream.close()
         

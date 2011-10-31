@@ -10,11 +10,12 @@ from automatparser import AutomatParser
 
 if __name__ == '__main__':
     
-    transition_table = '' #PUT PATH TO TRANSITION TABLE HERE
+    transition_table = 'analizator/automat_transition.table'
+    actions_table = 'analizator/actions.table'
     
     # creation of lex. analyzer instance
     our_little_analyzer = LexycalAnalyzer( sys.stdin, transition_table,
-        sys.stdout, sys.stderr )
+        actions_table, sys.stdout, sys.stderr )
     
     # create an instance of parser
     parser = AutomatParser( our_little_analyzer )

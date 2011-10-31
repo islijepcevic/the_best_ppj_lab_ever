@@ -11,7 +11,7 @@ executeable version of the automat - the lexycal analyzer
 '''
     
     def __init__( self, reg_def, stanja, lex, pravila ):
-        constructor
+        '''constructor'''
         
         self.regdef = reg_def # dict k: ime definicije; val: regex
         self.stanja = stanja # list stringova
@@ -19,7 +19,11 @@ executeable version of the automat - the lexycal analyzer
         self.pravila = pravila # list objekata AnalyzerRule()
         self.prijelazi = {} # key: (stanje, znak); value: [stanja]
         self.br_stanja = 0
-        
+    
+    
+    def dispose( self ):
+        del self.prijelazi
+        del self.pravila
     
     
     def run( self ):

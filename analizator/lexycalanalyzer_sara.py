@@ -27,6 +27,7 @@ class LexycalAnalyzer():
         self.automat = automat
         self.ulazni_program = ulazni_program
         
+        self.stanja_analizatora #[string]
         self.tipovi_lex_jedinka #[string]
         
         self.niz_uniformnih_znakova #[(tip_lex_jedinke, redak, index_u_tablici_znakova)]
@@ -35,37 +36,24 @@ class LexycalAnalyzer():
         self.brojac_linije = 1
         
         self.akcija = akcije #{ (stanje, izraz): [] }
-        self.reg_izraz #[int] - regularni izrazi poredani kao u ulaznoj datoteci, vrijednosti su prihv. stanja automata
-        self.stanja_analizatora #[string] - pocetna stanja svakog prijelaza poredana kao regularni izrazi
-        
+        self.reg_izraz #[int]
+
         self.pocetak = 0
         self.posljednji = 0
         self.zavrsetak = -1
         self.izraz = 0
-        
-        self.trenutno_stanje #string
     
-    
-    def pokreni_anazizu( self ):
-        
-        while ( not self.gotovo() ):
-            
-            self.prepoznaj_izraz()
-            
-            if self.izraz == -1:
-                self.oporavak()
-            else:
-                self.odredi_jedinku()
-    
-    
+
+
     def prepoznaj_izraz ( self ):
         P = self.automat.dohvati_presjek()
         R = self.automat.dohvati_trenutna()
         while R !=[]:
             if P == []: self.slucaj1(R,P)
             else: self.slucaj2(R,P)
-    
-    
+        
+
+
     def slucaj1 ( self, R, P ):
         self.zavrsetak = self.zavrsetak + 1
         trenutni_znak = self.ulazni_program [self.zavrsetak]
@@ -73,20 +61,16 @@ class LexycalAnalyzer():
 
 
     def slucaj2 ( self, R, P ):
-        for i in range ( len( self.reg_izraz ) ):
-            
-            reg_izraz = self.reg_izraz[i]
-            if self.reg_izraz[i] in P and \
-                self.trenutno_stanje == self.stanja_analizatora[i]:
-                
+        for i in range ( len( self.reg_izraz )):
+            if self.reg_izraz[i] in P:
                 self.izraz = i
                 break
-        
         self.posljednji = self.zavrsetak
         self.zavrsetak = self.zavrsetak + 1
         trenutni_znak = self.ulazni_program [self.zavrsetak]
         self.automat.promijeni_stanja( trenutni_znak )
-    
-    
-    def gotovo( self ):
+
+
         
+
+
