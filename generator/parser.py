@@ -7,24 +7,35 @@ Ivan Slijepcevic
 class Parser():
     '''This class ...'''
     
-    def __init__( self, instream ):
+    def __init__( self, definition):
         '''constructor'''
         
-        self.input_stream = instream
+        self.input_stream = ''
+        
+        ''' Dictionary containg regexes with their respective names where the
+        names are the keys, and correspoding regex is value
+        '''
+        self.regexes = {}
+        
+        ''' Array containg all automata states '''
+        self.states = []
+        
+        ''' Array containg all lexical units names '''
+        self.lu_names = []
+        
+        ''' Array containing objects for all transition rules '''
+        self.la_rules = []
         
         # lista regdef. svaki clan liste bi bio nesto tipa n-torka:
         # (ime_def, izraz); moze i mala lista umjesto n-torke
         self.regular_definitions = []
         
-        # ovdje ce ici 'desifrirane' reg_definicije
-        self.regular_dict = {}
-        
-        #liste stringova
-        self.analyzer_states = []
-        self.lexical_units = []
-        
-        # lista objekata AnalyzerRule
-        self.analyzer_rules = []
+        #self.lex_analyzer = lex_analyzer
+        self.set_input_stream(definition)
+    
+    
+    def set_input_stream (self, stream):
+        self.input_stream = stream
     
     
     def run():
