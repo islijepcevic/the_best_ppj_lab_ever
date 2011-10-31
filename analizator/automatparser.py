@@ -3,17 +3,19 @@
 created: 14. 10. 2011
 Ivan Slijepcevic
 '''
+from generator.analyzerrule import AnalyzerRule
+
 
 class AutomatParser():
     '''the implementation of CodeParser
     '''
     
+    
     def __init__( self, lex_analyzer ):
         '''constructor
         
         arguments:
-        lex_analyzer - the lexycal analyzer automat in which parsed data will be
-            stored
+        lex_analyzer - the lex analyzer in which parsed data will be stored
         '''
         
         self.lex_analyzer = lex_analyzer
@@ -26,6 +28,10 @@ class AutomatParser():
         transition_table = transition_stream.read().split()
         transition_stream.close()
         
+        #transition_table = transition_stream.read().split()
+        #transition_stream.close()
+        
+        # TODO: ne znam sto trebam spremati???
         ##############################
         # HERE PARSE THE LINES AND SAVE CONTENT TO THE ANALYZER
         # NEW METHODS WITHIN THE CLASS CAN BE CREATED AND CALLED

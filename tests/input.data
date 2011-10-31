@@ -1,0 +1,25 @@
+{prviTest} test|Regularnih|Definicija
+{nadov} nestoZaNadovezivanje
+{kleen} nestoZaKleena*
+{zag} zagrade(a|b)*
+{nestoSeps} (a|b|$|d|e)*
+
+%X S_pocetno S_komentar S_nesto
+
+%L IDN numConst strConst OP_neki
+
+<S_pocetno>#\|
+{
+-
+UDJI_U_STANJE S_komentar
+}
+<S_komentar>\|#
+{
+-
+UDJI_U_STANJE S_pocetno
+}
+<S_komentar>\n
+{
+-
+NOVI_REDAK
+}
