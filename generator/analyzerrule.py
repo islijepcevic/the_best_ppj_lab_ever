@@ -22,14 +22,23 @@ class AnalyzerRule():
         
         self.regular_expression = regular_expression
         
-        self.lexical_unit = None
-        self.new_line = False
-        self.change_state_to = None
-        self.go_back = None
+        self.lexical_unit = arguments[0]
+        self.new_line = arguments[1]
+        self.change_state_to = arguments[2]
+        self.go_back = arguments[3]
+    
+    
+    def actions_to_list( self ):
         
-        self._parse_arguments (arguments)
-
+        actions = []
+        actions.append( self.lexical_unit )
+        actions.append( self.new_line )
+        actions.append( self.change_state_to )
+        actions.append( self.go_back )
         
+        return actions
+    
+    
     def _parse_arguments (self, arguments):
         self.lexical_unit = arguments.pop(0)
         if len (arguments) != 0:
@@ -44,9 +53,9 @@ class AnalyzerRule():
                     self.go_back = arg.split()[1]
     
     def toString(self):
-        return  ("---\ncurrentState: " + self.state_name + "\nregex: " +
-                self.regular_expression +
-                "\nLex unit: " + self.lexical_unit + '\nnew line: ' +
-                str(self.new_line) + '\nchangeState: ' + str(self.change_state_to) +
-                '\ngo Back: ' + str(self.go_back) + '\n---')
-    #mak - slobodno dodaj funkcije koje ti trebaju u ovu klasu.
+        return  ("---\ncurrentState: " + self.state_name + "\nregex: " + \
+            self.regular_expression + \
+            "\nLex unit: " + self.lexical_unit + \
+            '\nnew line: ' +  str(self.new_line) + \
+            '\nchangeState: ' + str(self.change_state_to) + \
+            '\ngo Back: ' + str(self.go_back) + '\n---')

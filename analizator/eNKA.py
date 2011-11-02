@@ -2,38 +2,41 @@
 
 class eNKA:
     
-    def __init__( self ):
+    def __init__( self, broj_stanja, pocetno, prihvatljiva, prijelazi ):
         
-        self.broj_stanja #int
-        self.pocetno #int
-        self.prihvatljiva #set([int])
-        self.prijelazi #{ (int, char): [int] }
-        self.trenutna_stanja #set([int])
+        self.broj_stanja = broj_stanja #int
+        self.pocetno = pocetno #int
+        self.prihvatljiva = prihvatljiva #set([int])
+        self.prijelazi = prijelazi #{ (int, char): [int] }
+        
+        self.trenutna_stanja = set([])
         
         self.na_pocetak()
 
-    def dohvati_trenutna_stanja(self):
+    def dohvati_trenutna(self):
         return self.trenutna_stanja
 
     def dohvati_presjek(self):
         return self.trenutna_stanja.intersection(self.prihvatljiva)
 
     def promijeni_stanje(self, znak):
-        A=[]
-        for i in (self.trenutna_stanja):
-            A.append(self.prijelazi.get((i, znak),[]))
-        self.trenutna_stanja=set(A)
+        A = set([])
+        for stanje in self.trenutna_stanja:
+            nova_stanja = set( self.prijelazi.get( (stanje, znak), [] ) )
+            A.union( nova_stanja )
+        
+        self.trenutna_stanja = A
         self.e_okruzenje()
 
     def e_okruzenje(self):
-        S=self.trenutna_stanja.copy()
-        while len(S)!=0:
-            t=S.pop()
-            L=self.prijelazi.get(t,'$')
+        S = self.trenutna_stanja.copy()
+        while len(S) != 0:
+            t = S.pop()
+            L = self.prijelazi.get(t,'$')
             for v in (L):
                 if v not in self.trenutna_stanja:
                     self.trenutna_stanja.add(v)
-                    S.push(v)
+                    S.add(v)
 
     def na_pocetak(self):
         self.trenutna_stanja.clear()

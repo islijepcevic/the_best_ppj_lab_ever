@@ -10,18 +10,11 @@ from automatparser import AutomatParser
 
 if __name__ == '__main__':
     
-    transition_table = 'analizator/automat_transition.table'
-    actions_table = 'analizator/actions.table'
+    upute = 'analizator.upute'
     
-    # creation of lex. analyzer instance
-    our_little_analyzer = LexycalAnalyzer( sys.stdin, transition_table,
-        actions_table, sys.stdout, sys.stderr )
+    parser = AutomatParser( upute, sys.stdin )
     
-    # create an instance of parser
-    parser = AutomatParser( our_little_analyzer )
+    analyzer = parser.parse()
     
-    # do the parsing
-    parser.parse()
-    
-    # start the analysis of the parsed code
-    our_little_analyzer.analyze()
+    analyzer.pokreni_analizu()
+    analyzer.ispisi()

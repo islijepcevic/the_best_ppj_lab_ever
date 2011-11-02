@@ -4,18 +4,22 @@ created: 11. 10. 2011
 Ivan Slijepcevic
 '''
 
+from generator.automatmodel import AutomatModel
+from generator.regularexpression import RegularExpression
+from generator.analyzerrule import AnalyzerRule
+
 class Parser():
     '''This class ...'''
     
-    def __init__( self, definition):
+    def __init__( self, instream ):
         '''constructor'''
         
-        self.input_stream = ''
+        self.input_stream = instream
         
         ''' Dictionary containg regexes with their respective names where the
         names are the keys, and correspoding regex is value
         '''
-        self.regexes = {}
+        self.regdefs = {}
         
         ''' Array containg all automata states '''
         self.states = []
@@ -25,94 +29,109 @@ class Parser():
         
         ''' Array containing objects for all transition rules '''
         self.la_rules = []
-        
-        # lista regdef. svaki clan liste bi bio nesto tipa n-torka:
-        # (ime_def, izraz); moze i mala lista umjesto n-torke
-        self.regular_definitions = []
-        
-        #self.lex_analyzer = lex_analyzer
-        self.set_input_stream(definition)
-    
-    
-    def set_input_stream (self, stream):
-        self.input_stream = stream
-    
-    
-    def run():
-        
-        #procitaj ulaznu datoteku
-        #ucitaj sve -> radi naredba stdin.read(); koristi self.input kao stream
-        
-        # popuni sve vrijednosti
-        
-        #obradi_reg_def (pomoc: ppj-labos-upute.pdf odjeljak 2.4.2 i slika 2.13)
-        # kao objektnu paradigmu, predlazem da ovo implementiras u klasi
-        # RegularExpression, u metodi get_rid_of_regdef (slobodno ju preimenujes)
-        
-        #kako preimenujes regdef, popuni 'ciste' regdef u dictionary 
-        #(mozes i brisati listu putem); jer ce dict trebati kasnije, a ne list
-        
-        #za svaki objekt iz self.analyzer_rules
-            #pozovi metodu koja ce u regularnom izrazu reg_def pretvoriti u izraz
-            # opet mozes koristiti implementirano u koraku iznad
-        
-        #stvori automat( reg_def_dict, stanja, lex_unit, niz_pravila )
-        
-        #return automat
     
     
     def parse( self ):
         
-        #transition_stream = open( self.lex_analyzer.transition_table, 'r' )
-        
-        # FIXME: how to load la_definition_string
-        #la_definition_string = transition_stream.read()
-        la_definition_string = self.input_stream
+        la_definition_string = self.input_stream.read().split('\n')
         
         ''' First we split the file to its main parts: regexes, states,
         lexical units names and analyzer rules
         '''
-        regexes_str = la_definition_string.split( '\n\n%X' )[0]
-        states_str = la_definition_string.split( '%X' )[1].split('\n' )[0]
-        lu_names_str = la_definition_string.split( '%L' )[1].split( '\n' )[0]
-        la_rules_str = '\n' + la_definition_string.split( '%L' )[1].split( '\n\n' )[1]
-
         
-        ''' Then we put them into an arrays
-        '''
+        input_part = 'before'
+        regular_definitions = []
+        la_rules = []
         
-        ''' First regexes '''
-        rx = regexes_str.split('\n')
-        for r in rx:
-            key = r.split('} ')[0][1:]
-            val = r.split('} ')[1]
-            self.regexes[key] = val
-        
-        ''' Then states '''
-        self.states = states_str.split()
-        
-        ''' Lexical units names '''
-        self.lu_names = lu_names_str.split()
-        
-        ''' Lexical analyzer rules '''
-        rules = la_rules_str.split('\n}')
-        rules.pop(-1)
-        self.la_rules = self._gen_la_rules_ob (rules)
-    
-    
-    def _gen_la_rules_ob (self, rules):
-        ''' Generates analyzerRule objects from rules string'''
-        
-        #print (rules)
-        analyzer_rules = []
-        for rule in rules:
-            state = rule.split('>')[0][2:]
-            regex = rule.split('>')[1].splitlines()[0]
-            arguments = rule.split('\n{\n')[1].split('\n')
-                        
-            #print (regex)
-            #print (arguments)
+        for line in la_definition_string:
             
-            analyzer_rules.append(AnalyzerRule(state, regex, arguments))
+            if line == '':
+                continue
+            
+            if input_part == 'before':
+                if line[0:2] != '%X':
+                    # read regular definitions
+                    regular_definitions.append( line )
+                else:
+                    input_part = 'after'
+                    
+                    # read states
+                    self.states = line.split()[1:]
+            else:
+                if line[0:2] == '%L':
+                    # read lexical units
+                    self.lu_names = line.split()[1:]
+                else:
+                    # read rules
+                    la_rules.append( line )
         
-        return analyzer_rules
+        # Save regdefs
+        for rd in regular_definitions:
+            key = rd.split('} ')[0][1:]
+            val = RegularExpression( rd.split('} ')[1] )
+            val = self._expand( val )
+            self.regdefs[ key ] = val
+        
+        # Save rules
+        lrstate = 'out'
+        lastate = ''
+        rx = ''
+        args = [ '', False, '', -1 ]
+        
+        for line in la_rules:
+            if lrstate == 'out':
+                if line[0] == '<':
+                    lastate = line[1:].split('>')[0]
+                    rx = RegularExpression( line.split('>')[1] )
+                    rx = self._expand( rx )
+                elif line[0] == '{':
+                    lrstate = 'in'
+                else:
+                    print('something wrong')
+            else:
+                if line != '}':
+                    if line == 'NOVI_REDAK':
+                        args[1] = True
+                    elif line.split()[0] == 'UDJI_U_STANJE':
+                        args[2] = line.split()[1]
+                    elif line.split()[0] == 'VRATI_SE':
+                        args[3] = int( line.split()[1] )
+                    else:
+                        args[0] = line
+                else:
+                    lrstate = 'out'
+                    self.la_rules.append( AnalyzerRule( lastate, rx, args ) )
+                    
+                    lastate = ''
+                    rx = ''
+                    args = [ '', False, '', -1 ]
+        
+        return AutomatModel( self.regdefs, self.states, self.lu_names,
+            self.la_rules )
+    
+    def _expand( self, rx ):
+        '''expands regular definitions in regular expression to return only the
+        regular expression'''
+        
+        # nadji reference
+        start_point = 0
+        while ( True ):
+            
+            start_pos = rx.find( '{', start_point )
+            if start_pos == -1:
+                break
+            
+            if not rx.jest_operator( start_pos ):
+                start_point = start_pos + 1
+                continue
+            
+            end_pos = rx.find( '}', start_point )
+            
+            wrapped_rx_name = rx[ ( start_pos + 1 ): end_pos ]
+            
+            rx = rx.zamijeni( start_pos, end_pos,
+                self.regdefs[ wrapped_rx_name ] )
+            
+            start_point = end_pos + 1
+        
+        return rx

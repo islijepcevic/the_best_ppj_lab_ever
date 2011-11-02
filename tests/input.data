@@ -3,11 +3,8 @@
 {kleen} nestoZaKleena*
 {zag} zagrade(a|b)*
 {nestoSeps} (a|b|$|d|e)*
-
 %X S_pocetno S_komentar S_nesto
-
 %L IDN numConst strConst OP_neki
-
 <S_pocetno>#\|
 {
 -

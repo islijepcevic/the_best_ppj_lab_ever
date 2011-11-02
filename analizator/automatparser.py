@@ -3,37 +3,59 @@
 created: 14. 10. 2011
 Ivan Slijepcevic
 '''
-from generator.analyzerrule import AnalyzerRule
-
+from eNKA import eNKA
+from lexycalanalyzer import LexycalAnalyzer
 
 class AutomatParser():
     '''the implementation of CodeParser
     '''
     
     
-    def __init__( self, lex_analyzer ):
+    def __init__( self, upute_path, code_stream ):
         '''constructor
         
         arguments:
-        lex_analyzer - the lex analyzer in which parsed data will be stored
+        upute - path do datoteke s uputama za analizator
         '''
         
-        self.lex_analyzer = lex_analyzer
+        self.upute_path = upute_path
+        self.code_stream = code_stream
     
     
     def parse( self ):
         '''function that parses the code'''
         
-        transition_stream = open( self.lex_analyzer.transition_table_path, 'r' )
-        transition_table = transition_stream.read().split()
-        transition_stream.close()
+        upute_stream = open( self.upute_path, 'r' )
+        upute = upute_stream.read().split('\n')
+        upute_stream.close()
         
-        #transition_table = transition_stream.read().split()
-        #transition_stream.close()
+        for line in upute:
+            
+            if line == '':
+                continue
+            
+            if line[0] == 'R':
+                reg_izrazi = eval( line[1:] )
+                prihvatljiva_stanja = set( reg_izrazi )
+            elif line[0] == 'A':
+                akcije = eval( line[1:] )
+            elif line[0] == 'S':
+                broj_stanja = eval( line[1:] )
+            elif line[0] == 'P':
+                pocetno_stanje = eval( line[1:] )
+            elif line[0] == 'T':
+                prijelazi = eval( line[1:] )
+            elif line[0] == 'Z':
+                stanja = eval( line[1:] )
+            elif line[0] == 'I':
+                pocetno_stanje_la = line[1:]
+            else:
+                print( 'upute krive' )
         
-        # TODO: ne znam sto trebam spremati???
-        ##############################
-        # HERE PARSE THE LINES AND SAVE CONTENT TO THE ANALYZER
-        # NEW METHODS WITHIN THE CLASS CAN BE CREATED AND CALLED
-        ##############################
+        automat = eNKA( broj_stanja, pocetno_stanje, prihvatljiva_stanja,
+            prijelazi )
         
+        ulazni_kod = self.code_stream.read()
+        
+        return LexycalAnalyzer( automat, ulazni_kod, akcije, stanja, reg_izrazi,
+            pocetno_stanje_la )

@@ -9,8 +9,9 @@ import sys
 class LexycalAnalyzer():
     '''class that contains the automat'''
     
-    def __init__( self, automat, ulazni_program, akcije
-        izlazni_tok = sys.stdout, tok_za_greske = sys.stderr ):
+    def __init__( self, automat, ulazni_program, akcije, stanja_analizatora,
+        reg_izrazi, pocetno_stanje, izlazni_tok = sys.stdout,
+        tok_za_greske = sys.stderr ):
         '''constructor
         
         arguments:
@@ -21,34 +22,38 @@ class LexycalAnalyzer():
         '''
         
         # stream variables
-        self.izlazni_tok = outstream
-        self.tok_za_greske = errstream
+        self.izlazni_tok = izlazni_tok
+        self.tok_za_greske = tok_za_greske
         
         self.automat = automat
         self.ulazni_program = ulazni_program
         
-        self.tipovi_lex_jedinka #[string]
-        
-        self.niz_uniformnih_znakova #[(tip_lex_jedinke, redak, index_u_tablici_znakova)]
-        self.tablica_znakova #[(tip_lex_jedinke, jedinka_kao_string)]
-        
-        self.brojac_linije = 1
+        #self.tipovi_lex_jedinka #[string]
+        #self.lista_stanja_analizatora
         
         self.akcija = akcije #{ (stanje, izraz): [] }
-        self.reg_izraz #[int] - regularni izrazi poredani kao u ulaznoj datoteci, vrijednosti su prihv. stanja automata
-        self.stanja_analizatora #[string] - pocetna stanja svakog prijelaza poredana kao regularni izrazi
+        
+        # regularni izrazi poredani kao u ulaznoj datoteci, vrijednosti su prihv. stanja automata
+        self.reg_izrazi = reg_izrazi  #[int]
+        # pocetna stanja svakog prijelaza poredana kao regularni izrazi
+        self.stanja_analizatora = stanja_analizatora #[string]
         
         self.pocetak = 0
         self.posljednji = 0
         self.zavrsetak = -1
-        self.izraz = 0
+        self.izraz = -1
         
-        self.trenutno_stanje #string
+        self.brojac_linije = 1
+        
+        self.niz_uniformnih_znakova = [] #[(tip_lex_jedinke, redak, index_u_tablici_znakova)]
+        self.tablica_znakova = []#[(tip_lex_jedinke, jedinka_kao_string)]
+        
+        self.trenutno_stanje = pocetno_stanje
     
     
-    def pokreni_anazizu( self ):
+    def pokreni_analizu( self ):
         
-        while ( not self.gotovo() ):
+        while ( self.pocetak < len( self.ulazni_program ) ):
             
             self.prepoznaj_izraz()
             
@@ -62,31 +67,92 @@ class LexycalAnalyzer():
         P = self.automat.dohvati_presjek()
         R = self.automat.dohvati_trenutna()
         while R !=[]:
-            if P == []: self.slucaj1(R,P)
-            else: self.slucaj2(R,P)
-    
-    
-    def slucaj1 ( self, R, P ):
-        self.zavrsetak = self.zavrsetak + 1
-        trenutni_znak = self.ulazni_program [self.zavrsetak]
-        self.automat.promijeni_stanja( trenutni_znak )
-
-
-    def slucaj2 ( self, R, P ):
-        for i in range ( len( self.reg_izraz ) ):
+            if P == []:
+                self.slucaj1()
+            else:
+                self.slucaj2( P )
             
-            reg_izraz = self.reg_izraz[i]
-            if self.reg_izraz[i] in P and \
+            if self.zavrsetak == len( self.ulazni_program ):
+                break
+            
+            P = self.automat.dohvati_presjek()
+            R = self.automat.dohvati_trenutna()
+    
+    
+    def slucaj1 ( self ):
+        self.zavrsetak += 1
+        if self.zavrsetak == len( self.ulazni_program ):
+            trenutni_znak = '$'
+        else:
+            trenutni_znak = self.ulazni_program[ self.zavrsetak ]
+        self.automat.promijeni_stanje( trenutni_znak )
+    
+    
+    def slucaj2 ( self, P ):
+        for i in range( len( self.reg_izrazi ) ):
+            
+            reg_izraz = self.reg_izrazi[i]
+            if self.reg_izrazi[i] in P and \
                 self.trenutno_stanje == self.stanja_analizatora[i]:
                 
                 self.izraz = i
+                self.posljednji = self.zavrsetak
                 break
         
-        self.posljednji = self.zavrsetak
-        self.zavrsetak = self.zavrsetak + 1
-        trenutni_znak = self.ulazni_program [self.zavrsetak]
-        self.automat.promijeni_stanja( trenutni_znak )
+        self.slucaj1()
     
     
-    def gotovo( self ):
+    def oporavak(self):
+        print( self.ulazni_program[self.pocetak], file = self.tok_za_greske )
+        self.zavrsetak = self.pocetak
+        self.pocetak = self.pocetak + 1
+        self.automat.na_pocetak()
+    
+    
+    def odredi_jedinku ( self ):
         
+        pravilo = self.akcije[(self.trenutno_stanje, self.izraz)]
+        klasa = pravilo[0]
+        ime_stanja = pravilo[2]
+        
+        if pravilo[3] != -1:
+            self.posljednji = self.pocetak + pravilo[3] - 1
+        
+        leksicka_jedinka = self.ulazni_program[ self.pocetak : self.posljednji + 1 ]
+        
+        self.izraz = -1
+        self.pocetak = self.posljednji + 1
+        self.zavrsetak = self.posljednji
+        
+        if ime_stanja != '':
+            self.trenutno_stanje = ime_stanja
+        
+        self.dodaj_u_tablicu( klasa, leksicka_jedinka )
+        
+        if pravilo[1] == True:
+            self.brojac_linije += 1
+        
+        self.automat.na_pocetak()
+    
+    
+    def dodaj_u_tablicu(self, klasa, leksicka_jedinka):
+        for p in range(len(self.tablica_znakova)):
+            if self.tablica_znakova[p][0]==klasa and self.tablica_znakova==leksicka_jedinka:
+                t=p
+                break
+        else:
+            self.tablica_znakova.append((klasa, leksicka_jedinka))
+            t=len(self.tablica_znakova)-1
+        self.niz_uniformnih_znakova.append((klasa, leksicka_jedinka, t))
+    
+    
+    def ispisi( self ):
+        
+        ispis = ''
+        
+        for klasa, redak, index in self.niz_uniformnih_znakova:
+            
+            jedinka = self.tablica_znakova[ index ]
+            ispis += klasa + ' ' + redak + ' ' + jedinka + '\n'
+        
+        print( ispis, file = self.izlazni_tok )
