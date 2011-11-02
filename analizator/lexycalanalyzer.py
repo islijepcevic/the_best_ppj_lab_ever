@@ -49,14 +49,6 @@ class LexycalAnalyzer():
         self.tablica_znakova = []#[(tip_lex_jedinke, jedinka_kao_string)]
         
         self.trenutno_stanje = pocetno_stanje
-        
-        '''
-        print( self.reg_izrazi )
-        print( self.stanja_analizatora )
-        print()
-        print( self.akcije.keys() )
-        print()
-        '''
     
     
     def pokreni_analizu( self ):
@@ -64,7 +56,7 @@ class LexycalAnalyzer():
         while ( self.pocetak < len( self.ulazni_program ) ):
             
             self.prepoznaj_izraz()
-            ##print( 'poc:', self.pocetak, 'pos:', self.posljednji, 'zav:', self.zavrsetak, 'izr:', self.izraz )
+            
             if self.izraz == -1:
                 self.oporavak()
             else:
@@ -113,7 +105,8 @@ class LexycalAnalyzer():
     
     
     def oporavak(self):
-        print( self.ulazni_program[self.pocetak], file = self.tok_za_greske )
+        self.tok_za_greske.write( self.ulazni_program[ self.pocetak ] )
+        
         self.zavrsetak = self.pocetak
         self.pocetak = self.pocetak + 1
         self.automat.na_pocetak()
@@ -146,6 +139,8 @@ class LexycalAnalyzer():
             self.brojac_linije += 1
         
         self.automat.na_pocetak()
+        
+        print( klasa, ime_stanja, ':' +leksicka_jedinka + ':', self.brojac_linije )
     
     
     def dodaj_u_tablicu(self, klasa, leksicka_jedinka):
@@ -156,7 +151,9 @@ class LexycalAnalyzer():
         else:
             self.tablica_znakova.append((klasa, leksicka_jedinka))
             t=len(self.tablica_znakova)-1
-        self.niz_uniformnih_znakova.append((klasa, leksicka_jedinka, t))
+        
+        #klasa, redak, index
+        self.niz_uniformnih_znakova.append((klasa, self.brojac_linije, t))
     
     
     def ispisi( self ):
@@ -166,6 +163,7 @@ class LexycalAnalyzer():
         for klasa, redak, index in self.niz_uniformnih_znakova:
             
             jedinka = self.tablica_znakova[ index ][1]
-            ispis += klasa + ' ' + redak + ' ' + jedinka + '\n'
+            ispis += klasa + ' ' + str(redak) + ' ' + jedinka + '\n'
         
-        print( ispis, file = self.izlazni_tok )
+        #print (self.niz_uniformnih_znakova )
+        self.izlazni_tok.write( ispis )

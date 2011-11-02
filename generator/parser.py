@@ -82,7 +82,8 @@ class Parser():
             if lrstate == 'out':
                 if line[0] == '<':
                     lastate = line[1:].split('>')[0]
-                    rx = RegularExpression( line.split('>')[1] )
+                    pos_reg_begin = line.find( '>' ) + 1
+                    rx = RegularExpression( line[ pos_reg_begin :] )
                     rx = self._expand( rx )
                 elif line[0] == '{':
                     lrstate = 'in'
