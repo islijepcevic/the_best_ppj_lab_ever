@@ -26,19 +26,22 @@ class eNKA:
     
     
     def promijeni_stanje(self, znak):
-        A = set([])
-        for stanje in self.trenutna_stanja:
-            nova_stanja = set( self.prijelazi.get( (stanje, znak), [] ) )
-            A.update( nova_stanja )
         
-        self.trenutna_stanja = A
+        if len( znak ) > 0:
+            A = set([])
+            for stanje in self.trenutna_stanja:
+                nova_stanja = set( self.prijelazi.get( (stanje, znak), [] ) )
+                A.update( nova_stanja )
+            self.trenutna_stanja = A
+        
         self.e_okruzenje()
+    
     
     def e_okruzenje(self):
         S = self.trenutna_stanja.copy()
         while len(S) != 0:
             t = S.pop()
-            L = self.prijelazi.get( (t,'$'), [] )
+            L = self.prijelazi.get( (t, 'epsilon'), [] )
             for v in (L):
                 if v not in self.trenutna_stanja:
                     self.trenutna_stanja.add(v)

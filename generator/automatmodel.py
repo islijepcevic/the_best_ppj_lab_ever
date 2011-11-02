@@ -77,7 +77,7 @@ executeable version of the automat - the lexycal analyzer
     
     
     def dodaj_epsilon_prijelaz( self, stanje, novo_stanje ):
-        self.dodaj_prijelaz( stanje, novo_stanje, '$' )
+        self.dodaj_prijelaz( stanje, novo_stanje, 'epsilon' )
     
     
     def novo_stanje( self ):
@@ -120,6 +120,7 @@ executeable version of the automat - the lexycal analyzer
                 self.dodaj_epsilon_prijelaz(lijevo_stanje, privremeno_lijevo)
                 self.dodaj_epsilon_prijelaz(privremeno_desno, desno_stanje)
                 
+        # nema operatora izbora
         else:
             prefiksirano = False
             trenutno_stanje = lijevo_stanje

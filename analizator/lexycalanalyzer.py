@@ -83,7 +83,7 @@ class LexycalAnalyzer():
     def slucaj1 ( self ):
         self.zavrsetak += 1
         if self.zavrsetak == len( self.ulazni_program ):
-            trenutni_znak = '$'
+            trenutni_znak = ''
         else:
             trenutni_znak = self.ulazni_program[ self.zavrsetak ]
         #print( 'trenutni znak', trenutni_znak )
