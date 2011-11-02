@@ -140,7 +140,7 @@ class LexycalAnalyzer():
         
         self.automat.na_pocetak()
         
-        print( klasa, ime_stanja, ':' +leksicka_jedinka + ':', self.brojac_linije )
+        #print( klasa, ime_stanja, ':' +leksicka_jedinka + ':', self.brojac_linije )
     
     
     def dodaj_u_tablicu(self, klasa, leksicka_jedinka):
