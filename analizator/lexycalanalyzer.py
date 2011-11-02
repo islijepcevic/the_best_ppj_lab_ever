@@ -31,7 +31,7 @@ class LexycalAnalyzer():
         #self.tipovi_lex_jedinka #[string]
         #self.lista_stanja_analizatora
         
-        self.akcija = akcije #{ (stanje, izraz): [] }
+        self.akcije = akcije #{ (stanje, izraz): [] }
         
         # regularni izrazi poredani kao u ulaznoj datoteci, vrijednosti su prihv. stanja automata
         self.reg_izrazi = reg_izrazi  #[int]
@@ -49,6 +49,14 @@ class LexycalAnalyzer():
         self.tablica_znakova = []#[(tip_lex_jedinke, jedinka_kao_string)]
         
         self.trenutno_stanje = pocetno_stanje
+        
+        '''
+        print( self.reg_izrazi )
+        print( self.stanja_analizatora )
+        print()
+        print( self.akcije.keys() )
+        print()
+        '''
     
     
     def pokreni_analizu( self ):
@@ -56,7 +64,7 @@ class LexycalAnalyzer():
         while ( self.pocetak < len( self.ulazni_program ) ):
             
             self.prepoznaj_izraz()
-            
+            ##print( 'poc:', self.pocetak, 'pos:', self.posljednji, 'zav:', self.zavrsetak, 'izr:', self.izraz )
             if self.izraz == -1:
                 self.oporavak()
             else:
@@ -66,7 +74,8 @@ class LexycalAnalyzer():
     def prepoznaj_izraz ( self ):
         P = self.automat.dohvati_presjek()
         R = self.automat.dohvati_trenutna()
-        while R !=[]:
+        while len(R) > 0:
+            
             if P == []:
                 self.slucaj1()
             else:
@@ -85,6 +94,7 @@ class LexycalAnalyzer():
             trenutni_znak = '$'
         else:
             trenutni_znak = self.ulazni_program[ self.zavrsetak ]
+        #print( 'trenutni znak', trenutni_znak )
         self.automat.promijeni_stanje( trenutni_znak )
     
     
@@ -110,9 +120,11 @@ class LexycalAnalyzer():
     
     
     def odredi_jedinku ( self ):
+        reg_izraz = self.reg_izrazi[ self.izraz ]
+        pravilo = self.akcije[(self.trenutno_stanje, reg_izraz)]
         
-        pravilo = self.akcije[(self.trenutno_stanje, self.izraz)]
         klasa = pravilo[0]
+        
         ime_stanja = pravilo[2]
         
         if pravilo[3] != -1:
@@ -127,7 +139,8 @@ class LexycalAnalyzer():
         if ime_stanja != '':
             self.trenutno_stanje = ime_stanja
         
-        self.dodaj_u_tablicu( klasa, leksicka_jedinka )
+        if klasa != '-':
+            self.dodaj_u_tablicu( klasa, leksicka_jedinka )
         
         if pravilo[1] == True:
             self.brojac_linije += 1
@@ -152,7 +165,7 @@ class LexycalAnalyzer():
         
         for klasa, redak, index in self.niz_uniformnih_znakova:
             
-            jedinka = self.tablica_znakova[ index ]
+            jedinka = self.tablica_znakova[ index ][1]
             ispis += klasa + ' ' + redak + ' ' + jedinka + '\n'
         
         print( ispis, file = self.izlazni_tok )
