@@ -13,7 +13,7 @@ class Parser:
         self.ulazna_datoteka = ulazni_tok.read().split('\n')
         
         # podaci gramatike
-        self.nezavrsn_znakovi = set([])          # skup stringova
+        self.nezavrsn_znakovi = set([])     # skup stringova
         self.zavrsni_znakovi = set([])      # skup stringova
         self.pocetni_nezavrsni_znak = ''    # string
         self.produkcije = []                # niz objekata produkcija, mora biti

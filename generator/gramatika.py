@@ -8,10 +8,10 @@ class Gramatika:
                 produkcije ):
         
         # tipovi definirani u parseru
-        self.nezavrsni_znakovi = nezavrsni_znakovi
-        self.zavrsni_znakovi = zavrsni_znakovi
-        self.pocetni_nezavrsni = pocetni_nezavrsni
-        self.produkcije = self.produkcije
+        self.nezavrsni_znakovi = nezavrsni_znakovi  # skup stringova
+        self.zavrsni_znakovi = zavrsni_znakovi      # skup stringova
+        self.pocetni_nezavrsni = pocetni_nezavrsni  # string
+        self.produkcije = self.produkcije           # niz instanci Produkcije
         
         self.prazni_nezavrsni_znakovi = set([])
         self._zapocinje_znakom = {}  # matrica, bit ce dict unutar dicta, svaki
@@ -21,6 +21,8 @@ class Gramatika:
         self._zapocinje = {}     # kljuc je JEDAN nezavrsni znak, vrijednost je
                                 # skup zavrsnih znakova, str 102, prvi algoritam
         
+        # ovo se slijedom dogadja kako bi se gramatika pripremila da daje
+        # skup zapocni( niz_znakova )
         self._dodaj_novi_pocetni_nezavrsni()
         self._odredi_prazne_znakove()
         self._odredi_zapocinje_izravno_znakom()
