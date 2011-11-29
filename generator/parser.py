@@ -21,19 +21,6 @@ class Parser:
         
         # sinkronizacijski znakovi
         self.sinkronizacijski_znakovi = set([]) # skup stringova
-        '''
-        Tu cu metnuti onu svoju klasu pa je ti premjesti gdje mislis da
-        treba biti
-        Usput nisam siguran da li je moram nazvat self.produkcije_struct
-        buduci da je vec pod nekom klasom pa to pogledaj
-        '''
-        class produkcije_struct:
-            
-            def __init__(self, lijevo, desno):
-                
-                self.lijevo = lijevo
-                self.desno = desno
-                
     
     
     def ucitaj_gramatiku( self ):
@@ -71,7 +58,7 @@ class Parser:
                 if self.ulazna_datoteka[i,0] == '<':
                     self.trenutni_nezavrsni = self.ulazna_datoteka[i]
                 else:
-                    self.produkcije[j]=produkcije_struct(self.trenutni_nezavrsni, self.ulazna_datoteka[i])
+                    self.produkcije[j] = Produkcija(self.trenutni_nezavrsni, self.ulazna_datoteka[i])
                     j++
                     
         
