@@ -13,7 +13,7 @@ class Parser:
         self.ulazna_datoteka = ulazni_tok.read().split('\n')
         
         # podaci gramatike
-        self.nezavrsn_znakovi = set([])     # skup stringova
+        self.nezavrsni_znakovi = set([])     # skup stringova
         self.zavrsni_znakovi = set([])      # skup stringova
         self.pocetni_nezavrsni_znak = ''    # string
         self.produkcije = []                # niz objekata produkcija, mora biti
@@ -38,6 +38,19 @@ class Parser:
         Produkcija. Klasa Produkcija je zapravo samo struktura, jer nema nikakve
         metode, nego sluzi samo da sadrzi podatke o produkciji.
         '''
+        
+        '''
+        Evo malo da nesto napravim, reci ako negdje grijesim pa cu prepravit
+        '''
+        
+        self.nezavrsni_znakovi = self.ulazna_datoteka[0].split(' ')
+        del self.nezavrsni_znakovi[0]
+        self.pocetni_nezavrsni_znak = self.nezavrsni_znakovi[0]
+        self.zavrsni_znakovi = self.ulazna_datoteka[1].split(' ')
+        del self.zavrsni_znakovi[0]
+        self.sinkronizacijski_znakovi = self.ulazna_datoteka[2].split(' ')
+        del self.sinkronizacijski_znakovi[0]
+        self.produkcije = 
         
         return Gramatika( self.nezavrsni_znakovi, self.zavrsni_znakovi,
                         self.pocetni_nezavrsni_znak, self.produkcije )
