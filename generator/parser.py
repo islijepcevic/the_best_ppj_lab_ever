@@ -21,6 +21,19 @@ class Parser:
         
         # sinkronizacijski znakovi
         self.sinkronizacijski_znakovi = set([]) # skup stringova
+        '''
+        Tu cu metnuti onu svoju klasu pa je ti premjesti gdje mislis da
+        treba biti
+        Usput nisam siguran da li je moram nazvat self.produkcije_struct
+        buduci da je vec pod nekom klasom pa to pogledaj
+        '''
+        class produkcije_struct:
+            
+            def __init__(self, lijevo, desno):
+                
+                self.lijevo = lijevo
+                self.desno = desno
+                
     
     
     def ucitaj_gramatiku( self ):
@@ -41,6 +54,7 @@ class Parser:
         
         '''
         Evo malo da nesto napravim, reci ako negdje grijesim pa cu prepravit
+        Vjerojatno cu fulat negdje s pretvorbom lista -> set pa me cimni :)
         '''
         
         self.nezavrsni_znakovi = self.ulazna_datoteka[0].split(' ')
@@ -50,7 +64,16 @@ class Parser:
         del self.zavrsni_znakovi[0]
         self.sinkronizacijski_znakovi = self.ulazna_datoteka[2].split(' ')
         del self.sinkronizacijski_znakovi[0]
-        self.produkcije = 
+        
+        j=0
+        for i in range(len(self.ulazna_datoteka)):
+            if i>2:
+                if self.ulazna_datoteka[i,0] == '<':
+                    self.trenutni_nezavrsni = self.ulazna_datoteka[i]
+                else:
+                    self.produkcije[j]=produkcije_struct(self.trenutni_nezavrsni, self.ulazna_datoteka[i])
+                    j++
+                    
         
         return Gramatika( self.nezavrsni_znakovi, self.zavrsni_znakovi,
                         self.pocetni_nezavrsni_znak, self.produkcije )
