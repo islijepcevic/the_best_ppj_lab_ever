@@ -10,10 +10,12 @@ import sys
 
 from generator.parser import Parser
 
+datoteka_s_pravilima = 'analizator/analizator.upute'
+
 if __name__ == '__main__':
     
     #create parser object (with sys.stdin)
     parser = Parser( sys.stdin )
     automat = parser.parse()
     
-    automat.napravi_analizator()
+    automat.napravi_analizator( datoteka_s_pravilima )

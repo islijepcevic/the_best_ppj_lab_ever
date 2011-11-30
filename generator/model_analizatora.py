@@ -38,9 +38,11 @@ class ModelAnalizatora:
         # program skrsiti ako se nesto krivo izvelo (a u slucaju da svim nepotrebnima
         # stavis npr None za vrijednost, mozda bi se nesto viska izvelo i teze bi 
         # pronasli gresku) - ovo su samo pretpostavke, ali radimo tako
+        
+        self._stvori_tablice()
     
     
-    def ispisi_tablice( self ):
+    def ispisi_tablice( self, datoteka ):
         '''funkcija koja se poziva na kraju iz maina za ispis tablica u neku
         datoteku
         IVAN
@@ -48,7 +50,7 @@ class ModelAnalizatora:
         pass
     
     
-    def stvori_tablice( self ):
+    def _stvori_tablice( self ):
         '''najvaznija funkcija koja se poziva iz maina
         
         IVAN
