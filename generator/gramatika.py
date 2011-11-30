@@ -1,6 +1,6 @@
 '''gramatika'''
 
-from generator.produkcija import Produkcija
+from analizator.zajednicki.produkcija import Produkcija
 
 class Gramatika:
     

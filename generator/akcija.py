@@ -1,5 +1,7 @@
 '''akcija tablice akcija'''
 
+from analizator.zajednicki.produkcija import produkcija
+
 class Akcija:
     
     def __init__( self, tip, vrijednost ):

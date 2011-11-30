@@ -1,7 +1,7 @@
 '''ovo je parser'''
 
 from generator.gramatika import Gramatika
-from generator.produkcija import Produkcija
+from analizator.zajednicki.produkcija import Produkcija
 
 class Parser:
     
