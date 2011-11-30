@@ -40,12 +40,18 @@ class DKA:
     
     def _spoji_istovjetna( self ):
         '''utr knjiga str 26 - 27
-        cekaj s programiranjem ovoga dok se ne odluci kakvog ce oblika biti stanja
+        sada jos stanja nisu integeri, vec set setova
+        
         MAK
         '''
         
         '''napomena: buduci da su uglavnom stanja tipa skup (set) za dobivanje
         stanja koja nisu prihvatljiva mozes napraviti skupovski Q\F'''
+        
+        '''pseudo u knjizi valja, mozda ga malo prosiris da pase za varijable i za
+        sve slucajeve. ako ga zelis razumijet, kad se zavrtis u for petlji, 
+        prvo shvati dio pod inace, a onda onaj if
+        '''
         pass
     
     
