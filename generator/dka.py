@@ -5,21 +5,19 @@ class DKA:
     def __init__( self, stanja, ulazni_znakovi, pocetno_stanje, prihvatljiva,
                 prijelazi ):
         
+        self.stanja = stanja    # skup skupova LR1Stavki (i ako treba nesto dodatno za neprihvatljivo stanje)
+                                # nako minimizacije stanja, ova varijabla postaje
+                                # niz skupova LR1Stavki, a svugdje drugdje se za
+                                # stanje koristi samo index tog niza
         
-        # KONSTRUKTOR MOZDA NECE IZGLEDATI OVAKO, TU SE JOS DVOUMIM KOJEG CE
-        # TIPA BITI STANJA - SKUP LRSTAVKI ILI INTEGERI
-        # ALI SIGURNO CE PRIMATI ULAZ KAKAV JE OPISAN GORNJOM DEFINICIJOM I 
-        # DONJIM KOMENTARIMA!
-        
-        self.stanja = stanja                    # skup skupova LR1Stavki
         self.prihvatljiva = prihvatljiva        # skup skupova LR1Stavki
         self.ulazni_znakovi = ulazni_znakovi    # skup stringova
         self.pocetno_stanje = pocetno_stanje    # LR1Stavka
-        self.prijelazi = prijelazi      # rjecnik: kljuc = par (LR1Stavka, string)
-                                                # vrijednost = jedna LR1Stavka
+        self.prijelazi = prijelazi      # rjecnik: kljuc = par (skup LR1Stavki, string)
+                                                # vrijednost = skup LR1Stavki ->(ovdje to predstavlja jedno stanje
         
         self._minimiziraj()
-        # self._preramzmjesti ILI self._pretvori_u_brojeve
+        self._pretvori_stanja_u_brojeve()
     
     
     def _minimiziraj( self ):
@@ -27,12 +25,13 @@ class DKA:
         GOTOVO
         '''
         
-        self._odbaci_nedohvatjiva()
+        #self._odbaci_nedohvatjiva()        # ne treba jer algoritam stvaranja DKA to vec radi
         self._spoji_istovjetna()
     
     
     def _odbaci_nedohvatjiva( self ):
-        '''utr knjiga str 27 - 28
+        '''NE TREBA
+        utr knjiga str 27 - 28
         cekaj s programiranjem ovoga dok se ne odluci kakvog ce oblika biti stanja
         MAK
         '''
@@ -47,4 +46,9 @@ class DKA:
         
         '''napomena: buduci da su uglavnom stanja tipa skup (set) za dobivanje
         stanja koja nisu prihvatljiva mozes napraviti skupovski Q\F'''
+        pass
+    
+    
+    def _pretvori_stanja_u_brojeve( self ):
+        '''IVAN'''
         pass
