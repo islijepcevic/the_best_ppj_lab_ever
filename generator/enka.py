@@ -35,7 +35,11 @@ class ENKA:
         
         MAK
         '''
-        pass
+        for epsPoc in self._epsilon_okruzenje(self.pocetno_stanje):
+            if epsPoc in self.prihvatljiva:
+                return True
+        
+        return False
     
     
     def _epsilon_okruzenje( self ):
