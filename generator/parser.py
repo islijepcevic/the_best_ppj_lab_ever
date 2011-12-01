@@ -13,10 +13,10 @@ class Parser:
         self.ulazna_datoteka = ulazni_tok.read().split('\n')
         
         # podaci gramatike
-        self.nezavrsni_znakovi = set([])     # skup stringova
-        self.zavrsni_znakovi = set([])      # skup stringova
-        self.pocetni_nezavrsni_znak = ''    # string
-        self.produkcije = []                # niz objekata produkcija, mora biti
+        self.nezavrsni_znakovi = set([]) # skup stringova
+        self.zavrsni_znakovi = set([]) # skup stringova
+        self.pocetni_nezavrsni_znak = '' # string
+        self.produkcije = [] # niz objekata produkcija, mora biti
                                             # niz jer je bitan poredak
         
         # sinkronizacijski znakovi
@@ -24,25 +24,7 @@ class Parser:
     
     
     def ucitaj_gramatiku( self ):
-        '''iz ulazne datoteke ucitava podatke i stvara (te vraca) instancu
-        Gramatike
-        
-        ZORAN
-        '''
-        
-        '''
-        Zorane, ovdje prolazis vec pripremljeni niz self.ulazna_datoteka i 
-        popunjavas ostale podatke. Ako nesto nije jasno, javi se cim prije!
-        
-        Pazi kako stvaras produkcije! Treba za svaku stvoriti novi objekt klase
-        Produkcija. Klasa Produkcija je zapravo samo struktura, jer nema nikakve
-        metode, nego sluzi samo da sadrzi podatke o produkciji.
-        '''
-        
-        '''
-        Evo malo da nesto napravim, reci ako negdje grijesim pa cu prepravit
-        Vjerojatno cu fulat negdje s pretvorbom lista -> set pa me cimni :)
-        '''
+
         
         self.nezavrsni_znakovi = self.ulazna_datoteka[0].split(' ')
         del self.nezavrsni_znakovi[0]
@@ -52,25 +34,27 @@ class Parser:
         self.sinkronizacijski_znakovi = self.ulazna_datoteka[2].split(' ')
         del self.sinkronizacijski_znakovi[0]
         
-        j=0
-        for i in range(len(self.ulazna_datoteka)):
-            if i>2:
-                if self.ulazna_datoteka[i,0] == '<':
-                    self.trenutni_nezavrsni = self.ulazna_datoteka[i]
-                else:
-                    self.produkcije[j] = Produkcija(self.trenutni_nezavrsni, self.ulazna_datoteka[i])
-                    j++
+        
+        for i in range(3, len(self.ulazna_datoteka)):
+            
+            if self.ulazna_datoteka[i].startswith('<'):
+                for j in range (i + 1, len(self.ulazna_datoteka)):
+                    
+                    if self.ulazna_datoteka[j].startswith(' '):
+                        self.produkcije.append(Produkcija(self.ulazna_datoteka[i],
+                            self.ulazna_datoteka[j].lstrip().split(' ')))
+
+                    else:break
                     
         
         return Gramatika( self.nezavrsni_znakovi, self.zavrsni_znakovi,
-                        self.pocetni_nezavrsni_znak, self.produkcije )
+                       self.pocetni_nezavrsni_znak, self.produkcije )
     
     
     def ispisi_sinkronizacijske_znakove( self ):
         '''ispisuje sinkronizacijske znakove u neku datoteku za sintaksni
-        analizator. oni nisu potrebni generatoru pa ih ovaj parser niti ne salje
-        generatoru niti ih ne stavlja u gramatiku
-        
-        IVAN
-        '''
+analizator. oni nisu potrebni generatoru pa ih ovaj parser niti ne salje
+generatoru niti ih ne stavlja u gramatiku
+IVAN
+'''
         pass
