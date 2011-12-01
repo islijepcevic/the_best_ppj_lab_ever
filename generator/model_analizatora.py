@@ -45,6 +45,11 @@ class ModelAnalizatora:
     def ispisi_tablice( self, datoteka ):
         '''funkcija koja se poziva na kraju iz maina za ispis tablica u neku
         datoteku
+        
+        ispisuje:
+            tablicu akcija
+            tablicu novo stanje
+            pocetno stanje automata (treba za pocetno stanje stoga)
         IVAN
         '''
         pass
@@ -57,6 +62,7 @@ class ModelAnalizatora:
         '''
         
         #self._stvori_automat()
+        #razrijesi proturjecja - bilo ovdje, bilo u dka
         #self._izgradi_tablice()
         pass
     
@@ -94,5 +100,4 @@ class ModelAnalizatora:
         GORAN
         '''
         
-        '''napomena: pazi na proturjecja, uputa-za-labos 3.1.6'''
         pass
