@@ -62,7 +62,7 @@ class ENKA:
         
         return trSt
     
-    def _obavi_prijelaz (self, stanje, znak):
+    def _prijelaz (self, stanje, znak):
         stanja = self.prijelazi.get ((stanje, znak), [])
         
         stanjaN = set()
@@ -82,11 +82,16 @@ class ENKA:
         
         MAK
         '''
-
-        '''
-        trSt = {}
         
-        for znak in niz:
-            trSt.union()
-        ''' 
+        stanja = self._epsilon_okruzenje(stanje)
+        
+        stanjaN = set ()
+        print ("Stanja: " + str(stanja) + "\n")
+        for st in stanja:
+            for znak in niz:
+                print ("st: " + str(st) + "; znak: " + znak + "\n")
+                stanjaN = stanjaN.union (self._prijelaz(st, znak))
+                print ("stanjaN: " + str(stanjaN) + "\n")
+        
+        return stanjaN
             
