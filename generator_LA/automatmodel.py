@@ -39,7 +39,7 @@ executeable version of the automat - the lexycal analyzer
         del self.regdef
     
     
-    def napravi_analizator( self ):
+    def napravi_analizator( self, datoteka ):
         
         for pravilo in self.pravila:
             regex = pravilo.regular_expression
@@ -63,7 +63,7 @@ executeable version of the automat - the lexycal analyzer
         upute += 'Z' + str( self.stanja_analizatora ) + '\n'
         upute += 'I' + str( self.stanja[0] ) + '\n'
         
-        analyzer_stream = open( 'analizator/analizator.upute', 'w' )
+        analyzer_stream = open( datoteka, 'w' )
         analyzer_stream.write( upute )
         analyzer_stream.close()
     

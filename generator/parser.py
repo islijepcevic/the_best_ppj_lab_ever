@@ -51,7 +51,7 @@ class Parser:
                        self.pocetni_nezavrsni_znak, self.produkcije )
     
     
-    def ispisi_sinkronizacijske_znakove( self ):
+    def ispisi_sinkronizacijske_znakove( self, datoteka ):
         '''ispisuje sinkronizacijske znakove u neku datoteku za sintaksni
 analizator. oni nisu potrebni generatoru pa ih ovaj parser niti ne salje
 generatoru niti ih ne stavlja u gramatiku
