@@ -48,9 +48,8 @@ class ENKA:
         
         MAK
         '''
-
-            
-        trSt = []
+     
+        trSt = set()
         S = [stanje]
         
         while len(S) != 0:
@@ -58,16 +57,36 @@ class ENKA:
             L = self.prijelazi.get( (t, '$'), [] )
             for v in (L):
                 if v not in trSt:
-                    trSt.append(v)
+                    trSt.add(v)
                     S.append(v)
         
         return trSt
     
+    def _obavi_prijelaz (self, stanje, znak):
+        stanja = self.prijelazi.get ((stanje, znak), [])
+        
+        stanjaN = set()
+        if stanja == []:
+            return {}
+        else:
+            for st in stanja:
+                stanjaN.add (st)
+                stanjaN = stanjaN.union(self._epsilon_okruzenje(st))
+                 
+        return stanjaN
     
-    def prijelaz_za_niz( self, niz ):
+    
+    def prijelaz_za_niz( self, stanje, niz ):
         '''delta s kapicom, kako je to bilo oznacavano u utr-u
         trebalo bi samo prosirit se po epsilon okruzenju kolko se sjecam
         
         MAK
         '''
-        pass
+
+        '''
+        trSt = {}
+        
+        for znak in niz:
+            trSt.union()
+        ''' 
+            
