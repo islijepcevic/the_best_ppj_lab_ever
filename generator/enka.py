@@ -42,13 +42,26 @@ class ENKA:
         return False
     
     
-    def _epsilon_okruzenje( self ):
+    def _epsilon_okruzenje( self, stanje ):
         '''postoji kod za ovo u prvom labosu, u analizatoru; mozda treba
         prilagoditi tipove i neke detalje, nisam gledao
         
         MAK
         '''
-        pass
+
+            
+        trSt = []
+        S = [stanje]
+        
+        while len(S) != 0:
+            t = S.pop()
+            L = self.prijelazi.get( (t, '$'), [] )
+            for v in (L):
+                if v not in trSt:
+                    trSt.append(v)
+                    S.append(v)
+        
+        return trSt
     
     
     def prijelaz_za_niz( self, niz ):
