@@ -36,10 +36,18 @@ class ENKA:
                     prijelaziNka[klj] = novaStanja.union(self._eps_okruzenje_set(novaStanja))
     
         
+        if self._pocetni_prosiriv_do_prihvatljivih():
+            prihvatljivaNka = self.prihvatljiva.union(self.pocetno_stanje)
+        else:
+            prihvatljivaNka = self.prihvatljiva.copy()
+            
+        nka = NKA (self.stanja, self.ulazni_znakovi, self.pocetno_stanje,
+                   prihvatljivaNka, prijelaziNka)
         
-        return prijelaziNka
+        return nka
+        
         '''napomena: imam pseudo; u knjizi utr-a str 37'''
-        pass
+        #pass
     
     
     def _pocetni_prosiriv_do_prihvatljivih( self ):
