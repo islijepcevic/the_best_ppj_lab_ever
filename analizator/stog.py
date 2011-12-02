@@ -10,11 +10,11 @@ class Stog:
             self.stavi( pocetno_stanje )
     
     
-    def stavi( self ):
+    def stavi( self, element ):
         pass
     
     
-    def dohvati_vrh( self, n = 1 ):
+    def dohvati_vrh( self ):
         '''dohvaca prvih n znakova sa stoga
         '''
         pass
@@ -23,4 +23,8 @@ class Stog:
     def skini( self, n = 1 ):
         '''skida prvih n znakova sa stoga
         '''
+        pass
+    
+    
+    def jest_prazan( self ):
         pass
