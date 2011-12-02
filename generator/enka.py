@@ -49,7 +49,7 @@ class ENKA:
         MAK
         '''
      
-        trSt = set()
+        trSt = {stanje}
         S = [stanje]
         
         while len(S) != 0:
