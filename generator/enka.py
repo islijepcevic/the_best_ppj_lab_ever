@@ -62,6 +62,13 @@ class ENKA:
         
         return trSt
     
+    def _eps_okruzenje_set (self, stanja):
+        novaStanja = set()
+        for stanje in stanja:
+            novaStanja = novaStanja.union (self._epsilon_okruzenje(stanje))
+        
+        return novaStanja
+    
     def _prijelaz (self, stanje, znak):
         stanja = self.prijelazi.get ((stanje, znak), [])
         
@@ -92,6 +99,9 @@ class ENKA:
                 print ("st: " + str(st) + "; znak: " + znak + "\n")
                 stanjaN = stanjaN.union (self._prijelaz(st, znak))
                 print ("stanjaN: " + str(stanjaN) + "\n")
+        
+        if stanjaN == []:
+            return stanja
         
         return stanjaN
             
