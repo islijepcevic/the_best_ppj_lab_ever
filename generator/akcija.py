@@ -1,6 +1,6 @@
 '''akcija tablice akcija'''
 
-from analizator.zajednicki.produkcija import produkcija
+from analizator.zajednicki.produkcija import Produkcija
 
 class Akcija:
     

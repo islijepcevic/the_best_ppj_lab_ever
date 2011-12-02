@@ -14,13 +14,13 @@ class Stog:
         pass
     
     
-    def dohvati( self, n ):
+    def dohvati_vrh( self, n = 1 ):
         '''dohvaca prvih n znakova sa stoga
         '''
         pass
     
     
-    def skini( self, n ):
+    def skini( self, n = 1 ):
         '''skida prvih n znakova sa stoga
         '''
         pass

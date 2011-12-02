@@ -16,4 +16,4 @@ class Produkcija:
         IVAN
         '''
         return 'Produkcija("' + self.lijeva_strana + '","' + \
-                str( self.desna_strana ) + '")'
+                repr( self.desna_strana ) + '")'
