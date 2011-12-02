@@ -82,6 +82,12 @@ class ENKA:
                  
         return stanjaN
     
+    def _prijelaz_za_skup (self, stanja, znak):
+        novaStanja = set ()
+        for s in stanja:
+            novaStanja = novaStanja.union(self._prijelaz(s, znak))
+        
+        return novaStanja
     
     def prijelaz_za_niz( self, stanje, niz ):
         '''delta s kapicom, kako je to bilo oznacavano u utr-u
