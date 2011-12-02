@@ -4,6 +4,7 @@ from generator.gramatika import Gramatika
 from generator.enka import ENKA
 from generator.lr_1_stavka import LR1Stavka
 from analizator.zajednicki.akcija import Akcija
+from analizator.zajednicki.produkcija import Produkcija
 
 class ModelAnalizatora:
     
@@ -89,15 +90,48 @@ class ModelAnalizatora:
         dka = nka.kreiraj_dka()
         
         self.automat = dka
+
     
     
     def _izgradi_tablice( self ):
-        '''izgradjuje tablice Akcija i NovoStanje
-        tablice jos nisu definirane kakvog ce tipa biti
-        to jos i ovisi o tome kako ce DKA tocno izgledati
-        knjiga str 150 - 151
+
+        # grdji kaos je slaganje ove funkcije, neka ideja je tu
+        # ALI ispravnost i izvedba i vise nego upitna
+        # budem se jos potrudio oko dorade ovoga kad budu gotovi i drugi dijelovi
+        # koji se izvrsavaju prije 
+
+
+        auto = self.automat
+
         
-        GORAN
-        '''
+        for s in range (len( auto.stanja )):
+            for i in range ( len( auto.prijelazi[s] )):
+                
+                if (( s, auto.prijelazi[s].desno_poslije_tocke[0] ) in auto.prijelazi):
+                    self.akcija[s, auto.prijelazi[s].desno_poslije_tocke[0]] = Akcija('pomakni',
+                    auto.prijelazi[( s, auto.prijelazi[s].desno_poslije_tocke[0] )])
+
+                if ( auto.prijelazi[s].desno_poslije_tocke == '' ):
+                    for a in range (len( auto.prijelazi[s].skup_zapocinje )):
+                        if auto.prijelazi[s].skup_zapocinje[a] == '<<novi_nezavrsni_znak>>':
+                            continue
+                        self.akcija[s, auto.prijelazi[s].skup_zapocinje[a]] = Akcija('reduciraj',
+                        Produkcija(auto.prijelazi[s].lijeva_strana, auto.prijelazi[s].desno_prije_tocke ))
+
+                #### ovo nemam pojma kak izvest
+                if ( auto.prijelazi[s].lijeva_strana == '<<novi_nezavrsni_znak>>' ):
+                    if auto.prijelazi[s].je_li_potpuna():
+                        self.akcija[s, 'kraj_niza'] = 'Prihvati()'
+                ####
+
+                        
+            
+            for x in range ( len( auto.ulazni_znakovi )):
+                '''trebalo bi mu poslat samo nezavrsne_ulazne ili na neki drugi
+                nacin to provjerit!
+                '''
+                if (s, auto.ulazni_znakovi[x]) in auto.prijelazi:
+                    self.novo_stanje[s, auto.ulazni_znakovi[x]] = auto.prijelazi[( s, auto.ulazni_znakovi[x])]
+                                      
         
-        pass
+
