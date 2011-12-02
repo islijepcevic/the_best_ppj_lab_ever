@@ -8,12 +8,12 @@ class ENKA:
                 prijelazi ):
         
         
-        self.stanja = stanja                    # skup LR1Stavki
-        self.prihvatljiva = prihvatljiva        # skup LR1Stavki
-        self.ulazni_znakovi = ulazni_znakovi    # skup stringova
-        self.pocetno_stanje = pocetno_stanje    # LR1Stavka
-        self.prijelazi = prijelazi      # rjecnik: kljuc = par (LR1Stavka, string)
-                                                # vrijednost = skup LR1Stavki
+        self.stanja                 = set(stanja)           # skup LR1Stavki
+        self.prihvatljiva           = set(prihvatljiva)     # skup LR1Stavki
+        self.ulazni_znakovi         = set(ulazni_znakovi)   # skup stringova
+        self.pocetno_stanje         = pocetno_stanje        # LR1Stavka
+        self.prijelazi              = prijelazi             # rjecnik: kljuc = par (LR1Stavka, string)
+                                                            # vrijednost = skup LR1Stavki
         
         '''napomena: u knjizi pise da su sva stanja prihvatljiva, treba jos
         prokuziti da li da se doda dodatno neprihvatljivo stanje i kad/gdje'''
@@ -23,7 +23,21 @@ class ENKA:
         '''vraca instancu NKA
         MAK
         '''
+
+        prijelaziNka = dict()
+        for stanje in self.stanja:
+            for znak in self.ulazni_znakovi:
+                klj = (stanje, znak)
+
+                novaStanja = self._epsilon_okruzenje(stanje)
+                novaStanja = self._prijelaz_za_skup(novaStanja, znak)
+                
+                if novaStanja:
+                    prijelaziNka[klj] = novaStanja.union(self._eps_okruzenje_set(novaStanja))
+    
         
+        
+        return prijelaziNka
         '''napomena: imam pseudo; u knjizi utr-a str 37'''
         pass
     
