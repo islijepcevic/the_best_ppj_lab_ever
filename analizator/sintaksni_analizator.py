@@ -2,10 +2,11 @@
 
 import sys
 
-from list_stabla import ListStabla
+from leksicka_jedinka import LeksickaJedinka
 from unutarnji_cvor_stabla import UnutarnjiCvorStabla
 from stog import Stog
 from zajednicki.akcija import Akcija
+from zajednicki.greske import GreskaAnaliziranja
 
 class SintaksniAnalizator():
     
@@ -37,6 +38,11 @@ class SintaksniAnalizator():
         
         # SINKRONIZACIJSKI ZNAKOVI
         self.sinkronizacijski_znakovi = sinkronizacijski_znakovi
+        
+        # PRACENJE REZULTATA
+        self.niz_prihvacen = False  # postaje true kad je niz prihvacen bez
+                                    # odbijanja
+        self.niz_odbijen = False    # postaje true kad se niz odbije
     
     
     def analiziraj( self ):
@@ -51,23 +57,24 @@ class SintaksniAnalizator():
                                             Akcija( 'odbaci' ) )
             
             if akcija.tip == 'pomakni':
-                self.pomakni( jedinka_s_ulaza, akcija.vrijednost )
+                self._pomakni( jedinka_s_ulaza, akcija.vrijednost )
             
             elif akcija.tip == 'reduciraj':
-                self.reduciraj( akcija.vrijenost )
+                self._reduciraj( akcija.vrijenost )
             
             elif akcija.tip == 'prihvati':
-                self.prihvati()
+                self._prihvati()
                 break
             
             elif akcija.tip == 'odbaci':
-                self.odbaci()
+                self._odbaci()
             
             else:
-                raise KrivaAkcijaIznimka()
+                raise GreskaAnaliziranja( 'nedozvoljen tip akcije u ' + \
+                                        'tablici akcija' )
     
     
-    def pomakni( self, leksicka_jedinka, novo_stanje ):
+    def _pomakni( self, leksicka_jedinka, novo_stanje ):
         '''tipovi parametara: LeksickaJedinka, int'''
         
         self.stog.stavi( leksicka_jedinka )
@@ -75,8 +82,10 @@ class SintaksniAnalizator():
         self.index_parsiranja += 1
     
     
-    def reduciraj( self, produkcija ):
+    def _reduciraj( self, produkcija ):
         '''tip parametra: Produkcija'''
+        
+        trenutno_stanje = self.stog.dohvati_vrh()
         
         if produkcija.desna_strana != '$':
             # nije epsilon produkcija
@@ -98,18 +107,36 @@ class SintaksniAnalizator():
             trenutno_stanje = self.stog.dohvati_vrh()
             
             self.stog.stavi( novi_cvor )
-            self.stog.stavi( self.tablica_novo_stanje[ trenutno_stanje ]
-                                                    .get( produkcija.desna_strana )
             
         else:
             # epsilon produkcija
             
-    
-    
-    def prihvati( self ):
+            djeca_novog_cvora = [ LeksickaJedinka( '$' ) ]
+            
+            self.stog.stavi( produkcija.lijeva_strana, djeca_novog_cvora )
         
+        # stavljanje novog stanja
+        try:
+            novo_stanje = self.tablica_novo_stanje[ trenutno_stanje ]
+                                                    [ produkcija.desna_strana ]
+            
+            self.stog.stavi( novo_stanje )
         
+        except KeyError:
+            raise GreskaAnaliziranja( 'pokusaj dohvacanja nepostojece ' + \
+                                    'vrijednosti u tablici novo_stanje' )
     
     
-    def odbaci( self ):
-        pass
+    def _prihvati( self ):
+        
+        self.stog.skini()
+        
+        self.stablo = self.stog.dohvati_vrh()
+        
+        if not self.niz_odbijen:
+            self.niz_prihvacen = True
+    
+    
+    def _odbaci( self ):
+        
+        self.niz_odbijen = True

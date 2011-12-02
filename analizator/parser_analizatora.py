@@ -1,6 +1,7 @@
 '''parser sintaksnog analizatora'''
 
 from sintaksni_analizator import SintaksniAnalizator
+from leksicka_jedinka import LeksickaJedinka
 from zajednicki.produkcija import Produkcija
 from zajednicki.akcija import Akcija
 
