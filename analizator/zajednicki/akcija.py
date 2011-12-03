@@ -36,7 +36,7 @@ class Akcija:
             self.tip = tip
         
         if not tocan_input:
-            raise TypeError
+            raise TypeError( 'pokusaj stvaranja krivog tipa akcije' )
         
         # ako je sve dobro na kraju postoje:
             # self.tip          - 'pomakni' ili 'reduciraj'
