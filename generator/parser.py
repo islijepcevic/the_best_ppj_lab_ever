@@ -53,8 +53,8 @@ class Parser:
     
     def ispisi_sinkronizacijske_znakove( self, datoteka ):
         '''ispisuje sinkronizacijske znakove u neku datoteku za sintaksni
-analizator. oni nisu potrebni generatoru pa ih ovaj parser niti ne salje
-generatoru niti ih ne stavlja u gramatiku
-IVAN
-'''
+        analizator. oni nisu potrebni generatoru pa ih ovaj parser niti ne salje
+        generatoru niti ih ne stavlja u gramatiku
+        IVAN
+        '''
         pass

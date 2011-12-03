@@ -5,7 +5,7 @@ bit ce list u generativnom stablu
 
 class LeksickaJedinka:
     
-    def __init__( self, uniformni_znak, redak, leksicka_jedinka ):
+    def __init__( self, uniformni_znak, redak = 0, leksicka_jedinka = '' ):
         
         self.uniformni_znak = uniformni_znak
         self.redak = redak

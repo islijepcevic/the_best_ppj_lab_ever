@@ -1,6 +1,9 @@
 '''parser sintaksnog analizatora'''
 
 from sintaksni_analizator import SintaksniAnalizator
+from leksicka_jedinka import LeksickaJedinka
+from zajednicki.produkcija import Produkcija
+from zajednicki.akcija import Akcija
 
 class ParserAnalizatora:
     '''parsira sve upute potrebne sintaksnom analizatoru
@@ -18,5 +21,5 @@ class ParserAnalizatora:
     
     
     def parsiraj( self ):
-        
+        '''IVAN'''
         pass

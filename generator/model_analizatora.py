@@ -3,8 +3,8 @@
 from generator.gramatika import Gramatika
 from generator.enka import ENKA
 from generator.lr_1_stavka import LR1Stavka
-from generator.akcija import Akcija
-from analizator.zajednicki.produkcija import produkcija
+from analizator.zajednicki.akcija import Akcija
+from analizator.zajednicki.produkcija import Produkcija
 
 class ModelAnalizatora:
     
