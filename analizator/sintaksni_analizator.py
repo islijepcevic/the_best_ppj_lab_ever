@@ -50,7 +50,7 @@ class SintaksniAnalizator():
     
     def analiziraj( self ):
         
-        self._niz_analiziran
+        self._niz_analiziran = True
         
         while( True ):
             
@@ -87,10 +87,10 @@ class SintaksniAnalizator():
         if not self._niz_analiziran:
             self.analiziraj()
         
-        if self.generativno_stablo = None:
+        if self.generativno_stablo is None:
             return None
         
-        #sljedece akcije ispisivanja stabla
+        self.generativno_stablo.ispisi_preorder( self.izlazni_tok )
     
     
     def _pomakni( self, leksicka_jedinka, novo_stanje ):
@@ -181,6 +181,7 @@ class SintaksniAnalizator():
         ispis += '\n'
         
         self.tok_za_greske.write( ispis )
+    
     
     def _dohvati_liniju( self, redak ):
         
