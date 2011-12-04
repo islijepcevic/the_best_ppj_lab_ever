@@ -30,12 +30,6 @@ class Gramatika:
         self._odredi_zapocinje_izravno_znakom()
         self._odredi_zapocinje_znakom()
         self._odredi_zapocinje_za_nezavrsne()
-
-        #print za provjeru
-        '''
-        for x in range (len(self.produkcije)):
-            self.odredi_zapocinje_za_niz(self.produkcije[x].desna_strana)
-        '''
     
     
     def _dodaj_novi_pocetni_nezavrsni( self ):
@@ -149,7 +143,7 @@ class Gramatika:
                 
                 for znak in pomocni:
                     # dodaj nove znakove u neobradene ako nisu vec oznaceni
-                    if self._zapocinje_znakom[ trenutni_znak ][ znak ] and not
+                    if self._zapocinje_znakom[ trenutni_znak ][ znak ] and not \
                         self._zapocinje_znakom[ nezavrsni_znak ][ znak ]:
                         
                         neobradjeni.add( znak )
