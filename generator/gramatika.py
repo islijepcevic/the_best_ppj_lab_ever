@@ -103,41 +103,43 @@ class Gramatika:
         
         for produkcija in self.produkcije:
             
-            if produkcija.desna_strana[0] != '$':
-                self._zapocinje_znakom[ produkcija ][ 
+            if produkcija.desna_strana[0] == '$': continue
+            
+            znak_lijevo = produkcija.lijeva_strana
             
             for znak_desno in produkcija.desna_strana:
                 
-        
-        
-        for i in range (len(self.produkcije)):
-            for j in range (len( self.produkcije[i].desna_strana )):
-                
-                if j == 0 and self.produkcije[i].desna_strana[j] != '$':
+                if znak_desno in self.zavrsni_znakovi:
+                    self._zapocinje_znakom[ znak_lijevo ][ znak_desno ] = [1, 1]
+                    break
+                elif znak_desno in self.nezavrsni_znakovi:
                     
-                    self._zapocinje_znakom[self.produkcije[i].lijeva_strana,
-                                        self.produkcije[i].desna_strana[j]] = [1, 1]
-                
-                if (self.produkcije[i].desna_strana[j] in self.prazni_nezavrsni_znakovi) and (
-                    (j + 1) < len(self.produkcije[i].desna_strana)):
-                
-                    self._zapocinje_znakom[self.produkcije[i].lijeva_strana,
-                                        self.produkcije[i].desna_strana[j+1]] = [1, 1]
-                else: break
-
-
-
+                    self._zapocinje_znakom[ znak_lijevo ][ znak_desno ] = [1, 1]
+                    
+                    if znak_desno not in self.prazni_nezavrsni_znakovi:
+                        break
+    
     
     def _odredi_zapocinje_znakom( self ):
-
-
+        
         pomocni = self.nezavrsni_znakovi + self.zavrsni_znakovi
-
+        
+        # refleksivno se prosiri
         for j in range (len( pomocni )):
-            for k in range (len( pomocni )):
-                if (pomocni[j] == pomocni [k]):
-                    self._zapocinje_znakom[pomocni[j],pomocni[k]][1] = 1
-
+            if (pomocni[j] == pomocni [j]):
+                self._zapocinje_znakom[ pomocni[j] ][ pomocni[j] ][1] = 1
+        
+        # tranzitivno se prosiri
+        for nezavrsni_znak in self.nezavrsni_znakovi:
+            
+            # obavi sirenje dok god mozes
+            neobradjeni = set([])
+            
+            for znak in self._zapocinje_znakom[ nezavrsni_znak ].keys():
+                pass
+        
+        
+        ''' PRE SPOR ALGORITAM; ZATO SAM I OSTAVIO OVAJ ZADATAK SEBI
         vrti = True
         while ( vrti ):
             vrti = False
@@ -149,7 +151,7 @@ class Gramatika:
                             self._zapocinje_znakom[pomocni[b],pomocni[c]][1] == 1)):
                             if self._zapocinje_znakom[pomocni[a],pomocni[c]][1] == 0:
                                 self._zapocinje_znakom[pomocni[a],pomocni[c]][1] = 1
-                                vrti = True
+                                vrti = True'''
                         
                                                     
                     
