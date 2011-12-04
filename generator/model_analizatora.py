@@ -47,7 +47,15 @@ class ModelAnalizatora:
             pocetno stanje automata (treba za pocetno stanje stoga)
         IVAN
         '''
-        pass
+        
+        zapis = repr( self.akcija ) + '\n'
+        zapis += repr( self.novo_stanje ) + '\n'
+        zapis += repr( self.automat.pocetno_stanje )
+        
+        
+        tok = open( datoteka, 'w' )
+        tok.write( zapis )
+        tok.close()
     
     
     def _stvori_tablice( self ):
