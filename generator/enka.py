@@ -34,6 +34,11 @@ class ENKA:
                 
                 if novaStanja:
                     prijelaziNka[klj] = novaStanja.union(self._eps_okruzenje_set(novaStanja))
+                
+                # AKO NE BUDE RADILO
+                '''
+                prijelaziNka[klj] |= self.prijelaz_za_niz( stanje, znak )
+                '''
     
         
         if self._pocetni_prosiriv_do_prihvatljivih():
@@ -92,16 +97,15 @@ class ENKA:
         return novaStanja
     
     def _prijelaz (self, stanje, znak):
-        stanja = self.prijelazi.get ((stanje, znak), [])
+        stanja = self.prijelazi.get ((stanje, znak), set())
         
         stanjaN = set()
-        if stanja == []:
-            return {}
-        else:
+        if len( stanja ) != 0:
             for st in stanja:
                 stanjaN.add (st)
                 stanjaN = stanjaN.union(self._epsilon_okruzenje(st))
-                 
+        
+        # vraca prazni set ako na su na pocetku stanja duljine 0
         return stanjaN
     
     def _prijelaz_za_skup (self, stanja, znak):
@@ -109,7 +113,7 @@ class ENKA:
         for s in stanja:
             novaStanja = novaStanja.union(self._prijelaz(s, znak))
         
-        return novaStanja
+        return frozenset( novaStanja )
     
     def prijelaz_za_niz( self, stanje, niz ):
         '''delta s kapicom, kako je to bilo oznacavano u utr-u
@@ -120,16 +124,30 @@ class ENKA:
         
         stanja = self._epsilon_okruzenje(stanje)
         
-        stanjaN = set ()
-        print ("Stanja: " + str(stanja) + "\n")
+        #stanjaN = set ()
+        
+        '''
         for st in stanja:
             for znak in niz:
-                print ("st: " + str(st) + "; znak: " + znak + "\n")
                 stanjaN = stanjaN.union (self._prijelaz(st, znak))
-                print ("stanjaN: " + str(stanjaN) + "\n")
+        '''
         
+        for znak in niz:
+            stanja = self._prijelaz_za_skup( stanja, znak )
+        
+        '''
         if stanjaN == []:
             return stanja
         
         return stanjaN
-            
+        '''
+        return frozenset( stanja )
+        
+        # AKO NE BUDE RADILO: ALGORITAM EKVIVALENTAN UDZBENIKU UTR:
+        '''
+        P = set()
+        for r in self.prijelaz_za_niz( stanje, niz[:-1] ):
+            for p in self.prijelazi.get( (r, niz[-1]), set() ):
+                P |= p
+        return frozenset( self._eps_okruzenje_set( P ) )
+        '''

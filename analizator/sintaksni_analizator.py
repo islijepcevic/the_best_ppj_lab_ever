@@ -50,7 +50,7 @@ class SintaksniAnalizator():
     
     def analiziraj( self ):
         
-        self._niz_analiziran
+        self._niz_analiziran = True
         
         while( True ):
             
@@ -87,10 +87,10 @@ class SintaksniAnalizator():
         if not self._niz_analiziran:
             self.analiziraj()
         
-        if self.generativno_stablo = None:
+        if self.generativno_stablo is None:
             return None
         
-        #sljedece akcije ispisivanja stabla
+        self.generativno_stablo.ispisi_preorder( self.izlazni_tok )
     
     
     def _pomakni( self, leksicka_jedinka, novo_stanje ):
@@ -162,25 +162,42 @@ class SintaksniAnalizator():
     
     def _ispisi_gresku( self ):
         
+        ispis = ''
         gresna_jedinka = self._ulazni_niz[ self._index_parsiranja ]
         
-        redak_greske = gresna_jedinka.redak
-        ocekivani_znakovi = self.tablica_akcija[ self._stog.dohvati_vrh() ].keys()
-        procitani_znak = gresna_jedinka.uniformni_znak
+        if gresna_jedinka.uniformni_znak != '<<!>>':
+            redak_greske = gresna_jedinka.redak
+            ocekivani_znakovi = list( self.tablica_akcija[
+                                    self._stog.dohvati_vrh() ].keys() )
+            procitani_znak = gresna_jedinka.uniformni_znak
+            
+            linija_analiziranog_koda = self._dohvati_liniju( redak_greske )
+            
+            from functools import reduce
+            ocekivani_string = reduce( lambda x, y: str(x) + ', ' + str(y),
+                                        ocekivani_znakovi )
+            
+            ispis = 'Greska u retku ' + str( redak_greske ) + ':\n'
+            ispis += linija_analiziranog_koda + '\n'
+            ispis += 'dobiven znak: ' + procitani_znak + '\n'
+            ispis += 'ocekivani znak(ovi): ' + ocekivani_string + '\n'
+            ispis += '\n'
         
-        linija_analiziranog_koda = self._dohvati_liniju( redak_greske )
-        
-        from functools import reduce
-        ocekivani_string = reduce( lambda x, y: str(x) + ', ' + str(y),
-                                    ocekivani_znakovi )
-        
-        ispis = 'Greska u retku ' + str( redak_greske ) + ':\n'
-        ispis += linija_analiziranog_koda + '\n'
-        ispis += 'dobiven znak: ' + procitani_znak + '\n'
-        ispis += 'ocekivani znak(ovi): ' + ocekivani_string + '\n'
-        ispis += '\n'
+        else:
+            # procitan kraj niza
+            ocekivani_znakovi = list( self.tablica_akcija[
+                                    self._stog.dohvati_vrh() ].keys() )
+            
+            from functools import reduce
+            ocekivani_string = reduce( lambda x, y: str(x) + ', ' + str(y),
+                                        ocekivani_znakovi )
+            
+            ispis = 'Sintaksna analiza je dosla do kraja\n'
+            ispis += 'ocekivani znak(ovi): ' + ocekivani_string + '\n'
+            ispis += '\n'
         
         self.tok_za_greske.write( ispis )
+    
     
     def _dohvati_liniju( self, redak ):
         

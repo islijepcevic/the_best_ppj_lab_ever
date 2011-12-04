@@ -1,5 +1,7 @@
 '''model sintaksnog analizatora'''
 
+import sys
+
 from generator.gramatika import Gramatika
 from generator.enka import ENKA
 from generator.lr_1_stavka import LR1Stavka
@@ -8,7 +10,9 @@ from analizator.zajednicki.produkcija import Produkcija
 
 class ModelAnalizatora:
     
-    def __init__( self, gramatika ):
+    def __init__( self, gramatika, tok_za_pogreske = sys.stderr ):
+        
+        self.tok_za_pogreske = tok_za_pogreske
         
         self.gramatika = gramatika
         self.automat = None
@@ -32,8 +36,6 @@ class ModelAnalizatora:
                                 # on oznacava koje se stanje stavlja kao novo stanje
                                 # (to je valjda jasno iz predavanja, a i iz samog imena tablice)
         
-
-        
         self._stvori_tablice()
     
     
@@ -47,7 +49,15 @@ class ModelAnalizatora:
             pocetno stanje automata (treba za pocetno stanje stoga)
         IVAN
         '''
-        pass
+        
+        zapis = repr( self.akcija ) + '\n'
+        zapis += repr( self.novo_stanje ) + '\n'
+        zapis += repr( self.automat.pocetno_stanje )
+        
+        
+        tok = open( datoteka, 'w' )
+        tok.write( zapis )
+        tok.close()
     
     
     def _stvori_tablice( self ):
@@ -56,22 +66,91 @@ class ModelAnalizatora:
         IVAN
         '''
         
-        #self._stvori_automat()
-        #razrijesi proturjecja - bilo ovdje, bilo u dka
-        #self._izgradi_tablice()
-        pass
+        self._stvori_automat()
+        self._razrijesi_nejednoznacnosti()
+        self._izgradi_tablice()
+        
     
     
     def _kreiraj_enka( self ):
         '''iz gramatike stvara enka
         ovdje ide algoritam sa strane 148
-        SARA
         '''
         
-        '''napomena: imam pseudokod ovoga kako bi trebalo izgledati
-        vjerojatno cu ga staviti tu, ili cu sam ovo napisati
-        '''
-        pass
+        abeceda = self.gramatika.nezavrsni_znakovi.union( 
+                            self.gramatika.zavrsni_znakovi )
+        
+        pocetno_stanje = LR1Stavka( self.gramatika.pocetni_nezavrsni, [''],
+                                    self.gramatika.produkcije[-1].desna_strana,
+                                    frozenset([ '<<!>>' ]) )
+        
+        skup_stanja = set([ pocetno_stanje ])
+        prijelazi = {}  # rjecnik: kljuc = par (LR1Stavka, string)
+                        # vrijednost = skup LR1Stavki
+        
+        neobradjena_stanja = skup_stanja
+        
+        while( len( neobradjena_stanja ) > 0 ):
+            
+            trenutno_stanje = neobradjena_stanja.pop()  # tip: LR1Stavka
+            
+            # potpuna stavka
+            if trenutno_stanje.desno_od_tocke == "":
+                continue
+            
+            # slucaj iz knjige: 4 b)
+            znak_poslije_tocke = trenutno_stanje.desno_poslije_tocke[0]
+            nastavak_beta = trenutno_stanje.desno_poslije_tocke[1:]
+            
+            novo_stanje = LR1Stavka( trenutno_stanje.lijeva_strana,
+                                    trenutno_stanje.desno_prije_tocke + \
+                                        znak_poslije_tocke,
+                                    nastavak_beta,
+                                    trenutno_stanje.skup_zapocinje )
+            
+            if novo_stanje not in skup_stanja:
+                skup_stanja.add( novo_stanje )
+                neobradjena_stanja.add( novo_stanje )
+            
+            kljuc = (novo_stanje, znak_poslije_tocke)
+            if kljuc in prijelazi:
+                prijelazi[ kljuc ] |= ( novo_stanje )
+            else:
+                prijelazi[ kljuc ] = frozenset([ novo_stanje ])
+            
+            # slucaj iz knjige: 4 c)
+            if znak_poslije_tocke in self.gramatika.nezavrsni_znakovi:
+                
+                # stvori stavku za svaku produkciju iz nezavrsnog znaka q.poslije[0]
+                nova_stanja = set([])
+                for produkcija in self.gramatika.produkcije:
+                    if znak_poslije_tocke == produkcija.lijeva_strana:
+                        
+                        skup_T = self.gramatika.odredi_zapocinje_za_niz(
+                                                                nastavak_beta )
+                        
+                        if self.gramatika.je_li_prazan( nastavak_beta ):
+                            skup_T |= ( trenutno_stanje.skup_zapocinje )
+                        
+                        nova_stanja.add( LR1Stavka( znak_poslije_tocke, [''],
+                                                    produkcija.desna_strana,
+                                                    skup_T) )
+                
+                # stavi te sve stavke u prijelaze i stanja (ako nisu u stanjima)
+                for novo_stanje in nova_stanja:
+                    
+                    if novo_stanje not in skup_stanja:
+                        skup_stanja.add( novo_stanje )
+                        neobradjena_stanja.add( novo_stanje )
+                    
+                    kljuc = (novo_stanje, '$')
+                    if kljuc in prijelazi:
+                        prijelazi[ kljuc ] |= ( novo_stanje )
+                    else:
+                        prijelazi[ kljuc ] = frozenset([ novo_stanje ])
+        
+        return ENKA( skup_stanja, abeceda, pocetno_stanje, skup_stanja,
+                    prijelazi )
     
     
     def _stvori_automat( self ):
@@ -84,11 +163,98 @@ class ModelAnalizatora:
         dka = nka.kreiraj_dka()
         
         self.automat = dka
-
     
     
-
-
+    def _razrijesi_nejednoznacnosti( self ):
+        
+        for stanje in self.automat.stanja:  # stanja automata su u listi
+            
+            # jedno stanje je skup LR1Stavki
+            
+            # razrijesi pomakni/reduciraj
+            for i in range( len( stanje ) ):
+                
+                if not stanje[i].je_li_potpuna():
+                    continue
+                
+                for j in range( len( stanje ) ):
+                    
+                    if i == j:
+                        continue
+                    
+                    stavka1 = stanje[i]
+                    stavka2 = stanje[j]
+                    
+                    ret = stavka1.razrijesi_pr( stavka2 )
+                    
+                    if ret:
+                        self._pisi_pr( stavka1, stavka2, ret, self,automat.stanja.index( stanje ) )
+                    
+                    stanje[i] = stavka1
+            
+            # razrijesi reduciraj/reduciraj
+            for i in range( len( stanje ) ):
+                
+                if not stanje[i].je_li_potpuna():
+                    continue
+                
+                for j in range( i + 1, len( stanje ) ):
+                    
+                    if not stanje[j].je_li_potpuna():
+                        continue
+                    
+                    stavka1 = stanje[i]
+                    stavka2 = stanje[j]
+                    
+                    skup_za_maknuti = stavka1.skup_zapocinje & stavka2.skup_zapocinje
+                    
+                    if not skup_za_maknuti:
+                        continue
+                    
+                    produkcija1 = Produkcija( stavka1.lijeva_strana, 
+                                    stavka1.desno_prije_tocke + stavka1.desno_poslije_tocke )
+                    
+                    produkcija2 = Produkcija( stavka2.lijeva_strana, 
+                                    stavka2.desno_prije_tocke + stavka2.desno_poslije_tocke )
+                    
+                    for prod_gram in self.gramatika.produkcije:
+                        
+                        if produkcija1 == prod_gram:
+                            stavka2.skup_zapocinje -= skup_za_maknuti
+                            self._pisi_rr( stavka2, stavka1, skup_za_maknuti, self.automat.stanja.index( stanje ) )
+                            break
+                        
+                        if produkcija2 == prod_gram:
+                            stavka1.skup_zapocinje -= skup_za_maknuti
+                            self._pisi_rr( stavka1, stavka2, skup_za_maknuti, self.automat.stanja.index( stanje ))
+                            break
+                    
+                    stanje[i] = stavka1
+                    stanje[j] = stavka2
+    
+    
+    def _pisi_pr( self, stavka, druga, maknuto, stanje ):
+        
+        ispis = 'u stanju ' + str( stanje ) + '\n'
+        ispis += 'iz stavke ' + str( stavka) + '\n'
+        ispis += 'maknuti su znaci: ' + str(maknuto) + '\n'
+        ispis += 'zbog proturjecja pomakni/reduciraj sa stavkom ' + str(druga) + '\n'
+        ispis += '\n'
+        
+        self.tok_za_pogreske.write( ispis )
+    
+    
+    def _pisi_rr( self, stavka, druga, skup_za_maknuti, stanje ):
+        
+        ispis = 'u stanju ' + str(stanje) + '\n'
+        ispis += 'iz stavke ' + str(stavka) + '\n'
+        ispis += 'maknuti su znaci: ' + str( skup_za_maknuti ) + '\n'
+        ispis += 'zbog proturjecja reduciraj/reduciraj sa stavkom ' + str( druga ) + '\n'
+        ispis += '\n'
+        
+        self.tok_za_pogreske.write( ispis )
+    
+    
     def _izgradi_tablice( self ):
 
 
