@@ -92,16 +92,15 @@ class ENKA:
         return novaStanja
     
     def _prijelaz (self, stanje, znak):
-        stanja = self.prijelazi.get ((stanje, znak), [])
+        stanja = self.prijelazi.get ((stanje, znak), set())
         
         stanjaN = set()
-        if stanja == []:
-            return {}
-        else:
+        if len( stanja ) != 0:
             for st in stanja:
                 stanjaN.add (st)
                 stanjaN = stanjaN.union(self._epsilon_okruzenje(st))
-                 
+        
+        # vraca prazni set ako na su na pocetku stanja duljine 0
         return stanjaN
     
     def _prijelaz_za_skup (self, stanja, znak):
@@ -120,16 +119,23 @@ class ENKA:
         
         stanja = self._epsilon_okruzenje(stanje)
         
-        stanjaN = set ()
-        print ("Stanja: " + str(stanja) + "\n")
+        #stanjaN = set ()
+        
+        '''
         for st in stanja:
             for znak in niz:
-                print ("st: " + str(st) + "; znak: " + znak + "\n")
                 stanjaN = stanjaN.union (self._prijelaz(st, znak))
-                print ("stanjaN: " + str(stanjaN) + "\n")
+        '''
         
+        #stanjaN = stanja
+        
+        for znak in niz:
+            stanja = self._prijelaz_za_skup( stanja, znak )
+        
+        '''
         if stanjaN == []:
             return stanja
         
         return stanjaN
-            
+        '''
+        return stanja
