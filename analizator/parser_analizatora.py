@@ -22,4 +22,8 @@ class ParserAnalizatora:
     
     def parsiraj( self ):
         '''IVAN'''
+        
+        # na kraj ulaznog niza dodati znak za kraj niza
+        # treba biti instanca LeksickeJedinke sa atributom uniformni_znak
+        # vrijednosti "<<!>>"
         pass

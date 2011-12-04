@@ -32,8 +32,6 @@ class ModelAnalizatora:
                                 # on oznacava koje se stanje stavlja kao novo stanje
                                 # (to je valjda jasno iz predavanja, a i iz samog imena tablice)
         
-
-        
         self._stvori_tablice()
     
     
@@ -56,22 +54,91 @@ class ModelAnalizatora:
         IVAN
         '''
         
-        #self._stvori_automat()
+        self._stvori_automat()
         #razrijesi proturjecja - bilo ovdje, bilo u dka
-        #self._izgradi_tablice()
-        pass
+        self._izgradi_tablice()
+        
     
     
     def _kreiraj_enka( self ):
         '''iz gramatike stvara enka
         ovdje ide algoritam sa strane 148
-        SARA
         '''
         
-        '''napomena: imam pseudokod ovoga kako bi trebalo izgledati
-        vjerojatno cu ga staviti tu, ili cu sam ovo napisati
-        '''
-        pass
+        abeceda = self.gramatika.nezavrsni_znakovi.union( 
+                            self.gramatika.zavrsni_znakovi )
+        
+        pocetno_stanje = LR1Stavka( self.gramatika.pocetni_nezavrsni, [''],
+                                    self.gramatika.produkcije[-1].desna_strana,
+                                    set([ '<<!>>' ]) )
+        
+        skup_stanja = set([ pocetno_stanje ])
+        prijelazi = {}  # rjecnik: kljuc = par (LR1Stavka, string)
+                        # vrijednost = skup LR1Stavki
+        
+        neobradjena_stanja = skup_stanja
+        
+        while( len( neobradjena_stanja ) > 0 ):
+            
+            trenutno_stanje = neobradjena_stanja.pop()  # tip: LR1Stavka
+            
+            # potpuna stavka
+            if trenutno_stanje.desno_od_tocke == "":
+                continue
+            
+            # slucaj iz knjige: 4 b)
+            znak_poslije_tocke = trenutno_stanje.desno_poslije_tocke[0]
+            nastavak_beta = trenutno_stanje.desno_poslije_tocke[1:]
+            
+            novo_stanje = LR1Stavka( trenutno_stanje.lijeva_strana,
+                                    trenutno_stanje.desno_prije_tocke + \
+                                        znak_poslije_tocke,
+                                    nastavak_beta,
+                                    trenutno_stanje.skup_zapocinje )
+            
+            if novo_stanje not in skup_stanja:
+                skup_stanja.add( novo_stanje )
+                neobradjena_stanja.add( novo_stanje )
+            
+            kljuc = (novo_stanje, znak_poslije_tocke)
+            if kljuc in prijelazi:
+                prijelazi[ kljuc ].update( novo_stanje )
+            else:
+                prijelazi[ kljuc ] = set([ novo_stanje ])
+            
+            # slucaj iz knjige: 4 c)
+            if znak_poslije_tocke in self.gramatika.nezavrsni_znakovi:
+                
+                # stvori stavku za svaku produkciju iz nezavrsnog znaka q.poslije[0]
+                nova_stanja = set([])
+                for produkcija in self.gramatika.produkcije:
+                    if znak_poslije_tocke == produkcija.lijeva_strana:
+                        
+                        skup_T = self.gramatika.odredi_zapocinje_za_niz(
+                                                                nastavak_beta )
+                        
+                        if self.gramatika.je_li_prazan( nastavak_beta ):
+                            skup_T.update( trenutno_stanje.skup_zapocinje )
+                        
+                        nova_stanja.add( LR1Stavka( znak_poslije_tocke, [''],
+                                                    produkcija.desna_strana,
+                                                    skup_T) )
+                
+                # stavi te sve stavke u prijelaze i stanja (ako nisu u stanjima)
+                for novo_stanje in nova_stanja:
+                    
+                    if novo_stanje not in skup_stanja:
+                        skup_stanja.add( novo_stanje )
+                        neobradjena_stanja.add( novo_stanje )
+                    
+                    kljuc = (novo_stanje, '$')
+                    if kljuc in prijelazi:
+                        prijelazi[ kljuc ].update( novo_stanje )
+                    else:
+                        prijelazi[ kljuc ] = set([ novo_stanje ])
+        
+        return ENKA( skup_stanja, abeceda, pocetno_stanje, skup_stanja,
+                    prijelazi )
     
     
     def _stvori_automat( self ):

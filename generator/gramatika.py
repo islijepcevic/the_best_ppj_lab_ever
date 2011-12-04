@@ -38,7 +38,7 @@ class Gramatika:
         self.nezavrsni_znakovi.insert(0, '<<novi_nezavrsni_znak>>')
         stari_pocetni = self.pocetni_nezavrsni
         self.pocetni_nezavrsni = '<<novi_nezavrsni_znak>>'
-        self.produkcije.insert(0, Produkcija('<<novi_nezavrsni_znak>>', stari_pocetni.split() ))
+        self.produkcije.append( Produkcija('<<novi_nezavrsni_znak>>', [stari_pocetni] ) )
 
         
     
@@ -183,3 +183,16 @@ class Gramatika:
                     break
                 
         return temp_skup
+    
+    
+    def je_niz_li_prazan( self, niz ):
+        
+        for znak in niz:
+            if znak in self.zavrsni_znakovi or
+                (znak not in self.prazni_nezavrsni_znakovi):
+                
+                break
+        else:
+            return True
+        
+        return False
