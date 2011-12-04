@@ -55,7 +55,7 @@ class NKA:
                 
                 for q in q1:
                   
-                    new_q = new_q.union(frozenset (self.prijelazi.get((q, z), {})))
+                    new_q = new_q.union(frozenset ({self.prijelazi.get((q, z), {})}))
                     
                     
                 
