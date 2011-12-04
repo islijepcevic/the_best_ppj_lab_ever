@@ -25,6 +25,9 @@ class Stog:
     def skini( self ):
         '''skini element s vrha stoga'''
         
+        if self.jest_prazan():
+            return GreskaNaStogu( 'pokusaj skidanja sa praznog stoga' )
+        
         self.stog.pop()
     
     
