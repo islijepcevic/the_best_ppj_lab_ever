@@ -1,6 +1,7 @@
 '''greske i iznimke
 
 GreskaDka
+GreskaIzgradnjeTablice
 GreskaAnalizatora
 GreskaNaStogu
 '''
@@ -11,6 +12,19 @@ class Greska( Exception ):
 
 
 class GreskaDka( Greska ):
+    '''greska na stogu'''
+    
+    def __init__( self, poruka ):
+        
+        self._poruka = poruka
+    
+    
+    def __str__( self ):
+        
+        return self._poruka
+
+
+class GreskaIzgradnjeTablice( Greska ):
     '''greska na stogu'''
     
     def __init__( self, poruka ):

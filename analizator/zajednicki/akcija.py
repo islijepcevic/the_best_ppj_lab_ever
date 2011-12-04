@@ -31,9 +31,11 @@ class Akcija:
         
         elif tip == 'prihvati':
             self.tip = tip
+            tocan_input = True
             
         elif tip == 'odbaci':
             self.tip = tip
+            tocan_input = True
         
         if not tocan_input:
             raise TypeError( 'pokusaj stvaranja krivog tipa akcije' )

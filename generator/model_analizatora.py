@@ -7,6 +7,7 @@ from generator.enka import ENKA
 from generator.lr_1_stavka import LR1Stavka
 from analizator.zajednicki.akcija import Akcija
 from analizator.zajednicki.produkcija import Produkcija
+from analizator.zajednicki.greske import GreskaIzgradnjeTablice
 
 class ModelAnalizatora:
     
@@ -31,7 +32,7 @@ class ModelAnalizatora:
         self.novo_stanje = [] # ova tablica je slicna kao akcija, dakle niz
                                 # s indexom istim kao za stanje DKA;
                                 # clan niza je dict
-                                # kljuc dicta je zavrsni znak gramatike (string)
+                                # kljuc dicta je nezavrsni znak gramatike (string)
                                 # vrijednost dicta je ovdje samo jedan cijeli broj
                                 # on oznacava koje se stanje stavlja kao novo stanje
                                 # (to je valjda jasno iz predavanja, a i iz samog imena tablice)
@@ -99,8 +100,15 @@ class ModelAnalizatora:
                 continue
             
             # slucaj iz knjige: 4 b)
+            
+            if trenutno_stanje.je_li_potpuna():
+                continue
+            
             znak_poslije_tocke = trenutno_stanje.desno_poslije_tocke[0]
-            nastavak_beta = trenutno_stanje.desno_poslije_tocke[1:]
+            
+            nastavak_beta = []
+            if len( trenutno_stanje.desno_poslije_tocke ) > 1:
+                nastavak_beta = trenutno_stanje.desno_poslije_tocke[1:]
             
             novo_stanje = LR1Stavka( trenutno_stanje.lijeva_strana,
                                     trenutno_stanje.desno_prije_tocke + \
@@ -132,9 +140,12 @@ class ModelAnalizatora:
                         if self.gramatika.je_li_prazan( nastavak_beta ):
                             skup_T |= ( trenutno_stanje.skup_zapocinje )
                         
+                        desni_dio = ['']
+                        if produkcija.desna_strana[0] != '$':
+                            desni_dio = produkcija.desna_strana
+                        
                         nova_stanja.add( LR1Stavka( znak_poslije_tocke, [''],
-                                                    produkcija.desna_strana,
-                                                    skup_T) )
+                                                    desni_dio, skup_T) )
                 
                 # stavi te sve stavke u prijelaze i stanja (ako nisu u stanjima)
                 for novo_stanje in nova_stanja:
@@ -259,6 +270,7 @@ class ModelAnalizatora:
 
 
         auto = self.automat
+        znaci_za_akcije = self.gramatika.zavrsni_znakovi | set([ '<<!>>' ]) )
 
         for s in range (len( auto.stanja )):
             
@@ -274,25 +286,32 @@ class ModelAnalizatora:
             # iteriranje po LR1Stavkama pojedinog stanja DKA
             for i in range (len( auto.stanja[s] )):
                 
-                # if-uvjet za 'pomakni'
-                if (( s, auto.stanja[s][i].desno_poslije_tocke[0]) in auto.prijelazi)
-                    and (not auto.stanja[s][i].desno_poslije_tocke[0].startswith('<')):
-                    
-                    self.akcija[s][auto.stanja[s][i].desno_poslije_tocke[0]] = Akcija ('pomakni',
-                    auto.prijelazi[(s, auto.stanja[s][i].desno_poslije_tocke[0])])
+                znak_poslije_tocke = auto.stanja[s][i].desno_poslije_tocke[0]
                 
+                # if-uvjet za 'pomakni'
+                if (( s, znak_poslije_tocke) in auto.prijelazi)
+                    and (znak_poslije_tocke in znaci_za_akcije ):
+                    
+                    self.akcija[s][ znak_poslije_tocke ] = \
+                        Akcija ('pomakni', auto.prijelazi[ (s, znak_poslije_tocke) ] )
+                
+                # if-uvjet za 'prihvati' i 'reduciraj'
                 if auto.stanja[s][i].je_li_potpuna():
                     
+                    # if-uvjet samo za 'prihvati' - bitniji od 'reduciraj'
                     if auto.stanja[s][i].lijeva_strana == '<<novi_nezavrsni_znak>>':
                         
-                        if auto.stanja[s][i].skup_zapocinje == ['kraj_niza']:
+                        if auto.stanja[s][i].skup_zapocinje == frozenset([ '<<!>>' ]):
                             
-                            self.akcija[s][auto.stanja[s][i].skup_zapocinje[0]] = 'Potvrda()'
-      
-                        
+                            self.akcija[s][ znak_poslije_tocke ] = Akcija( 'prihvati' )
+                            
                             continue
-                                           
+                        
+                        else:
+                            raise GreskaIzgradnjeTablice( 'postoji stavka s novim nezavrsnim znakom, ' + \
+                                'kojoj je skup zapocinje jednak: ' + str( auto.stanja[s][i].skup_zapocinje ) )
                     
+                    # petlja za 'reduciraj'
                     for x in range (len (auto.stanja[s][i].skup_zapocinje)):
                         
                         if auto.stanja[s][i].desno_prije_tocke == [''] :
@@ -300,17 +319,16 @@ class ModelAnalizatora:
                             # da imamo lijepo zapisano, nece slat prazni skup nego onaj epsilon
                             # u obliku znaka '$' bas kao u Ulaznoj!
 
-                            self.akcija[s][auto.stanja[s][i].skup_zapocinje[x]] = Akcija ('reduciraj',
-                            Produkcija( auto.stanja[s][i].lijeva_strana, '$' ))
+                            self.akcija[s][ auto.stanja[s][i].skup_zapocinje[x] ] = Akcija ('reduciraj',
+                                                    Produkcija( auto.stanja[s][i].lijeva_strana, ['$'] ))
                             
                         else:
-                            self.akcija[s][auto.stanja[s][i].skup_zapocinje[x]] = Akcija ('reduciraj',
+                            self.akcija[s][ auto.stanja[s][i].skup_zapocinje[x] ] = Akcija ('reduciraj',
                             Produkcija( auto.stanja[s][i].lijeva_strana, auto.stanja[s][i].desno_prije_tocke ))
-
                         
             #petlja za tablicu novo stanje
             for x in range ( len ( auto.ulazni_znakovi ) ):
-                if ((s, auto.ulazni_znakovi[x]) in auto.prijelazi) and auto.ulazni_znakovi[x].startswith('<'):
-                    self.novo_stanje[s][auto.ulazni_znakovi[x]] = auto.prijelazi[(s, auto.ulazni_znakovi[x])]
-
+                if ((s, auto.ulazni_znakovi[x]) in auto.prijelazi) and 
+                    auto.ulazni_znakovi[x] in self.gramatika.nezavrsni_znakovi:
                     
+                    self.novo_stanje[s][auto.ulazni_znakovi[x]] = auto.prijelazi[(s, auto.ulazni_znakovi[x])]

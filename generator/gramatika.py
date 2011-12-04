@@ -170,7 +170,7 @@ class Gramatika:
         
         temp_skup = set([])
         
-        if niz[0] == '$':
+        if (not niz) or (niz[0] == '$'):
             return set()
             
         else:
