@@ -91,19 +91,33 @@ class Gramatika:
         #a vrijednost je skup od 2 clana sa mogucim vrijednostima 0 ili 1
         #self._zapocinje_znakom[znak1, znak2]=[ZapocinjeIzravnoZnakom, ZapocinjeZnakom]
 
+        # svi kljucevi
         pomocni = self.nezavrsni_znakovi + self.zavrsni_znakovi
+        
+        # inicijalizacija tablica
         for x in range (len( pomocni )):
             for y in range (len( pomocni )):
-                self._zapocinje_znakom[pomocni[x], pomocni[y]] = [0, 0]
-
+                self._zapocinje_znakom[ pomocni[ x ] ][ pomocni[ y ] ] = [0, 0]
             
         # funkcija
         
+        for produkcija in self.produkcije:
+            
+            if produkcija.desna_strana[0] != '$':
+                self._zapocinje_znakom[ produkcija ][ 
+            
+            for znak_desno in produkcija.desna_strana:
+                
+        
+        
         for i in range (len(self.produkcije)):
             for j in range (len( self.produkcije[i].desna_strana )):
+                
                 if j == 0 and self.produkcije[i].desna_strana[j] != '$':
+                    
                     self._zapocinje_znakom[self.produkcije[i].lijeva_strana,
                                         self.produkcije[i].desna_strana[j]] = [1, 1]
+                
                 if (self.produkcije[i].desna_strana[j] in self.prazni_nezavrsni_znakovi) and (
                     (j + 1) < len(self.produkcije[i].desna_strana)):
                 
