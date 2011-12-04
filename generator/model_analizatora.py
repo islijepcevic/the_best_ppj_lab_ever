@@ -261,36 +261,42 @@ class ModelAnalizatora:
         auto = self.automat
 
         for s in range (len( auto.stanja )):
-
+            
+            # zanemari neprihvatljiva stanja
+            if auto.stanja[s] not in auto.prihvatljiva:
+                continue
+            
+            # tablice su otprije prazni nizovi, dodaj element prazni dict
             self.akcija.append(dict())
             self.novo_stanje.append(dict())
 
-
+            # petlja za tablicu akcija
+            # iteriranje po LR1Stavkama pojedinog stanja DKA
             for i in range (len( auto.stanja[s] )):
-
-                if (( s, auto.stanja[s][i].desno_poslije_tocke[0]) in
-                    auto.prijelazi) and (not auto.stanja[s][i].desno_poslije_tocke[0].startswith('<')):
-                    kanter += 1
-
+                
+                # if-uvjet za 'pomakni'
+                if (( s, auto.stanja[s][i].desno_poslije_tocke[0]) in auto.prijelazi)
+                    and (not auto.stanja[s][i].desno_poslije_tocke[0].startswith('<')):
+                    
                     self.akcija[s][auto.stanja[s][i].desno_poslije_tocke[0]] = Akcija ('pomakni',
                     auto.prijelazi[(s, auto.stanja[s][i].desno_poslije_tocke[0])])
-
+                
                 if auto.stanja[s][i].je_li_potpuna():
                     
                     if auto.stanja[s][i].lijeva_strana == '<<novi_nezavrsni_znak>>':
                         
                         if auto.stanja[s][i].skup_zapocinje == ['kraj_niza']:
-
+                            
                             self.akcija[s][auto.stanja[s][i].skup_zapocinje[0]] = 'Potvrda()'
       
                         
                             continue
                                            
-
+                    
                     for x in range (len (auto.stanja[s][i].skup_zapocinje)):
-
+                        
                         if auto.stanja[s][i].desno_prije_tocke == [''] :
-
+                            
                             # da imamo lijepo zapisano, nece slat prazni skup nego onaj epsilon
                             # u obliku znaka '$' bas kao u Ulaznoj!
 
@@ -302,7 +308,7 @@ class ModelAnalizatora:
                             Produkcija( auto.stanja[s][i].lijeva_strana, auto.stanja[s][i].desno_prije_tocke ))
 
                         
-
+            #petlja za tablicu novo stanje
             for x in range ( len ( auto.ulazni_znakovi ) ):
                 if ((s, auto.ulazni_znakovi[x]) in auto.prijelazi) and auto.ulazni_znakovi[x].startswith('<'):
                     self.novo_stanje[s][auto.ulazni_znakovi[x]] = auto.prijelazi[(s, auto.ulazni_znakovi[x])]

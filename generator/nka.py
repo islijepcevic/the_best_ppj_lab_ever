@@ -22,13 +22,8 @@ class NKA:
         MAK
         '''
         
-<<<<<<< HEAD
-        q0 = set ({self.pocetno_stanje})
-        stanjaDKA = set (q0)        
-=======
         q0 = frozenset ({self.pocetno_stanje})
         stanjaDKA = set (q0)
->>>>>>> 6d0c8cb303f1d480cb3588182568e75c73d01c3e
         
         postoji_neprihvatljivo = False
         obradjena = set()
@@ -41,10 +36,6 @@ class NKA:
         
         prijelaziDKA = dict()
         
-<<<<<<< HEAD
-        
-=======
->>>>>>> 6d0c8cb303f1d480cb3588182568e75c73d01c3e
         while len (Q) > len (obradjena):
             #print ("Sva stanja: " + str (Q))
             #print ("obradjena: " + str(obradjena))
@@ -62,13 +53,7 @@ class NKA:
                 
                 for q in q1:
                   
-<<<<<<< HEAD
-                    new_q = new_q.union(frozenset ({self.prijelazi.get((q, z), {})}))
-                    
-                    
-=======
-                    new_q = new_q.union(frozenset (self.prijelazi.get((q, z), {})))
->>>>>>> 6d0c8cb303f1d480cb3588182568e75c73d01c3e
+                    new_q = new_q.union(frozenset ( { self.prijelazi.get( (q, z), {} ) } ))
                 
                 if new_q:
                     stanjaDKA.add(frozenset(new_q))
@@ -78,18 +63,8 @@ class NKA:
                     postoji_neprihvatljivo = True
                 
             #input()
-         
-<<<<<<< HEAD
-        F = stanjaDKA.copy()
         
         if postoji_neprihvatljivo:
             stanjaDKA.add(None)
-            
-=======
-        F = stanjaDKA
-        
-        if postoji_neprihvatljivo:
-            stanjaDKA.add(None)
->>>>>>> 6d0c8cb303f1d480cb3588182568e75c73d01c3e
         
         return DKA (stanjaDKA, self.ulazni_znakovi, q0, F, prijelaziDKA)
