@@ -160,52 +160,32 @@ class Gramatika:
 
         pomocni = self.nezavrsni_znakovi + self.zavrsni_znakovi
         
-        for x in range (len( pomocni )):
-            temp_skup = []
-            for y in range (len( pomocni )):
-                if self._zapocinje_znakom[pomocni[x], pomocni[y]][1] == 1 and (
-                    pomocni[y] in self.zavrsni_znakovi):
-                    temp_skup.append(pomocni[y])
-            self._zapocinje[pomocni[x]] = temp_skup
-
-            
-        #print za provjeru
-        '''
-        for x in range (len(pomocni)):
-           print(pomocni[x] +': '+ str(self._zapocinje[pomocni[x]]))
-        '''
-            
+        for nz in self.nezavrsni_znakovi:
+            temp_skup = set([])
+            for zz in self.zavrsni_znakovi:
+                if self._zapocinje_znakom[ nz ][ zz ]:
+                    temp_skup.add( zz )
+            self._zapocinje[ nz ] = temp_skup
     
     
     def odredi_zapocinje_za_niz( self, niz ):
-
-
         # ovaj niz treba bit zadan kao produkcija.desna_strana
         # znaci kao niz stringova, a ne 1 string
         
-        temp_skup = []
+        temp_skup = set([])
+        
         if niz[0] == '$':
-            self._zapocinje[str(niz)] = set()
+            return set()
             
         else:
-            
             
             for x in range(len( niz )):
                 
                 if (niz[x] in self.prazni_nezavrsni_znakovi):
-                    temp_skup.extend(self._zapocinje[niz[x]])
+                    temp_skup.update( self._zapocinje[niz[x]] )
                     continue
                 else: 
-                    temp_skup.extend(self._zapocinje[niz[x]])
+                    temp_skup.update( self._zapocinje[niz[x]] )
                     break
                 
-        self._zapocinje[str(niz)] = set(temp_skup)
-        
-        #print ('Zapocinje'+ str(niz)+ str(self._zapocinje[str(niz)]))
-                                 
-
-    
-                
-
-
-
+        return temp_skup
