@@ -14,7 +14,7 @@ class DKA:
         self.ulazni_znakovi = ulazni_znakovi    # skup stringova
         self.pocetno_stanje = pocetno_stanje    # LR1Stavka
         self.prijelazi = prijelazi      # rjecnik: kljuc = par (skup LR1Stavki, string)
-                                        # vrijednost = skup LR1Stavki ->(ovdje to predstavlja jedno stanje
+                                        # vrijednost = skup LR1Stavki ->(ovdje to predstavlja jedno stanje)
         
         self._minimiziraj()
         self._pretvori_stanja_u_brojeve()

@@ -70,7 +70,7 @@ class ModelAnalizatora:
         
         pocetno_stanje = LR1Stavka( self.gramatika.pocetni_nezavrsni, [''],
                                     self.gramatika.produkcije[-1].desna_strana,
-                                    set([ '<<!>>' ]) )
+                                    frozenset([ '<<!>>' ]) )
         
         skup_stanja = set([ pocetno_stanje ])
         prijelazi = {}  # rjecnik: kljuc = par (LR1Stavka, string)
@@ -102,9 +102,9 @@ class ModelAnalizatora:
             
             kljuc = (novo_stanje, znak_poslije_tocke)
             if kljuc in prijelazi:
-                prijelazi[ kljuc ].update( novo_stanje )
+                prijelazi[ kljuc ] |= ( novo_stanje )
             else:
-                prijelazi[ kljuc ] = set([ novo_stanje ])
+                prijelazi[ kljuc ] = frozenset([ novo_stanje ])
             
             # slucaj iz knjige: 4 c)
             if znak_poslije_tocke in self.gramatika.nezavrsni_znakovi:
@@ -118,7 +118,7 @@ class ModelAnalizatora:
                                                                 nastavak_beta )
                         
                         if self.gramatika.je_li_prazan( nastavak_beta ):
-                            skup_T.update( trenutno_stanje.skup_zapocinje )
+                            skup_T |= ( trenutno_stanje.skup_zapocinje )
                         
                         nova_stanja.add( LR1Stavka( znak_poslije_tocke, [''],
                                                     produkcija.desna_strana,
@@ -133,9 +133,9 @@ class ModelAnalizatora:
                     
                     kljuc = (novo_stanje, '$')
                     if kljuc in prijelazi:
-                        prijelazi[ kljuc ].update( novo_stanje )
+                        prijelazi[ kljuc ] |= ( novo_stanje )
                     else:
-                        prijelazi[ kljuc ] = set([ novo_stanje ])
+                        prijelazi[ kljuc ] = frozenset([ novo_stanje ])
         
         return ENKA( skup_stanja, abeceda, pocetno_stanje, skup_stanja,
                     prijelazi )

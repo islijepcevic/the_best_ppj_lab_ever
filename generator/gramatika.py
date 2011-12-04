@@ -73,6 +73,8 @@ class Gramatika:
                     self.prazni_nezavrsni_znakovi.add(
                         self.produkcije[i].lijeva_strana)
                     vrti = True
+        
+        self.prazni_nezavrsni_znakovi = frozenset( self.prazni_nezavrsni_znakovi )
     
     
     def _odredi_zapocinje_izravno_znakom( self ):

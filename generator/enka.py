@@ -113,7 +113,7 @@ class ENKA:
         for s in stanja:
             novaStanja = novaStanja.union(self._prijelaz(s, znak))
         
-        return novaStanja
+        return frozenset( novaStanja )
     
     def prijelaz_za_niz( self, stanje, niz ):
         '''delta s kapicom, kako je to bilo oznacavano u utr-u
@@ -141,7 +141,7 @@ class ENKA:
         
         return stanjaN
         '''
-        return stanja
+        return frozenset( stanja )
         
         # AKO NE BUDE RADILO: ALGORITAM EKVIVALENTAN UDZBENIKU UTR:
         '''
@@ -149,5 +149,5 @@ class ENKA:
         for r in self.prijelaz_za_niz( stanje, niz[:-1] ):
             for p in self.prijelazi.get( (r, niz[-1]), set() ):
                 P |= p
-        return self._eps_okruzenje_set( P )
+        return frozenset( self._eps_okruzenje_set( P ) )
         '''

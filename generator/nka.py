@@ -18,13 +18,12 @@ class NKA:
     
     def kreiraj_dka( self ):
         '''vraca instancu DKA
-        ovaj algoritam ostavi za kraj, mislim da ga treba malo ubrzati
         generalno: knjiga utr, str 32
         MAK
         '''
         
-        q0 = set ({self.pocetno_stanje})
-        stanjaDKA = set (q0)        
+        q0 = frozenset ({self.pocetno_stanje})
+        stanjaDKA = set (q0)
         
         postoji_neprihvatljivo = False
         obradjena = set()
@@ -36,7 +35,6 @@ class NKA:
             Q.add(frozenset({s}))
         
         prijelaziDKA = dict()
-        
         
         while len (Q) > len (obradjena):
             #print ("Sva stanja: " + str (Q))
@@ -56,8 +54,6 @@ class NKA:
                 for q in q1:
                   
                     new_q = new_q.union(frozenset (self.prijelazi.get((q, z), {})))
-                    
-                    
                 
                 if new_q:
                     stanjaDKA.add(frozenset(new_q))
@@ -72,6 +68,5 @@ class NKA:
         
         if postoji_neprihvatljivo:
             stanjaDKA.add(None)
-            
         
         return DKA (stanjaDKA, self.ulazni_znakovi, q0, F, prijelaziDKA)
