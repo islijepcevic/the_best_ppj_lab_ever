@@ -81,7 +81,7 @@ class ModelAnalizatora:
         abeceda = self.gramatika.nezavrsni_znakovi.union( 
                             self.gramatika.zavrsni_znakovi )
         
-        pocetno_stanje = LR1Stavka( self.gramatika.pocetni_nezavrsni, [''],
+        pocetno_stanje = LR1Stavka( self.gramatika.pocetni_nezavrsni, [],
                                     self.gramatika.produkcije[-1].desna_strana,
                                     frozenset([ '<<!>>' ]) )
         
@@ -89,7 +89,7 @@ class ModelAnalizatora:
         prijelazi = {}  # rjecnik: kljuc = par (LR1Stavka, string)
                         # vrijednost = skup LR1Stavki
         
-        neobradjena_stanja = skup_stanja
+        neobradjena_stanja = skup_stanja.copy()
         
         while( len( neobradjena_stanja ) > 0 ):
             
@@ -119,7 +119,7 @@ class ModelAnalizatora:
                 skup_stanja.add( novo_stanje )
                 neobradjena_stanja.add( novo_stanje )
             
-            kljuc = (novo_stanje, znak_poslije_tocke)
+            kljuc = (trenutno_stanje, znak_poslije_tocke)
             if kljuc in prijelazi:
                 prijelazi[ kljuc ] |= frozenset([ novo_stanje ])
             else:
@@ -143,7 +143,7 @@ class ModelAnalizatora:
                         if produkcija.desna_strana[0] != '$':
                             desni_dio = produkcija.desna_strana
                         
-                        nova_stanja.add( LR1Stavka( znak_poslije_tocke, [''],
+                        nova_stanja.add( LR1Stavka( znak_poslije_tocke, [],
                                                     desni_dio, skup_T) )
                 
                 # stavi te sve stavke u prijelaze i stanja (ako nisu u stanjima)
@@ -153,11 +153,12 @@ class ModelAnalizatora:
                         skup_stanja.add( novo_stanje )
                         neobradjena_stanja.add( novo_stanje )
                     
-                    kljuc = (novo_stanje, '$')
+                    kljuc = (trenutno_stanje, '$')
                     if kljuc in prijelazi:
                         prijelazi[ kljuc ] |= frozenset([ novo_stanje ])
                     else:
                         prijelazi[ kljuc ] = frozenset([ novo_stanje ])
+        
         
         return ENKA( skup_stanja, abeceda, pocetno_stanje, skup_stanja.copy(),
                     prijelazi )
@@ -176,45 +177,49 @@ class ModelAnalizatora:
     
     
     def _razrijesi_nejednoznacnosti( self ):
-        
+        #print( type(self.automat.stanja), self.automat.stanja )
         for stanje in self.automat.stanja:  # stanja automata su u listi
             
             # jedno stanje je skup LR1Stavki
             
+            #print( type(stanje), stanje )
             # razrijesi pomakni/reduciraj
-            for i in range( len( stanje ) ):
-                
-                if not stanje[i].je_li_potpuna():
+            #for i in range( len( stanje ) ):
+            for stavka1 in stanje:
+                #print( type(stavka1), stavka1 )
+                if not stavka1.je_li_potpuna():
                     continue
                 
-                for j in range( len( stanje ) ):
+                for stavka2 in stanje:
                     
-                    if i == j:
+                    if stavka1 == stavka2:
                         continue
                     
-                    stavka1 = stanje[i]
-                    stavka2 = stanje[j]
+                    #stavka1 = stanje[i]
+                    #stavka2 = stanje[j]
                     
                     ret = stavka1.razrijesi_pr( stavka2 )
                     
                     if ret:
                         self._pisi_pr( stavka1, stavka2, ret, self,automat.stanja.index( stanje ) )
                     
-                    stanje[i] = stavka1
+                    #stanje[i] = stavka1
+                    # nadam se da je ovdje zbog mutable u self.automatu sve zabiljezeno i promijenjeno
             
             # razrijesi reduciraj/reduciraj
-            for i in range( len( stanje ) ):
+            for stavka1 in stanje:
                 
-                if not stanje[i].je_li_potpuna():
+                if not stavka1.je_li_potpuna():
                     continue
                 
-                for j in range( i + 1, len( stanje ) ):
+                #for j in range( i + 1, len( stanje ) ):
+                for stavka2 in stanje:
                     
-                    if not stanje[j].je_li_potpuna():
+                    if not stavka2.je_li_potpuna():
                         continue
                     
-                    stavka1 = stanje[i]
-                    stavka2 = stanje[j]
+                    #stavka1 = stanje[i]
+                    #stavka2 = stanje[j]
                     
                     skup_za_maknuti = stavka1.skup_zapocinje & stavka2.skup_zapocinje
                     
@@ -239,8 +244,8 @@ class ModelAnalizatora:
                             self._pisi_rr( stavka1, stavka2, skup_za_maknuti, self.automat.stanja.index( stanje ))
                             break
                     
-                    stanje[i] = stavka1
-                    stanje[j] = stavka2
+                    #stanje[i] = stavka1
+                    #stanje[j] = stavka2
     
     
     def _pisi_pr( self, stavka, druga, maknuto, stanje ):
@@ -283,9 +288,11 @@ class ModelAnalizatora:
 
             # petlja za tablicu akcija
             # iteriranje po LR1Stavkama pojedinog stanja DKA
-            for i in range (len( auto.stanja[s] )):
+            for stavka in auto.stanja[s]:
                 
-                znak_poslije_tocke = auto.stanja[s][i].desno_poslije_tocke[0]
+                if stavka.je_li_potpuna():
+                    continue
+                znak_poslije_tocke = stavka.desno_poslije_tocke[0]
                 
                 # if-uvjet za 'pomakni'
                 if ( ( s, znak_poslije_tocke) in auto.prijelazi ) \
@@ -295,12 +302,12 @@ class ModelAnalizatora:
                         Akcija ('pomakni', auto.prijelazi[ (s, znak_poslije_tocke) ] )
                 
                 # if-uvjet za 'prihvati' i 'reduciraj'
-                if auto.stanja[s][i].je_li_potpuna():
+                if stavka.je_li_potpuna():
                     
                     # if-uvjet samo za 'prihvati' - bitniji od 'reduciraj'
-                    if auto.stanja[s][i].lijeva_strana == '<<novi_nezavrsni_znak>>':
+                    if stavka.lijeva_strana == '<<novi_nezavrsni_znak>>':
                         
-                        if auto.stanja[s][i].skup_zapocinje == frozenset([ '<<!>>' ]):
+                        if stavka.skup_zapocinje == frozenset([ '<<!>>' ]):
                             
                             self.akcija[s][ znak_poslije_tocke ] = Akcija( 'prihvati' )
                             
@@ -308,26 +315,26 @@ class ModelAnalizatora:
                         
                         else:
                             raise GreskaIzgradnjeTablice( 'postoji stavka s novim nezavrsnim znakom, ' + \
-                                'kojoj je skup zapocinje jednak: ' + str( auto.stanja[s][i].skup_zapocinje ) )
+                                'kojoj je skup zapocinje jednak: ' + str( stavka.skup_zapocinje ) )
                     
                     # petlja za 'reduciraj'
                     for x in range (len (auto.stanja[s][i].skup_zapocinje)):
                         
-                        if auto.stanja[s][i].desno_prije_tocke == [''] :
+                        if stavka.desno_prije_tocke == [''] :
                             
                             # da imamo lijepo zapisano, nece slat prazni skup nego onaj epsilon
                             # u obliku znaka '$' bas kao u Ulaznoj!
 
-                            self.akcija[s][ auto.stanja[s][i].skup_zapocinje[x] ] = Akcija ('reduciraj',
-                                                    Produkcija( auto.stanja[s][i].lijeva_strana, ['$'] ))
+                            self.akcija[s][ stavka.skup_zapocinje[x] ] = Akcija ('reduciraj',
+                                                    Produkcija( stavka.lijeva_strana, ['$'] ))
                             
                         else:
-                            self.akcija[s][ auto.stanja[s][i].skup_zapocinje[x] ] = Akcija ('reduciraj',
-                            Produkcija( auto.stanja[s][i].lijeva_strana, auto.stanja[s][i].desno_prije_tocke ))
+                            self.akcija[s][ stavka.skup_zapocinje[x] ] = Akcija ('reduciraj',
+                            Produkcija( stavka.lijeva_strana, stavka.desno_prije_tocke ))
                         
             #petlja za tablicu novo stanje
-            for x in range ( len ( auto.ulazni_znakovi ) ):
-                if ((s, auto.ulazni_znakovi[x]) in auto.prijelazi) and \
-                    auto.ulazni_znakovi[x] in self.gramatika.nezavrsni_znakovi:
+            for znak in auto.ulazni_znakovi:
+                if ((s, znak) in auto.prijelazi) and \
+                    znak in self.gramatika.nezavrsni_znakovi:
                     
-                    self.novo_stanje[s][auto.ulazni_znakovi[x]] = auto.prijelazi[(s, auto.ulazni_znakovi[x])]
+                    self.novo_stanje[s][ znak ] = auto.prijelazi[(s, znak )]

@@ -30,6 +30,9 @@ class Gramatika:
         self._odredi_zapocinje_izravno_znakom()
         self._odredi_zapocinje_znakom()
         self._odredi_zapocinje_za_nezavrsne()
+        
+        print( self.prazni_nezavrsni_znakovi )
+        print()
     
     
     def _dodaj_novi_pocetni_nezavrsni( self ):

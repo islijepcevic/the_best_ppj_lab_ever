@@ -1,6 +1,11 @@
 '''akcija tablice akcija'''
 
-from analizator.zajednicki.produkcija import Produkcija
+main =  len( __name__.split('.') )
+
+if main == 3:
+    from analizator.zajednicki.produkcija import Produkcija
+else:
+    from zajednicki.produkcija import Produkcija
 
 class Akcija:
     

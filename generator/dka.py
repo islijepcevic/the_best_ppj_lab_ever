@@ -12,7 +12,7 @@ def pronadji_index( niz, vrijednost ):
     
     pocetak = 0
     kraj = len( niz )
-    index = (pocetak + kraj) / 2
+    index = (pocetak + kraj) // 2
     
     while True:
         
@@ -26,7 +26,7 @@ def pronadji_index( niz, vrijednost ):
             return index
         
         index_pom = index
-        index = (pocetak + kraj) / 2
+        index = (pocetak + kraj) // 2
         
         if index == index_pom:
             raise GreskaDka( 'binary search zakazao' )
@@ -48,7 +48,7 @@ class DKA:
         self.prijelazi = prijelazi      # rjecnik: kljuc = par (skup LR1Stavki, string)
                                         # vrijednost = skup LR1Stavki ->(ovdje to predstavlja jedno stanje)
         
-        self._minimiziraj()
+        #self._minimiziraj()
         self._pretvori_stanja_u_brojeve()
     
     
@@ -81,14 +81,16 @@ class DKA:
         # inicijalizacija
         tablica_neistovjetnih = {}    #dict: key=stanje; 
                                             #value=dict: key=stanje; value = bool
-        ukupno = len( self.stanja )
+        
         for stanje1 in self.stanja:
+            #print( stanje1, type(stanje1) )
             tablica_neistovjetnih[ stanje1 ] = {}
             
             for stanje2 in self.stanja:
+                
                 if stanje1 >= stanje2:
                     continue
-                if (stanje1 in self.neprihvatljiva and stanje2 in self.neprihvatljiva) or \
+                if (stanje1 in neprihvatljiva and stanje2 in neprihvatljiva) or \
                     (stanje1 in self.prihvatljiva and stanje2 in self.prihvatljiva):
                     
                     # oba stanja su prihvatljiva ili neprihvatljiva => NE oznaci ih kao neistovjetna
@@ -105,8 +107,8 @@ class DKA:
                     continue
                 
                 for a in self.ulazni_znakovi:
-                    novo1 = self.prijelaz[ stanje1, a ]
-                    novo2 = self.prijelaz[ stanje2, a ]
+                    novo1 = self.prijelazi[ stanje1, a ]
+                    novo2 = self.prijelazi[ stanje2, a ]
                     
                     if novo1 == novo2:
                         continue
@@ -215,15 +217,21 @@ class DKA:
         prihvatljiva = set()
         
         if len( self.stanja ) == len( self.prihvatljiva ):
-            stanja = prihvatljiva = sorted( list( self.stanja ) )
+            stanja = sorted( list( self.stanja ) )
+            prihvatljiva = stanja[:]
         
         elif len( self.stanja ) - 1 == len( self.prihvatljiva ):
             neprihvatljiva = stanja - prihvatljiva
-            stanja = prihvatljiva = sorted( list( self.prihvatljiva ) )
+            stanja = sorted( list( self.prihvatljiva ) )
+            prihvatljiva = stanja[:]
             stanja.append( neprihvatljiva )
         
         else:
             raise GreskaDka( 'DKA je krivog oblika i ima vise od jednog neprihvatljivog stanja' )
+        
+        #print( self.stanja )
+        #print()
+        #print(stanja )
         
         pocetno_stanje = pronadji_index( stanja, self.pocetno_stanje )
         
@@ -238,7 +246,10 @@ class DKA:
             if (q, a) not in novi_prijelazi:
                 novi_prijelazi[ (q, a) ] = r
             else:
-                raise GreskaDka( 'DKA ima nedeterministicki prijelaz' )
+                ispis =  'DKA ima nedeterministicki prijelaz\n' + \
+                    str( self.prijelazi[kljuc] ) + '\n' + \
+                    str( novi_prijelazi[(q,a)] ) + '\n' + str(r) + '\n'
+                #raise GreskaDka( ispis )
         
         self.stanja = stanja
         self.prihvatljiva = prihvatljiva

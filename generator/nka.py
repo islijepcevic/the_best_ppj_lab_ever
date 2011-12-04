@@ -21,50 +21,48 @@ class NKA:
         generalno: knjiga utr, str 32
         MAK
         '''
-        
         q0 = frozenset ({self.pocetno_stanje})
-        stanjaDKA = set (q0)
+        
+        stanjaDKA = set()
+        stanjaDKA.add( q0 )
         
         postoji_neprihvatljivo = False
-        obradjena = set()
-        q1 = set()
         
-        
-        Q = set()
-        for s in self.stanja:
-            Q.add(frozenset({s}))
+        neobradjena = set( )
+        neobradjena.add( q0 )
         
         prijelaziDKA = dict()
         
-        while len (Q) > len (obradjena):
-            #print ("Sva stanja: " + str (Q))
-            #print ("obradjena: " + str(obradjena))
-            q1 = ((Q - obradjena).pop())
+        while len (neobradjena ) > 0:
+            #print( len(neobradjena ) )
             
-            #print ("Obradjujem stanje " + str (q1))
+            q1 = neobradjena.pop()
             
-            obradjena.add(frozenset(q1))
-            
-            #input ()
-            
-            for z in self.ulazni_znakovi:
+            for z in (self.ulazni_znakovi | set(['<<!>>']) ):
                 
                 new_q = set()
                 
-                for q in q1:
-                  
-                    new_q = new_q.union(frozenset ( { self.prijelazi.get( (q, z), {} ) } ))
+                for q in q1:    # q je stavka, q1 je skup stavki (frozenset)
+                    
+                    new_q  |= set(  self.prijelazi.get( (q, z), set() ) )
+                
+                new_q = frozenset( new_q )
                 
                 if new_q:
-                    stanjaDKA.add(frozenset(new_q))
+                    
+                    if new_q not in stanjaDKA:
+                        neobradjena.add( new_q )
+                        stanjaDKA.add(new_q)
+                    
                     prijelaziDKA[(frozenset(q1), z)] = new_q
                     
                 else:
                     postoji_neprihvatljivo = True
-                
-            #input()
+                    prijelaziDKA[ (frozenset(q1), z) ] = frozenset([None])
+        
+        F = stanjaDKA.copy()
         
         if postoji_neprihvatljivo:
-            stanjaDKA.add(None)
+            stanjaDKA.add( frozenset([None]) )
         
         return DKA (stanjaDKA, self.ulazni_znakovi, q0, F, prijelaziDKA)

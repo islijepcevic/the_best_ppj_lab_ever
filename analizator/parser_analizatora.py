@@ -15,7 +15,7 @@ class ParserAnalizatora:
     def __init__( self, ulazni_tok_programa, put_do_tablica,
                 put_do_sinkronizacijskih_znakova ):
         
-        self.ulazni_tok = ulazni_tok
+        self.ulazni_tok = ulazni_tok_programa
         self.put_do_tablica = put_do_tablica
         self.put_do_sinkronizacijskih_znakova = put_do_sinkronizacijskih_znakova
     
@@ -59,6 +59,9 @@ class ParserAnalizatora:
         pravi_kod = []
         
         for line in kod:
+            if line == '':
+                continue
+            
             line = line.split(' ')
             
             unif = line[0]

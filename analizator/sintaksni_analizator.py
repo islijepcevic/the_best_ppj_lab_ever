@@ -7,7 +7,7 @@ from unutarnji_cvor_stabla import UnutarnjiCvorStabla
 from stog import Stog
 from stablo import Stablo
 from zajednicki.akcija import Akcija
-from zajednicki.greske import GreskaAnaliziranja
+from zajednicki.greske import GreskaAnalizatora
 
 class SintaksniAnalizator():
     
@@ -78,7 +78,7 @@ class SintaksniAnalizator():
                     break
             
             else:
-                raise GreskaAnaliziranja( 'nedozvoljen tip akcije u ' + \
+                raise GreskaAnalizatora( 'nedozvoljen tip akcije u ' + \
                                         'tablici akcija' )
     
     
@@ -90,7 +90,7 @@ class SintaksniAnalizator():
         if self.generativno_stablo is None:
             return None
         
-        self.generativno_stablo.ispisi_preorder( self.izlazni_tok )
+        self.generativno_stablo.ispisi_preorder( self._izlazni_tok )
     
     
     def _pomakni( self, leksicka_jedinka, novo_stanje ):
@@ -136,13 +136,13 @@ class SintaksniAnalizator():
         
         # stavljanje novog stanja
         try:
-            novo_stanje = self.tablica_novo_stanje[ trenutno_stanje ]
+            novo_stanje = self.tablica_novo_stanje[ trenutno_stanje ] \
                                                     [ produkcija.desna_strana ]
             
             self._stog.stavi( novo_stanje )
         
         except KeyError:
-            raise GreskaAnaliziranja( 'pokusaj dohvacanja nepostojece ' + \
+            raise GreskaAnalizatora( 'pokusaj dohvacanja nepostojece ' + \
                                     'vrijednosti u tablici novo_stanje' )
     
     
@@ -174,13 +174,13 @@ class SintaksniAnalizator():
             linija_analiziranog_koda = self._dohvati_liniju( redak_greske )
             
             from functools import reduce
-            ocekivani_string = reduce( lambda x, y: str(x) + ', ' + str(y),
-                                        ocekivani_znakovi )
+            #ocekivani_string = reduce( lambda x, y: str(x) + ', ' + str(y),
+            #                            ocekivani_znakovi )
             
             ispis = 'Greska u retku ' + str( redak_greske ) + ':\n'
             ispis += linija_analiziranog_koda + '\n'
             ispis += 'dobiven znak: ' + procitani_znak + '\n'
-            ispis += 'ocekivani znak(ovi): ' + ocekivani_string + '\n'
+            #ispis += 'ocekivani znak(ovi): ' + ocekivani_string + '\n'
             ispis += '\n'
         
         else:
@@ -189,24 +189,24 @@ class SintaksniAnalizator():
                                     self._stog.dohvati_vrh() ].keys() )
             
             from functools import reduce
-            ocekivani_string = reduce( lambda x, y: str(x) + ', ' + str(y),
-                                        ocekivani_znakovi )
+            #ocekivani_string = reduce( lambda x, y: str(x) + ', ' + str(y),
+            #                            ocekivani_znakovi )
             
             ispis = 'Sintaksna analiza je dosla do kraja\n'
-            ispis += 'ocekivani znak(ovi): ' + ocekivani_string + '\n'
+            #spis += 'ocekivani znak(ovi): ' + ocekivani_string + '\n'
             ispis += '\n'
         
-        self.tok_za_greske.write( ispis )
+        self._tok_za_greske.write( ispis )
     
     
     def _dohvati_liniju( self, redak ):
         
         prvi = zadnji = self._index_parsiranja
         
-        while self._ulazni_niz[ prvi ].redak = redak:
+        while self._ulazni_niz[ prvi ].redak == redak:
             prvi -= 1
         
-        while self._ulazni_niz[ zadnji ].redak = redak:
+        while self._ulazni_niz[ zadnji ].redak == redak:
             zadnji += 1
         
         linija = ''
@@ -226,7 +226,7 @@ class SintaksniAnalizator():
         '''
         
         # pomakni se u nizu na prvi sinkronizacijski znak
-        while not self._ulazni_niz[ self._index_parsiranja ].uniformni_znak in
+        while not self._ulazni_niz[ self._index_parsiranja ].uniformni_znak in \
                                                 self._sinkronizacijski_znakovi:
             
             self._index_parsiranja += 1

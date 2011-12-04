@@ -45,8 +45,8 @@ class LR1Stavka:
     def __str__( self ):
         
         string = self.lijeva_strana + ' -> '
-        string += self.desno_prije_tocke + ' * '
-        string += self.desno_poslije_tocke + ', { '
+        string += str( self.desno_prije_tocke ) + ' * '
+        string += str( self.desno_poslije_tocke ) + ', { '
         
         for znak in self.skup_zapocinje:
             string += znak + ', '
@@ -55,6 +55,10 @@ class LR1Stavka:
         string += ' }'
         
         return string
+    
+    
+    def __repr__( self ):
+        return self.__str__()
     
     
     def __hash__( self ):

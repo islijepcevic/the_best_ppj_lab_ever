@@ -45,6 +45,9 @@ class Parser:
             if self.ulazna_datoteka[i].startswith('<'):
                 for j in range (i + 1, len(self.ulazna_datoteka)):
                     
+                    if self.ulazna_datoteka[j] == '' or self.ulazna_datoteka[j] == ' ':
+                        continue
+                    
                     if self.ulazna_datoteka[j].startswith(' '):
                         self.produkcije.append(Produkcija(self.ulazna_datoteka[i],
                             self.ulazna_datoteka[j].lstrip().split(' ')))
