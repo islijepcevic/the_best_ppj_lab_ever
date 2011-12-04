@@ -16,3 +16,23 @@ class LR1Stavka:
         if self.desno_poslije_tocke == '':
             return True
         return False
+    
+    
+    def __hash__( self ):
+        
+        za_hash = self.lijeva_strana
+        za_hash += ':' + self.desno_prije_tocke
+        za_hash += ':' + self.desno_poslije_tocke
+        
+        for znak in self.skup_zapocinje:
+            za_hash += '^' + znak
+        
+        return hash( za_hash ) + len( self.skup_zapocinje )
+    
+    
+    def __cmp__( self, other ):
+        
+        hash_self = self.__hash__()
+        hash_other = other.__hash__()
+        
+        return hash_self - hash_other
