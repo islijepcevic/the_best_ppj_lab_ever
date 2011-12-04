@@ -190,7 +190,7 @@ class Gramatika:
     def je_niz_li_prazan( self, niz ):
         
         for znak in niz:
-            if znak in self.zavrsni_znakovi or
+            if znak in self.zavrsni_znakovi or \
                 (znak not in self.prazni_nezavrsni_znakovi):
                 
                 break

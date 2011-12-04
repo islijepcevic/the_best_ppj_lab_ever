@@ -1,6 +1,6 @@
 '''dka model'''
 
-from analizator.zamjenjivi.greske import GreskaDka
+from analizator.zajednicki.greske import GreskaDka
 
 
 def pronadji_index( niz, vrijednost ):

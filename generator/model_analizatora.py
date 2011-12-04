@@ -1,5 +1,7 @@
 '''model sintaksnog analizatora'''
 
+import sys
+
 from generator.gramatika import Gramatika
 from generator.enka import ENKA
 from generator.lr_1_stavka import LR1Stavka
