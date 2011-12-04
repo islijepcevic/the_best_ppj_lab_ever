@@ -12,13 +12,7 @@ class Gramatika:
         self.nezavrsni_znakovi = nezavrsni_znakovi # skup stringova
         self.zavrsni_znakovi = zavrsni_znakovi # skup stringova
         self.pocetni_nezavrsni = pocetni_nezavrsni # string
-        self.produkcije = produkcije
-        
-        '''
-        print (self.nezavrsni_znakovi)
-        print (self.zavrsni_znakovi)
-        print (self.produkcije)# niz instanci Produkcije
-        '''
+        self.produkcije = produkcije    # niz! instanci Produkcije
         
         self.prazni_nezavrsni_znakovi = set([])
         self._zapocinje_znakom = {} # matrica, bit ce dict unutar dicta, svaki
@@ -42,10 +36,8 @@ class Gramatika:
         for x in range (len(self.produkcije)):
             self.odredi_zapocinje_za_niz(self.produkcije[x].desna_strana)
         '''
-            
-            
-        
-        
+    
+    
     def _dodaj_novi_pocetni_nezavrsni( self ):
 
         
@@ -57,40 +49,37 @@ class Gramatika:
         
     
     def _odredi_prazne_znakove( self ):
-
         
+        # stavi u listu praznih sve lijeve strane epsilon-produkcija
         for i in range (len( self.produkcije )):
             
             if ('$' in self.produkcije[i].desna_strana):
                 self.prazni_nezavrsni_znakovi.add(
                     self.produkcije[i].lijeva_strana)
-                
-        ##print (self.prazni_nezavrsni_znakovi)
-
+        
+        # prosiruj se dok mozes == flood fill
         vrti = True
         while ( vrti ):
             vrti = False
             
+            # za svaki znak produkcije
             for i in range (len( self.produkcije )):
                 
+                # ako je vec u listi praznih - zanemari
                 if (self.produkcije[i].lijeva_strana in
-                    self.prazni_nezavrsni_znakovi):
-                        continue
-                for j in range (len( self.produkcije[i].desna_strana )):
-                    
-                    
-                    if (self.produkcije[i].desna_strana[j]
-                        in self.prazni_nezavrsni_znakovi): pass
+                    self.prazni_nezavrsni_znakovi): continue
                 
-                    else: break
-                    
-                    if j == (len( self.produkcije[i].desna_strana ) - 1):
-                        self.prazni_nezavrsni_znakovi.add(
-                            self.produkcije[i].lijeva_strana)
-                        vrti = True
-                        
-        ##print (self.prazni_nezavrsni_znakovi)
-
+                # 
+                for desna_strana in self.produkcije[i].desna_strana:
+                    if (desna_strana not in self.prazni_nezavrsni_znakovi):
+                        break
+                
+                # else se izvrsi ako se nije desio break
+                else:
+                    self.prazni_nezavrsni_znakovi.add(
+                        self.produkcije[i].lijeva_strana)
+                    vrti = True
+    
     
     def _odredi_zapocinje_izravno_znakom( self ):
         
