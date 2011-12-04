@@ -34,8 +34,10 @@ class Gramatika:
     
     def _dodaj_novi_pocetni_nezavrsni( self ):
 
+        nz = list( self.nezavrsni_znakovi )
+        nz.insert(0, '<<novi_nezavrsni_znak>>')
+        self.nezavrsni_znakovi = frozenset( nz )
         
-        self.nezavrsni_znakovi.insert(0, '<<novi_nezavrsni_znak>>')
         stari_pocetni = self.pocetni_nezavrsni
         self.pocetni_nezavrsni = '<<novi_nezavrsni_znak>>'
         self.produkcije.append( Produkcija('<<novi_nezavrsni_znak>>', [stari_pocetni] ) )
@@ -88,12 +90,13 @@ class Gramatika:
         #self._zapocinje_znakom[znak1, znak2]= int
 
         # svi kljucevi
-        pomocni = self.nezavrsni_znakovi + self.zavrsni_znakovi
+        pomocni = self.nezavrsni_znakovi | self.zavrsni_znakovi
         
         # inicijalizacija tablica
-        for x in range (len( pomocni )):
-            for y in range (len( pomocni )):
-                self._zapocinje_znakom[ pomocni[ x ] ][ pomocni[ y ] ] = False
+        for a in pomocni:
+            self._zapocinje_znakom[ a ] = {}
+            for b in pomocni:
+                self._zapocinje_znakom[ a ][ b ] = False
             
         # funkcija
         
@@ -118,12 +121,11 @@ class Gramatika:
     
     def _odredi_zapocinje_znakom( self ):
         
-        pomocni = self.nezavrsni_znakovi + self.zavrsni_znakovi
+        pomocni = self.nezavrsni_znakovi | self.zavrsni_znakovi
         
         # refleksivno se prosiri
-        for j in range (len( pomocni )):
-            if (pomocni[j] == pomocni [j]):
-                self._zapocinje_znakom[ pomocni[j] ][ pomocni[j] ] = True
+        for a in pomocni:
+            self._zapocinje_znakom[ a ][ a ] = True
         
         # tranzitivno se prosiri
         for nezavrsni_znak in self.nezavrsni_znakovi:
@@ -154,7 +156,7 @@ class Gramatika:
     def _odredi_zapocinje_za_nezavrsne( self ):
         
 
-        pomocni = self.nezavrsni_znakovi + self.zavrsni_znakovi
+        pomocni = self.nezavrsni_znakovi | self.zavrsni_znakovi
         
         for nz in self.nezavrsni_znakovi:
             temp_skup = set([])
@@ -187,7 +189,7 @@ class Gramatika:
         return temp_skup
     
     
-    def je_niz_li_prazan( self, niz ):
+    def je_li_niz_prazan( self, niz ):
         
         for znak in niz:
             if znak in self.zavrsni_znakovi or \

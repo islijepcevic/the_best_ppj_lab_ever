@@ -26,16 +26,18 @@ class Parser:
     def ucitaj_gramatiku( self ):
 
         
-        self.nezavrsni_znakovi = frozenset( self.ulazna_datoteka[0].split(' ') )
-        del self.nezavrsni_znakovi[0]
+        self.nezavrsni_znakovi = self.ulazna_datoteka[0].split(' ')[1:]
+        #del self.nezavrsni_znakovi[0]
         
         self.pocetni_nezavrsni_znak = self.nezavrsni_znakovi[0]
         
-        self.zavrsni_znakovi = frozenset( self.ulazna_datoteka[1].split(' ') )
-        del self.zavrsni_znakovi[0]
+        self.nezavrsni_znakovi = frozenset( self.nezavrsni_znakovi )
         
-        self.sinkronizacijski_znakovi = frozenset( self.ulazna_datoteka[2].split(' ') )
-        del self.sinkronizacijski_znakovi[0]
+        self.zavrsni_znakovi = frozenset( self.ulazna_datoteka[1].split(' ')[1:] )
+        #del self.zavrsni_znakovi[0]
+        
+        self.sinkronizacijski_znakovi = frozenset( self.ulazna_datoteka[2].split(' ')[1:] )
+        #del self.sinkronizacijski_znakovi[0]
         
         # parsiranje produkcija
         for i in range(3, len(self.ulazna_datoteka)):

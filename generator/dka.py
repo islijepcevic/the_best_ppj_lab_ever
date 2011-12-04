@@ -88,7 +88,7 @@ class DKA:
             for stanje2 in self.stanja:
                 if stanje1 >= stanje2:
                     continue
-                if (stanje1 in self.neprihvatljiva and stanje2 in self.neprihvatljiva) or
+                if (stanje1 in self.neprihvatljiva and stanje2 in self.neprihvatljiva) or \
                     (stanje1 in self.prihvatljiva and stanje2 in self.prihvatljiva):
                     
                     # oba stanja su prihvatljiva ili neprihvatljiva => NE oznaci ih kao neistovjetna

@@ -96,7 +96,7 @@ class ModelAnalizatora:
             trenutno_stanje = neobradjena_stanja.pop()  # tip: LR1Stavka
             
             # potpuna stavka
-            if trenutno_stanje.desno_od_tocke == "":
+            if trenutno_stanje.desno_poslije_tocke == "":
                 continue
             
             # slucaj iz knjige: 4 b)
@@ -111,8 +111,7 @@ class ModelAnalizatora:
                 nastavak_beta = trenutno_stanje.desno_poslije_tocke[1:]
             
             novo_stanje = LR1Stavka( trenutno_stanje.lijeva_strana,
-                                    trenutno_stanje.desno_prije_tocke + \
-                                        znak_poslije_tocke,
+                                    trenutno_stanje.desno_prije_tocke + [znak_poslije_tocke ],
                                     nastavak_beta,
                                     trenutno_stanje.skup_zapocinje )
             
@@ -122,7 +121,7 @@ class ModelAnalizatora:
             
             kljuc = (novo_stanje, znak_poslije_tocke)
             if kljuc in prijelazi:
-                prijelazi[ kljuc ] |= ( novo_stanje )
+                prijelazi[ kljuc ] |= frozenset([ novo_stanje ])
             else:
                 prijelazi[ kljuc ] = frozenset([ novo_stanje ])
             
@@ -137,7 +136,7 @@ class ModelAnalizatora:
                         skup_T = self.gramatika.odredi_zapocinje_za_niz(
                                                                 nastavak_beta )
                         
-                        if self.gramatika.je_li_prazan( nastavak_beta ):
+                        if self.gramatika.je_li_niz_prazan( nastavak_beta ):
                             skup_T |= ( trenutno_stanje.skup_zapocinje )
                         
                         desni_dio = ['']
@@ -156,7 +155,7 @@ class ModelAnalizatora:
                     
                     kljuc = (novo_stanje, '$')
                     if kljuc in prijelazi:
-                        prijelazi[ kljuc ] |= ( novo_stanje )
+                        prijelazi[ kljuc ] |= frozenset([ novo_stanje ])
                     else:
                         prijelazi[ kljuc ] = frozenset([ novo_stanje ])
         
@@ -270,7 +269,7 @@ class ModelAnalizatora:
 
 
         auto = self.automat
-        znaci_za_akcije = self.gramatika.zavrsni_znakovi | set([ '<<!>>' ]) )
+        znaci_za_akcije = self.gramatika.zavrsni_znakovi | set([ '<<!>>' ])
 
         for s in range (len( auto.stanja )):
             
@@ -289,7 +288,7 @@ class ModelAnalizatora:
                 znak_poslije_tocke = auto.stanja[s][i].desno_poslije_tocke[0]
                 
                 # if-uvjet za 'pomakni'
-                if (( s, znak_poslije_tocke) in auto.prijelazi)
+                if ( ( s, znak_poslije_tocke) in auto.prijelazi ) \
                     and (znak_poslije_tocke in znaci_za_akcije ):
                     
                     self.akcija[s][ znak_poslije_tocke ] = \
@@ -328,7 +327,7 @@ class ModelAnalizatora:
                         
             #petlja za tablicu novo stanje
             for x in range ( len ( auto.ulazni_znakovi ) ):
-                if ((s, auto.ulazni_znakovi[x]) in auto.prijelazi) and 
+                if ((s, auto.ulazni_znakovi[x]) in auto.prijelazi) and \
                     auto.ulazni_znakovi[x] in self.gramatika.nezavrsni_znakovi:
                     
                     self.novo_stanje[s][auto.ulazni_znakovi[x]] = auto.prijelazi[(s, auto.ulazni_znakovi[x])]
