@@ -28,13 +28,16 @@ class Parser:
         
         self.nezavrsni_znakovi = self.ulazna_datoteka[0].split(' ')
         del self.nezavrsni_znakovi[0]
+        
         self.pocetni_nezavrsni_znak = self.nezavrsni_znakovi[0]
+        
         self.zavrsni_znakovi = self.ulazna_datoteka[1].split(' ')
         del self.zavrsni_znakovi[0]
+        
         self.sinkronizacijski_znakovi = self.ulazna_datoteka[2].split(' ')
         del self.sinkronizacijski_znakovi[0]
         
-        
+        # parsiranje produkcija
         for i in range(3, len(self.ulazna_datoteka)):
             
             if self.ulazna_datoteka[i].startswith('<'):
@@ -57,4 +60,7 @@ class Parser:
         generatoru niti ih ne stavlja u gramatiku
         IVAN
         '''
-        pass
+        
+        tok = open( datoteka, 'w' )
+        tok.write( repr( self.sinkronizacijski_znakovi ) )
+        tok.close()
