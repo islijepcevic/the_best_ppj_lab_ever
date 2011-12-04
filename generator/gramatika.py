@@ -88,8 +88,8 @@ class Gramatika:
         #kasnije se ista "tablica" koristi i za relaciju ZapocinjeZnakom
         #stvara se dict sa svim mogucim kljucevima (2D tablica u knjizi)
         #(nezavrsni + zavrsni) x ( nezavrsni + zavrsni)
-        #a vrijednost je skup od 2 clana sa mogucim vrijednostima 0 ili 1
-        #self._zapocinje_znakom[znak1, znak2]=[ZapocinjeIzravnoZnakom, ZapocinjeZnakom]
+        #a vrijednost je boolean
+        #self._zapocinje_znakom[znak1, znak2]= int
 
         # svi kljucevi
         pomocni = self.nezavrsni_znakovi + self.zavrsni_znakovi
@@ -97,7 +97,7 @@ class Gramatika:
         # inicijalizacija tablica
         for x in range (len( pomocni )):
             for y in range (len( pomocni )):
-                self._zapocinje_znakom[ pomocni[ x ] ][ pomocni[ y ] ] = [0, 0]
+                self._zapocinje_znakom[ pomocni[ x ] ][ pomocni[ y ] ] = False
             
         # funkcija
         
@@ -110,11 +110,11 @@ class Gramatika:
             for znak_desno in produkcija.desna_strana:
                 
                 if znak_desno in self.zavrsni_znakovi:
-                    self._zapocinje_znakom[ znak_lijevo ][ znak_desno ] = [1, 1]
+                    self._zapocinje_znakom[ znak_lijevo ][ znak_desno ] = True
                     break
                 elif znak_desno in self.nezavrsni_znakovi:
                     
-                    self._zapocinje_znakom[ znak_lijevo ][ znak_desno ] = [1, 1]
+                    self._zapocinje_znakom[ znak_lijevo ][ znak_desno ] = True
                     
                     if znak_desno not in self.prazni_nezavrsni_znakovi:
                         break
@@ -127,45 +127,33 @@ class Gramatika:
         # refleksivno se prosiri
         for j in range (len( pomocni )):
             if (pomocni[j] == pomocni [j]):
-                self._zapocinje_znakom[ pomocni[j] ][ pomocni[j] ][1] = 1
+                self._zapocinje_znakom[ pomocni[j] ][ pomocni[j] ] = True
         
         # tranzitivno se prosiri
         for nezavrsni_znak in self.nezavrsni_znakovi:
             
-            # obavi sirenje dok god mozes
             neobradjeni = set([])
             
-            for znak in self._zapocinje_znakom[ nezavrsni_znak ].keys():
-                pass
-        
-        
-        ''' PRE SPOR ALGORITAM; ZATO SAM I OSTAVIO OVAJ ZADATAK SEBI
-        vrti = True
-        while ( vrti ):
-            vrti = False
-            for a in range (len( pomocni )):
-                for b in range (len( pomocni )):
-                    for c in range (len( pomocni )):
+            for znak in pomocni:
+                if self._zapocinje_znakom[ nezavrsni_znak ][ znak ]:
+                    neobradjeni.add( znak )
+            
+            neobradjeni.discard( nezavrsni_znak )   # mice ga bio on prisutan
+                                                    # ili ne - on je samo za
+                                                    # refleksivno okruzenje
+            
+            # obavi sirenje dok god mozes
+            while len( neobradjeni ) > 0:
+                trenutni_znak = neobradjeni.pop()
+                self._zapocinje_znakom[ nezavrsni_znak ][ trenutni_znak ] = True
+                
+                for znak in pomocni:
+                    # dodaj nove znakove u neobradene ako nisu vec oznaceni
+                    if self._zapocinje_znakom[ trenutni_znak ][ znak ] and not
+                        self._zapocinje_znakom[ nezavrsni_znak ][ znak ]:
                         
-                        if ((self._zapocinje_znakom[pomocni[a],pomocni[b]][1] == 1) and (
-                            self._zapocinje_znakom[pomocni[b],pomocni[c]][1] == 1)):
-                            if self._zapocinje_znakom[pomocni[a],pomocni[c]][1] == 0:
-                                self._zapocinje_znakom[pomocni[a],pomocni[c]][1] = 1
-                                vrti = True'''
-                        
-                                                    
-                    
-        #print za provjeru
-        '''
-        for x in range (len(pomocni)):
-            for y in range (len(pomocni)):
-                if self._zapocinje_znakom[pomocni[x],
-                                       pomocni[y]] != [0,0]:
-                    print(pomocni[x]+' , '+ pomocni[y]+ ' '+str(self._zapocinje_znakom[
-                        pomocni[x], pomocni[y]]))
-        '''
-
-
+                        neobradjeni.add( znak )
+    
     
     def _odredi_zapocinje_za_nezavrsne( self ):
         
