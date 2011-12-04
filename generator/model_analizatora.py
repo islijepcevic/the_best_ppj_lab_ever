@@ -160,7 +160,7 @@ class ModelAnalizatora:
                     else:
                         prijelazi[ kljuc ] = frozenset([ novo_stanje ])
         
-        return ENKA( skup_stanja, abeceda, pocetno_stanje, skup_stanja,
+        return ENKA( skup_stanja, abeceda, pocetno_stanje, skup_stanja.copy(),
                     prijelazi )
     
     
