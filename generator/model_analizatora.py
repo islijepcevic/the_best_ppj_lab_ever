@@ -8,7 +8,9 @@ from analizator.zajednicki.produkcija import Produkcija
 
 class ModelAnalizatora:
     
-    def __init__( self, gramatika ):
+    def __init__( self, gramatika, tok_za_pogreske = sys.stderr ):
+        
+        self.tok_za_pogreske = tok_za_pogreske
         
         self.gramatika = gramatika
         self.automat = None
@@ -55,7 +57,7 @@ class ModelAnalizatora:
         '''
         
         self._stvori_automat()
-        #razrijesi proturjecja - bilo ovdje, bilo u dka
+        self._razrijesi_nejednoznacnosti()
         self._izgradi_tablice()
         
     
@@ -151,11 +153,98 @@ class ModelAnalizatora:
         dka = nka.kreiraj_dka()
         
         self.automat = dka
-
     
     
-
-
+    def _razrijesi_nejednoznacnosti( self ):
+        
+        for stanje in self.automat.stanja:  # stanja automata su u listi
+            
+            # jedno stanje je skup LR1Stavki
+            
+            # razrijesi pomakni/reduciraj
+            for i in range( len( stanje ) ):
+                
+                if not stanje[i].je_li_potpuna():
+                    continue
+                
+                for j in range( len( stanje ) ):
+                    
+                    if i == j:
+                        continue
+                    
+                    stavka1 = stanje[i]
+                    stavka2 = stanje[j]
+                    
+                    ret = stavka1.razrijesi_pr( stavka2 )
+                    
+                    if ret:
+                        self._pisi_pr( stavka1, stavka2, ret, self,automat.stanja.index( stanje ) )
+                    
+                    stanje[i] = stavka1
+            
+            # razrijesi reduciraj/reduciraj
+            for i in range( len( stanje ) ):
+                
+                if not stanje[i].je_li_potpuna():
+                    continue
+                
+                for j in range( i + 1, len( stanje ) ):
+                    
+                    if not stanje[j].je_li_potpuna():
+                        continue
+                    
+                    stavka1 = stanje[i]
+                    stavka2 = stanje[j]
+                    
+                    skup_za_maknuti = stavka1.skup_zapocinje & stavka2.skup_zapocinje
+                    
+                    if not skup_za_maknuti:
+                        continue
+                    
+                    produkcija1 = Produkcija( stavka1.lijeva_strana, 
+                                    stavka1.desno_prije_tocke + stavka1.desno_poslije_tocke )
+                    
+                    produkcija2 = Produkcija( stavka2.lijeva_strana, 
+                                    stavka2.desno_prije_tocke + stavka2.desno_poslije_tocke )
+                    
+                    for prod_gram in self.gramatika.produkcije:
+                        
+                        if produkcija1 == prod_gram:
+                            stavka2.skup_zapocinje -= skup_za_maknuti
+                            self._pisi_rr( stavka2, stavka1, skup_za_maknuti, self.automat.stanja.index( stanje ) )
+                            break
+                        
+                        if produkcija2 == prod_gram:
+                            stavka1.skup_zapocinje -= skup_za_maknuti
+                            self._pisi_rr( stavka1, stavka2, skup_za_maknuti, self.automat.stanja.index( stanje ))
+                            break
+                    
+                    stanje[i] = stavka1
+                    stanje[j] = stavka2
+    
+    
+    def _pisi_pr( self, stavka, druga, maknuto, stanje ):
+        
+        ispis = 'u stanju ' + str( stanje ) + '\n'
+        ispis += 'iz stavke ' + str( stavka) + '\n'
+        ispis += 'maknuti su znaci: ' + str(maknuto) + '\n'
+        ispis += 'zbog proturjecja pomakni/reduciraj sa stavkom ' + str(druga) + '\n'
+        ispis += '\n'
+        
+        self.tok_za_pogreske.write( ispis )
+    
+    
+    def _pisi_rr( self, stavka, druga, skup_za_maknuti, stanje ):
+        
+        ispis = 'u stanju ' + str(stanje) + '\n'
+        ispis += 'iz stavke ' + str(stavka) + '\n'
+        ispis += 'maknuti su znaci: ' + str( skup_za_maknuti ) + '\n'
+        ispis += 'zbog proturjecja reduciraj/reduciraj sa stavkom ' + str( druga ) + '\n'
+        ispis += '\n'
+        
+        self.tok_za_pogreske.write( ispis )
+    
+    
     def _izgradi_tablice( self ):
 
 

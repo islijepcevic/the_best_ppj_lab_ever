@@ -35,3 +35,23 @@ class Produkcija:
         hash_other = other.__hash__()
         
         return hash_self - hash_other
+    
+    
+    def __eq__( self, other ):
+        
+        if self.lijeva_strana == other.lijeva_strana and \
+            self.desna_strana == other.desna_strana:
+            
+            return True
+        
+        return False
+    
+    
+    def __ne__( self, other ):
+        
+        if self.lijeva_strana != other.lijeva_strana or \
+            self.desna_strana != other.desna_strana:
+            
+            return True
+        
+        return False

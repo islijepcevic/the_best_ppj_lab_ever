@@ -2,12 +2,26 @@
 
 class LR1Stavka:
     
-    def __init__( self, lijevo, prije, poslije, zapocinje ):
+    def __init__( self, lijevo, prije, poslije, zapocinje,  ):
         
         self.lijeva_strana = lijevo         # string
         self.desno_prije_tocke = prije      # niz stringova
         self.desno_poslije_tocke = poslije  # niz stringova
         self.skup_zapocinje = zapocinje     # skup stringova
+    
+    
+    def razrijesi_pr( self, druga ):
+        
+        znak_iza_tocke = druga.desno_poslije_tocke
+        skup_za_maknuti = set()
+        
+        for znak in self.skup_zapocinje:
+            if znak == znak_iza_tocke:
+                skup_za_maknuti |= znak
+        
+        self.skup_zapocinje -= skup_za_maknuti
+        
+        return skup_za_maknuti
     
     
     def je_li_potpuna( self ):
@@ -26,6 +40,21 @@ class LR1Stavka:
             za_hash += '^' + znak
         
         return za_hash
+    
+    
+    def __str__( self ):
+        
+        string = self.lijeva_strana + ' -> '
+        string += self.desno_prije_tocke + ' * '
+        string += self.desno_poslije_tocke + ', { '
+        
+        for znak in self.skup_zapocinje:
+            string += znak + ', '
+        string = string[:-2]
+        
+        string += ' }'
+        
+        return string
     
     
     def __hash__( self ):
@@ -65,6 +94,6 @@ class LR1Stavka:
             self.desno_poslije_tocke != other.desno_poslije_tocke or \
             self.skup_zapocinje != other.skup_zapocinje:
             
-            return False
+            return True
         
-        return True
+        return False
