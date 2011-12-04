@@ -34,6 +34,11 @@ class ENKA:
                 
                 if novaStanja:
                     prijelaziNka[klj] = novaStanja.union(self._eps_okruzenje_set(novaStanja))
+                
+                # AKO NE BUDE RADILO
+                '''
+                prijelaziNka[klj] |= self.prijelaz_za_niz( stanje, znak )
+                '''
     
         
         if self._pocetni_prosiriv_do_prihvatljivih():
@@ -127,8 +132,6 @@ class ENKA:
                 stanjaN = stanjaN.union (self._prijelaz(st, znak))
         '''
         
-        #stanjaN = stanja
-        
         for znak in niz:
             stanja = self._prijelaz_za_skup( stanja, znak )
         
@@ -139,3 +142,12 @@ class ENKA:
         return stanjaN
         '''
         return stanja
+        
+        # AKO NE BUDE RADILO: ALGORITAM EKVIVALENTAN UDZBENIKU UTR:
+        '''
+        P = set()
+        for r in self.prijelaz_za_niz( stanje, niz[:-1] ):
+            for p in self.prijelazi.get( (r, niz[-1]), set() ):
+                P |= p
+        return self._eps_okruzenje_set( P )
+        '''
