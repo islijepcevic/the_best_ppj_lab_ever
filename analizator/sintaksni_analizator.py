@@ -54,6 +54,8 @@ class SintaksniAnalizator():
         
         while( True ):
             
+            #print( self._stog.stog )
+            
             trenutno_stanje = self._stog.dohvati_vrh()
             jedinka_s_ulaza = self._ulazni_niz[ self._index_parsiranja ]
             
@@ -63,7 +65,7 @@ class SintaksniAnalizator():
                 self._pomakni( jedinka_s_ulaza, akcija.vrijednost )
             
             elif akcija.tip == 'reduciraj':
-                self._reduciraj( akcija.vrijenost )
+                self._reduciraj( akcija.vrijednost )
             
             elif akcija.tip == 'prihvati':
                 self._prihvati()
@@ -106,7 +108,7 @@ class SintaksniAnalizator():
         
         trenutno_stanje = self._stog.dohvati_vrh()
         
-        if produkcija.desna_strana != '$':
+        if produkcija.desna_strana != ['$']:
             # nije epsilon produkcija
             
             djeca_novog_cvora = []
@@ -131,13 +133,14 @@ class SintaksniAnalizator():
             # epsilon produkcija
             
             djeca_novog_cvora = [ LeksickaJedinka( '$' ) ]
+            novi_cvor = UnutarnjiCvorStabla( produkcija.lijeva_strana, djeca_novog_cvora )
             
-            self._stog.stavi( produkcija.lijeva_strana, djeca_novog_cvora )
+            self._stog.stavi( novi_cvor )
         
         # stavljanje novog stanja
         try:
             novo_stanje = self.tablica_novo_stanje[ trenutno_stanje ] \
-                                                    [ produkcija.desna_strana ]
+                                                    [ produkcija.lijeva_strana ]
             
             self._stog.stavi( novo_stanje )
         

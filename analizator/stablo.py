@@ -29,7 +29,7 @@ class Stablo:
             
             izlazni_tok.write( cvor.nezavrsni_znak + '\n' )
             
-            for dijete in cvor.nezavrsni_znak:
+            for dijete in cvor.djeca:
                 
                 self._ispisuj( dijete, dubina + 1, izlazni_tok )
             
@@ -48,4 +48,5 @@ class Stablo:
                 izlazni_tok.write( '$\n' )
             
         else:
+            print( type( cvor ), cvor )
             raise TypeError( 'krivi tip na stablu' )

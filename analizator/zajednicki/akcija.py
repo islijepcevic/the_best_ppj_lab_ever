@@ -23,8 +23,8 @@ class Akcija:
         if tip == 'pomakni':
             self.tip = tip
             
-            if type( vrijednost ) == int:
-                self.vrijednost = vrijednost
+            if type( vrijednost ) == int or type( vrijednost ) == str:
+                self.vrijednost = int(vrijednost)
                 tocan_input = True
         
         elif tip == 'reduciraj':
@@ -43,7 +43,7 @@ class Akcija:
             tocan_input = True
         
         if not tocan_input:
-            raise TypeError( 'pokusaj stvaranja krivog tipa akcije' )
+            raise TypeError( 'pokusaj stvaranja krivog tipa akcije: ' + str(tip) + ' ' + str(vrijednost))
         
         # ako je sve dobro na kraju postoje:
             # self.tip          - 'pomakni' ili 'reduciraj'

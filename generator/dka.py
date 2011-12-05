@@ -23,7 +23,7 @@ def pronadji_index( niz, vrijednost ):
         elif trenutni > vrijednost:
             pocetak = index
         else:
-            return index
+            return index - 1
         
         index_pom = index
         index = (pocetak + kraj) // 2
@@ -51,9 +51,13 @@ class DKA:
         #self._minimiziraj()
         self._pretvori_stanja_u_brojeve()
         
-        print( 'STANJA')
-        for stanje in self.stanja: print( stanje)
+        '''
+        print( 'PRIJELAZI' )
+        for i in range( len( self.stanja ) ):
+            for z in self.ulazni_znakovi:
+                print( (i,z), '==', self.prijelazi[ (i,z) ] )
         print()
+        '''
     
     
     def _minimiziraj( self ):
@@ -225,23 +229,34 @@ class DKA:
             prihvatljiva = stanja[:]
         
         elif len( self.stanja ) - 1 == len( self.prihvatljiva ):
-            neprihvatljiva = stanja - prihvatljiva
-            stanja = sorted( list( self.prihvatljiva ) )
-            prihvatljiva = stanja[:]
+            neprihvatljiva = frozenset({None})
+            prihvatljiva = sorted( list( self.prihvatljiva ) )
+            stanja = prihvatljiva[:]
             stanja.append( neprihvatljiva )
+            stanja = sorted( stanja )
         
         else:
             raise GreskaDka( 'DKA je krivog oblika i ima vise od jednog neprihvatljivog stanja' )
         
-        pocetno_stanje = pronadji_index( stanja, self.pocetno_stanje )
+        pocetno_stanje = stanja.index( self.pocetno_stanje )#pronadji_index( stanja, self.pocetno_stanje )
+        
+        '''
+        print()
+        print( len( stanja ) )
+        for stanje in stanja: print( stanje )
+        print()
+        print( 'PETLJA' )
+        '''
         
         novi_prijelazi = {}
         for kljuc in self.prijelazi.keys():
             
             # zamislimo: prijelaz(q, a) = r
-            q = pronadji_index( stanja, kljuc[0] )
+            q = stanja.index( kljuc[0] )#q = pronadji_index( stanja, kljuc[0] )
             a = kljuc[1]
-            r = pronadji_index( stanja, self.prijelazi[ kljuc ] )
+            r = stanja.index( self.prijelazi[ kljuc ] )#pronadji_index( stanja, self.prijelazi[ kljuc ] )
+            
+            #print( q, a, r )
             
             if (q, a) not in novi_prijelazi:
                 novi_prijelazi[ (q, a) ] = r

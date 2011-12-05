@@ -181,17 +181,17 @@ class ModelAnalizatora:
             
             # jedno stanje je skup LR1Stavki
             
-            
             # razrijesi pomakni/reduciraj
             #for i in range( len( stanje ) ):
             for stavka1 in stanje:
                 
-                if not stavka1.je_li_potpuna():
+                
+                if not stavka1 or not stavka1.je_li_potpuna():
                     continue
                 
                 for stavka2 in stanje:
                     
-                    if stavka1 == stavka2:
+                    if (not stavka2) or (stavka1 == stavka2):
                         continue
                     
                     #stavka1 = stanje[i]
@@ -208,13 +208,13 @@ class ModelAnalizatora:
             # razrijesi reduciraj/reduciraj
             for stavka1 in stanje:
                 
-                if not stavka1.je_li_potpuna():
+                if not stavka1 or not stavka1.je_li_potpuna():
                     continue
                 
                 #for j in range( i + 1, len( stanje ) ):
                 for stavka2 in stanje:
                     
-                    if not stavka2.je_li_potpuna():
+                    if not stavka2 or not stavka2.je_li_potpuna():
                         continue
                     
                     if stavka1 == stavka2:
@@ -284,6 +284,8 @@ class ModelAnalizatora:
             if auto.stanja[s] not in auto.prihvatljiva:
                 continue
             
+            print ( s, auto.stanja[s] )
+            
             # tablice su otprije prazni nizovi, dodaj element prazni dict
             self.akcija.append(dict())
             self.novo_stanje.append(dict())
@@ -340,3 +342,11 @@ class ModelAnalizatora:
                     znak in self.gramatika.nezavrsni_znakovi:
                     
                     self.novo_stanje[s][ znak ] = auto.prijelazi[(s, znak )]
+        
+        print()
+        print( 'AKCIJA' )
+        print( self.akcija )
+        print()
+        print( 'NOVO STANJE') 
+        print( self.novo_stanje )
+        print()

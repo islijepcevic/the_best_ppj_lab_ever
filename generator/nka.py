@@ -25,7 +25,6 @@ class NKA:
         MAK
         '''
         q0 = self.pocetna_stanje
-        print(q0)
         
         
         stanjaDKA = set()
