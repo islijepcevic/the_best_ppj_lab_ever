@@ -39,8 +39,7 @@ class ENKA:
                 '''
                 prijelaziNka[klj] |= self.prijelaz_za_niz( stanje, znak )
                 '''
-    
-        print()
+        
         if self._pocetni_prosiriv_do_prihvatljivih():
             prihvatljivaNka = self.prihvatljiva.union({ self.pocetno_stanje })
         else:

@@ -62,7 +62,7 @@ class ModelAnalizatora:
     
     
     def _stvori_tablice( self ):
-        '''najvaznija funkcija koja se poziva iz maina
+        '''najvaznija funkcija koja se poziva iz pri konstrukciji objekta
         
         IVAN
         '''
@@ -71,6 +71,18 @@ class ModelAnalizatora:
         self._razrijesi_nejednoznacnosti()
         self._izgradi_tablice()
         
+    
+    
+    def _stvori_automat( self ):
+        '''stvara enka, nka te na kraju dka i njega sprema pod "svoj" automat
+        GOTOVO
+        '''
+        
+        enka = self._kreiraj_enka()
+        nka = enka.kreiraj_nka()
+        dka = nka.kreiraj_dka()
+        
+        self.automat = dka
     
     
     def _kreiraj_enka( self ):
@@ -139,7 +151,7 @@ class ModelAnalizatora:
                         if self.gramatika.je_li_niz_prazan( nastavak_beta ):
                             skup_T |= ( trenutno_stanje.skup_zapocinje )
                         
-                        desni_dio = ['']
+                        desni_dio = []
                         if produkcija.desna_strana[0] != '$':
                             desni_dio = produkcija.desna_strana
                         
@@ -159,34 +171,21 @@ class ModelAnalizatora:
                     else:
                         prijelazi[ kljuc ] = frozenset([ novo_stanje ])
         
-        
         return ENKA( skup_stanja, abeceda, pocetno_stanje, skup_stanja.copy(),
                     prijelazi )
     
     
-    def _stvori_automat( self ):
-        '''stvara enka, nka te na kraju dka i njega sprema pod "svoj" automat
-        GOTOVO
-        '''
-        
-        enka = self._kreiraj_enka()
-        nka = enka.kreiraj_nka()
-        dka = nka.kreiraj_dka()
-        
-        self.automat = dka
-    
-    
     def _razrijesi_nejednoznacnosti( self ):
-        #print( type(self.automat.stanja), self.automat.stanja )
+        
         for stanje in self.automat.stanja:  # stanja automata su u listi
             
             # jedno stanje je skup LR1Stavki
             
-            #print( type(stanje), stanje )
+            
             # razrijesi pomakni/reduciraj
             #for i in range( len( stanje ) ):
             for stavka1 in stanje:
-                #print( type(stavka1), stavka1 )
+                
                 if not stavka1.je_li_potpuna():
                     continue
                 

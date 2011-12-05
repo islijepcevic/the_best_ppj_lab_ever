@@ -30,9 +30,6 @@ class Gramatika:
         self._odredi_zapocinje_izravno_znakom()
         self._odredi_zapocinje_znakom()
         self._odredi_zapocinje_za_nezavrsne()
-        
-        print( self.prazni_nezavrsni_znakovi )
-        print()
     
     
     def _dodaj_novi_pocetni_nezavrsni( self ):
@@ -161,12 +158,13 @@ class Gramatika:
 
         pomocni = self.nezavrsni_znakovi | self.zavrsni_znakovi
         
-        for nz in self.nezavrsni_znakovi:
+        for znak in pomocni:
             temp_skup = set([])
             for zz in self.zavrsni_znakovi:
-                if self._zapocinje_znakom[ nz ][ zz ]:
+                if self._zapocinje_znakom[ znak ][ zz ]:
                     temp_skup.add( zz )
-            self._zapocinje[ nz ] = temp_skup
+            self._zapocinje[ znak ] = temp_skup
+        
     
     
     def odredi_zapocinje_za_niz( self, niz ):

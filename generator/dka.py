@@ -83,7 +83,7 @@ class DKA:
                                             #value=dict: key=stanje; value = bool
         
         for stanje1 in self.stanja:
-            #print( stanje1, type(stanje1) )
+            
             tablica_neistovjetnih[ stanje1 ] = {}
             
             for stanje2 in self.stanja:
@@ -228,10 +228,6 @@ class DKA:
         
         else:
             raise GreskaDka( 'DKA je krivog oblika i ima vise od jednog neprihvatljivog stanja' )
-        
-        #print( self.stanja )
-        #print()
-        #print(stanja )
         
         pocetno_stanje = pronadji_index( stanja, self.pocetno_stanje )
         

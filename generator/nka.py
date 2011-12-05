@@ -34,7 +34,6 @@ class NKA:
         prijelaziDKA = dict()
         
         while len (neobradjena ) > 0:
-            #print( len(neobradjena ) )
             
             q1 = neobradjena.pop()
             
