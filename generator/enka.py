@@ -40,29 +40,18 @@ class ENKA:
                 
                 # IVAN
                 if klj not in prijelaziNka:
-                    prijelaziNka[klj] = self.prijelaz_za_niz( stanje, znak )
+                    prijelaziNka[klj] = self.prijelaz_za_niz( stanje, [znak] )
                 else:
-                    prijelaziNka[klj] |= self.prijelaz_za_niz( stanje, znak )
-                
+                    prijelaziNka[klj] |= self.prijelaz_za_niz( stanje, [znak] )
+        
         
         if self._pocetni_prosiriv_do_prihvatljivih():
             prihvatljivaNka = self.prihvatljiva.union({ self.pocetno_stanje })
         else:
             prihvatljivaNka = self.prihvatljiva.copy()
         
-        
-        print( 'skup stanja:' )
-        for stanje in self.stanja: print( '   ', stanje )
-        print()
-        print( 'prihvatljiva:' )
-        print( prihvatljivaNka )
-        print()
-        print( 'prijelazi:' )
-        for k in prijelaziNka.keys(): print( k, '--', prijelaziNka[k] )
-        print()
-        raise BaseException
-        
-        nka = NKA (self.stanja, self.ulazni_znakovi, self.pocetno_stanje,
+        nka = NKA (self.stanja, self.ulazni_znakovi,
+                    self._epsilon_okruzenje( self.pocetno_stanje ),
                    prihvatljivaNka, prijelaziNka)
         
         return nka
@@ -103,7 +92,7 @@ class ENKA:
                     trSt.add(v)
                     S.append(v)
         
-        return trSt
+        return frozenset( trSt )
     
     def _eps_okruzenje_set (self, stanja):
         novaStanja = set()

@@ -217,6 +217,9 @@ class ModelAnalizatora:
                     if not stavka2.je_li_potpuna():
                         continue
                     
+                    if stavka1 == stavka2:
+                        continue
+                    
                     #stavka1 = stanje[i]
                     #stavka2 = stanje[j]
                     

@@ -11,9 +11,12 @@ class NKA:
         self.stanja             = set(stanja)           # skup LR1Stavki
         self.prihvatljiva       = set(prihvatljiva)     # skup LR1Stavki
         self.ulazni_znakovi     = set(ulazni_znakovi)   # skup stringova
-        self.pocetno_stanje     = pocetno_stanje        # LR1Stavka
+        self.pocetna_stanje     = pocetno_stanje        # skup LR1stavki 
+                                                        # oznacava sva stanja enka koja 
+                                                        # su u epsilon okruzenju pocetnog
         self.prijelazi          = dict(prijelazi)       # rjecnik: kljuc = par (LR1Stavka, string)
                                                         # vrijednost = skup LR1Stavki
+        
     
     
     def kreiraj_dka( self ):
@@ -21,7 +24,9 @@ class NKA:
         generalno: knjiga utr, str 32
         MAK
         '''
-        q0 = frozenset ({self.pocetno_stanje})
+        q0 = self.pocetna_stanje
+        print(q0)
+        
         
         stanjaDKA = set()
         stanjaDKA.add( q0 )
@@ -35,14 +40,13 @@ class NKA:
         
         while len (neobradjena ) > 0:
             
-            q1 = neobradjena.pop()
+            q1 = neobradjena.pop()  # stanje DKA
             
             for z in (self.ulazni_znakovi | set(['<<!>>']) ):
                 
                 new_q = set()
                 
                 for q in q1:    # q je stavka, q1 je skup stavki (frozenset)
-                    
                     new_q  |= set(  self.prijelazi.get( (q, z), set() ) )
                 
                 new_q = frozenset( new_q )
@@ -53,15 +57,17 @@ class NKA:
                         neobradjena.add( new_q )
                         stanjaDKA.add(new_q)
                     
+                    
                     prijelaziDKA[(frozenset(q1), z)] = new_q
                     
                 else:
                     postoji_neprihvatljivo = True
                     prijelaziDKA[ (frozenset(q1), z) ] = frozenset([None])
-        
+            
         F = stanjaDKA.copy()
         
         if postoji_neprihvatljivo:
             stanjaDKA.add( frozenset([None]) )
         
         return DKA (stanjaDKA, self.ulazni_znakovi, q0, F, prijelaziDKA)
+    

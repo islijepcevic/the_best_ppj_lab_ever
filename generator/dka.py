@@ -50,6 +50,10 @@ class DKA:
         
         #self._minimiziraj()
         self._pretvori_stanja_u_brojeve()
+        
+        print( 'STANJA')
+        for stanje in self.stanja: print( stanje)
+        print()
     
     
     def _minimiziraj( self ):
