@@ -293,10 +293,13 @@ class ModelAnalizatora:
             # petlja za tablicu akcija
             # iteriranje po LR1Stavkama pojedinog stanja DKA
             for stavka in auto.stanja[s]:
+                print( '\t', stavka )
                 
                 if stavka.je_li_potpuna():
                     continue
                 znak_poslije_tocke = stavka.desno_poslije_tocke[0]
+                
+                print( '\t', znak_poslije_tocke )
                 
                 # if-uvjet za 'pomakni'
                 if ( ( s, znak_poslije_tocke) in auto.prijelazi ) \
