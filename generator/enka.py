@@ -28,23 +28,40 @@ class ENKA:
         for stanje in self.stanja:
             for znak in self.ulazni_znakovi:
                 klj = (stanje, znak)
-
+                
+                # MAK
+                '''
                 novaStanja = self._epsilon_okruzenje(stanje)
                 novaStanja = self._prijelaz_za_skup(novaStanja, znak)
                 
                 if novaStanja:
                     prijelaziNka[klj] = novaStanja.union(self._eps_okruzenje_set(novaStanja))
+                '''
                 
-                # AKO NE BUDE RADILO
-                '''
-                prijelaziNka[klj] |= self.prijelaz_za_niz( stanje, znak )
-                '''
+                # IVAN
+                if klj not in prijelaziNka:
+                    prijelaziNka[klj] = self.prijelaz_za_niz( stanje, znak )
+                else:
+                    prijelaziNka[klj] |= self.prijelaz_za_niz( stanje, znak )
+                
         
         if self._pocetni_prosiriv_do_prihvatljivih():
             prihvatljivaNka = self.prihvatljiva.union({ self.pocetno_stanje })
         else:
             prihvatljivaNka = self.prihvatljiva.copy()
-            
+        
+        
+        print( 'skup stanja:' )
+        for stanje in self.stanja: print( '   ', stanje )
+        print()
+        print( 'prihvatljiva:' )
+        print( prihvatljivaNka )
+        print()
+        print( 'prijelazi:' )
+        for k in prijelaziNka.keys(): print( k, '--', prijelaziNka[k] )
+        print()
+        raise BaseException
+        
         nka = NKA (self.stanja, self.ulazni_znakovi, self.pocetno_stanje,
                    prihvatljivaNka, prijelaziNka)
         
@@ -93,7 +110,7 @@ class ENKA:
         for stanje in stanja:
             novaStanja = novaStanja.union (self._epsilon_okruzenje(stanje))
         
-        return novaStanja
+        return frozenset( novaStanja )
     
     def _prijelaz (self, stanje, znak):
         stanja = self.prijelazi.get ((stanje, znak), set())
@@ -120,8 +137,8 @@ class ENKA:
         
         MAK
         '''
-        
-        stanja = self._epsilon_okruzenje(stanje)
+        """
+        #stanja = self._epsilon_okruzenje(stanje)
         
         #stanjaN = set ()
         
@@ -131,8 +148,8 @@ class ENKA:
                 stanjaN = stanjaN.union (self._prijelaz(st, znak))
         '''
         
-        for znak in niz:
-            stanja = self._prijelaz_za_skup( stanja, znak )
+        #for znak in niz:
+            #stanja = self._prijelaz_za_skup( stanja, znak )
         
         '''
         if stanjaN == []:
@@ -140,13 +157,21 @@ class ENKA:
         
         return stanjaN
         '''
-        return frozenset( stanja )
-        
+        #return frozenset( stanja )
+        """
         # AKO NE BUDE RADILO: ALGORITAM EKVIVALENTAN UDZBENIKU UTR:
-        '''
+        # IVAN
+        
+        if not niz:
+            return frozenset( self._epsilon_okruzenje( stanje ) )
+        
+        znak = niz[-1]
+        
+        eP = self.prijelaz_za_niz( stanje, niz[:-1] )   # za niz duljine 1, niz[:1]==[]
+        
         P = set()
-        for r in self.prijelaz_za_niz( stanje, niz[:-1] ):
-            for p in self.prijelazi.get( (r, niz[-1]), set() ):
-                P |= p
-        return frozenset( self._eps_okruzenje_set( P ) )
-        '''
+        
+        for estanje in eP:
+            P |= self.prijelazi.get( (estanje, znak), set() )
+        
+        return self._eps_okruzenje_set( P )
