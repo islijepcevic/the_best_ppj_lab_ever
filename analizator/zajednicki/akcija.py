@@ -57,4 +57,7 @@ class Akcija:
         
         IVAN
         '''
+        if self.tip == 'reduciraj':
+            return 'Akcija("' + self.tip + '",' + repr( self.vrijednost ) + ')'
+        
         return 'Akcija("' + self.tip + '","' + repr( self.vrijednost ) + '")'

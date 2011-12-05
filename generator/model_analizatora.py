@@ -293,20 +293,20 @@ class ModelAnalizatora:
             # petlja za tablicu akcija
             # iteriranje po LR1Stavkama pojedinog stanja DKA
             for stavka in auto.stanja[s]:
-                print( '\t', stavka )
-                
-                if stavka.je_li_potpuna():
-                    continue
-                znak_poslije_tocke = stavka.desno_poslije_tocke[0]
-                
-                print( '\t', znak_poslije_tocke )
+                #print( '\t', stavka )
                 
                 # if-uvjet za 'pomakni'
-                if ( ( s, znak_poslije_tocke) in auto.prijelazi ) \
-                    and (znak_poslije_tocke in znaci_za_akcije ):
+                if not stavka.je_li_potpuna():
+                    znak_poslije_tocke = stavka.desno_poslije_tocke[0]
+                
+                    #print( '\t', znak_poslije_tocke )
                     
-                    self.akcija[s][ znak_poslije_tocke ] = \
-                        Akcija ('pomakni', auto.prijelazi[ (s, znak_poslije_tocke) ] )
+                    # dodatni uvjet za pomakni (onaj pravi)
+                    if ( ( s, znak_poslije_tocke) in auto.prijelazi ) \
+                        and (znak_poslije_tocke in znaci_za_akcije ):
+                        
+                        self.akcija[s][ znak_poslije_tocke ] = \
+                            Akcija ('pomakni', auto.prijelazi[ (s, znak_poslije_tocke) ] )
                 
                 # if-uvjet za 'prihvati' i 'reduciraj'
                 if stavka.je_li_potpuna():
@@ -325,18 +325,18 @@ class ModelAnalizatora:
                                 'kojoj je skup zapocinje jednak: ' + str( stavka.skup_zapocinje ) )
                     
                     # petlja za 'reduciraj'
-                    for x in range (len (auto.stanja[s][i].skup_zapocinje)):
+                    for znak in stavka.skup_zapocinje:
                         
                         if stavka.desno_prije_tocke == [''] :
                             
                             # da imamo lijepo zapisano, nece slat prazni skup nego onaj epsilon
                             # u obliku znaka '$' bas kao u Ulaznoj!
 
-                            self.akcija[s][ stavka.skup_zapocinje[x] ] = Akcija ('reduciraj',
+                            self.akcija[s][ znak ] = Akcija ('reduciraj',
                                                     Produkcija( stavka.lijeva_strana, ['$'] ))
                             
                         else:
-                            self.akcija[s][ stavka.skup_zapocinje[x] ] = Akcija ('reduciraj',
+                            self.akcija[s][ znak ] = Akcija ('reduciraj',
                             Produkcija( stavka.lijeva_strana, stavka.desno_prije_tocke ))
                         
             #petlja za tablicu novo stanje
