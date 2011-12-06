@@ -284,7 +284,7 @@ class ModelAnalizatora:
             if auto.stanja[s] not in auto.prihvatljiva:
                 continue
             
-            print ( s, auto.stanja[s] )
+            #print ( s, auto.stanja[s] )
             
             # tablice su otprije prazni nizovi, dodaj element prazni dict
             self.akcija.append(dict())
@@ -316,7 +316,7 @@ class ModelAnalizatora:
                         
                         if stavka.skup_zapocinje == frozenset([ '<<!>>' ]):
                             
-                            self.akcija[s][ znak_poslije_tocke ] = Akcija( 'prihvati' )
+                            self.akcija[s][ '<<!>>' ] = Akcija( 'prihvati' )
                             
                             continue
                         
@@ -345,7 +345,7 @@ class ModelAnalizatora:
                     znak in self.gramatika.nezavrsni_znakovi:
                     
                     self.novo_stanje[s][ znak ] = auto.prijelazi[(s, znak )]
-        
+        '''
         print()
         print( 'AKCIJA' )
         print( self.akcija )
@@ -353,3 +353,4 @@ class ModelAnalizatora:
         print( 'NOVO STANJE') 
         print( self.novo_stanje )
         print()
+        '''

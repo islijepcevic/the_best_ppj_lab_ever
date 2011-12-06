@@ -54,8 +54,6 @@ class SintaksniAnalizator():
         
         while( True ):
             
-            #print( self._stog.stog )
-            
             trenutno_stanje = self._stog.dohvati_vrh()
             jedinka_s_ulaza = self._ulazni_niz[ self._index_parsiranja ]
             
@@ -107,8 +105,7 @@ class SintaksniAnalizator():
         '''tip parametra: Produkcija'''
         
         trenutno_stanje = self._stog.dohvati_vrh()
-        
-        if produkcija.desna_strana != ['$']:
+        if produkcija.desna_strana != []:
             # nije epsilon produkcija
             
             djeca_novog_cvora = []

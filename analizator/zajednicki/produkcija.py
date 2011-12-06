@@ -15,8 +15,8 @@ class Produkcija:
         
         IVAN
         '''
-        return 'Produkcija("' + self.lijeva_strana + '","' + \
-                repr( self.desna_strana ) + '")'
+        return 'Produkcija("' + self.lijeva_strana + '",' + \
+                repr( self.desna_strana ) + ')'
     
     
     def __hash__( self ):
