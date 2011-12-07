@@ -4,7 +4,7 @@ import sys
 
 from leksicka_jedinka import LeksickaJedinka
 from unutarnji_cvor_stabla import UnutarnjiCvorStabla
-from stog import Stog
+from zajednicki.stog import Stog
 from stablo import Stablo
 from zajednicki.akcija import Akcija
 from zajednicki.greske import GreskaAnalizatora
@@ -88,6 +88,7 @@ class SintaksniAnalizator():
             self.analiziraj()
         
         if self.generativno_stablo is None:
+            self._tok_za_greske.write( 'stablo nije generirano' )
             return None
         
         self.generativno_stablo.ispisi_preorder( self._izlazni_tok )

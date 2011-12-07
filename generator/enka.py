@@ -15,7 +15,7 @@ class ENKA:
         self.pocetno_stanje         = pocetno_stanje        # LR1Stavka
         self.prijelazi              = prijelazi             # rjecnik: kljuc = par (LR1Stavka, string)
                                                             # vrijednost = skup LR1Stavki
-        
+        print( len(self.stanja), len(self.ulazni_znakovi) )
         '''napomena: u knjizi pise da su sva stanja prihvatljiva, treba jos
         prokuziti da li da se doda dodatno neprihvatljivo stanje i kad/gdje'''
     
@@ -24,9 +24,14 @@ class ENKA:
         '''vraca instancu NKA
         MAK
         '''
-
+        from datetime import datetime
+        t1 = datetime.now()
         prijelaziNka = dict()
+        z = 0
         for stanje in self.stanja:
+            if z % 101 == 0:
+                print( z, datetime.now() - t1 )
+            z += 1
             for znak in self.ulazni_znakovi:
                 klj = (stanje, znak)
                 

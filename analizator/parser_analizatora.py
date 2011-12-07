@@ -74,6 +74,6 @@ class ParserAnalizatora:
             pravi_kod.append( LeksickaJedinka(unif, redak, leksjed) )
         
         pravi_kod.append( LeksickaJedinka('<<!>>') )
-        for l in pravi_kod: print( l )
-        print()
+        #for l in pravi_kod: print( l )
+        #print()
         return pravi_kod
