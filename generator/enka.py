@@ -1,6 +1,7 @@
 '''epsilon nka model'''
 
 from generator.nka import NKA
+from analizator.zajednicki.stog import Stog
 
 class ENKA:
     
@@ -80,17 +81,47 @@ class ENKA:
         
         MAK
         '''
-     
-        trSt = {stanje}
-        S = [stanje]
         
-        while len(S) != 0:
-            t = S.pop()
-            L = self.prijelazi.get( (t, '$'), [] )
-            for v in (L):
+        trSt = {stanje}
+        #S = [stanje]    #stog
+        S = Stog( stanje )
+        
+        hehe = True
+        #while len(S) != 0:
+        while not S.jest_prazan():
+            
+            #t = S.pop()                             #jedno stanje
+            t = S.dohvati_vrh()
+            S.skini()
+            L = self.prijelazi.get( (t, '$'), set() )  # skup stanja
+            
+            
+            '''
+            bla = len(trSt)
+            print(bla)
+            
+            if bla == 407 :
+                print( 407 )
+                print( L )
+                print()
+            
+            if bla == 408:
+                print( 408 )
+                print( L )
+                hehe = True
+                print()
+            
+            if bla == 1 and hehe:
+                print( 1 )
+                print( trSt )
+                print()
+                #raise BaseException
+            '''
+            for v in L:
                 if v not in trSt:
                     trSt.add(v)
-                    S.append(v)
+                    #S.append(v)
+                    S.stavi( v )
         
         return frozenset( trSt )
     
