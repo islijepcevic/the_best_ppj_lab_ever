@@ -4,6 +4,7 @@ import sys
 
 from generator.gramatika import Gramatika
 from generator.enka import ENKA
+from generator.prijelazi import Prijelazi
 from generator.lr_1_stavka import LR1Stavka
 from analizator.zajednicki.akcija import Akcija
 from analizator.zajednicki.produkcija import Produkcija
@@ -100,8 +101,7 @@ class ModelAnalizatora:
         
         skup_stanja = set([ pocetno_stanje ])   # treba zbog brzine pronalaska stanja u ovom algoritmu
         niz_stanja = [ pocetno_stanje ]     # ovo ce se predavati
-        prijelazi = [ {} ]  # rjecnik: kljuc = par (LR1Stavka, string)
-                        # vrijednost = skup LR1Stavki
+        prijelazi = Prijelazi( type( set() ) ) # dict( stanje: dict( znak: set( index-stavke ) ) )
         
         neobradjena_stanja = set( 0 )   # index u niz stanja
         
@@ -135,15 +135,11 @@ class ModelAnalizatora:
                 skup_stanja.add( novo_stanje )
                 index_novog = len( niz_stanja )
                 niz_stanja.append( novo_stanje )
-                neobradjena_stanja.add( novo_stanje )
+                neobradjena_stanja.add( index_novog )
             else:
                 index_novog = niz_stanja.index( novo_stanje )
             
-            #kljuc = (trenutno_stanje, znak_poslije_tocke)
-            if kljuc in prijelazi:
-                prijelazi[ trenutno_stanje_index ][ znak_poslije_tocke ].add( index_novog )
-            else:
-                prijelazi[ trenutno_stanje_index ][ znak_poslije_tocke ] = set( index_novog )
+            prijelazi.dodaj( trenutno_stanje, znak_poslije_tocke, index_novog )
             
             # slucaj iz knjige: 4 c)
             if znak_poslije_tocke in self.gramatika.nezavrsni_znakovi:
@@ -175,15 +171,11 @@ class ModelAnalizatora:
                         skup_stanja.add( novo_stanje )
                         index_novog = len( niz_stanja )
                         niz_stanja.append( novo_stanje )
-                        neobradjena_stanja.add( novo_stanje )
+                        neobradjena_stanja.add( index_novog )
                     else:
                         index_novog = niz_stanja.index( novo_stanje )
                     
-                    #kljuc = (trenutno_stanje, '$')
-                    if kljuc in prijelazi:
-                        prijelazi[ trenutno_stanje ][ '$' ].add( index_novog )
-                    else:
-                        prijelazi[ trenutno_stanje ][ '$' ] = set( index_novog )
+                    prijelazi.dodaj( trenutno_stanje, '$', index_novog )
         
         return ENKA( niz_stanja, abeceda, prijelazi )
     

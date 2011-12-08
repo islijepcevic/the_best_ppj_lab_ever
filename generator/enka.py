@@ -2,11 +2,12 @@
 
 from generator.nka import NKA
 from generator.dka import DKA
+from generator.prijelazi import Prijelazi
 from analizator.zajednicki.stog import Stog
 
 class ENKA:
     
-    def __init__( self, stanja, ulazni_znakovi, prihvatljiva, prijelazi ):
+    def __init__( self, stanja, ulazni_znakovi, prijelazi ):
         
         '''
         # OLD VERSION
@@ -22,6 +23,8 @@ class ENKA:
         self.prijelazi = prijelazi  # niz dictova; key=znak s ulaza; value=set indexa stanja
         self.abeceda = ulazni_znakovi   # set stringova
         
+        self._pocetno_stanje_index = 0
+        
         # ovdje se pamte izracunata epsilon okruzenja
         # kad jedno okruzenje bude izracunato, vrijednost ovog niza na indexu
         # zeljenog stanja postaje skup indexa na sva stanja e-okruzenja
@@ -35,126 +38,72 @@ class ENKA:
     
     def kreiraj_dka( self ):
         
-        dka_pocetno = self._epsilon_okruzenje( self.pocetno_stanje )
+        # treba vratiti frozenset indexa stanja/stavki
+        dka_pocetno = self._epsilon_okruzenje( self._pocetno_stanje_index )
         
-        stanja_dka = set()
-        stanja_dka.add( dka_pocetno )
+        stanja_dka = [ dka_pocetno  ]
         
         postoji_neprihvatljivo = False
         
-        neobradjena = Stog( dka_pocetno )
+        neobradjena = Stog( 0 )
         
-        prijelazi_dka = dict()
+        prijelazi_dka = Prijelazi() # dict( int_stanje: dict( znak: int_stanje ) )
+        
+        # varijable samo za test ispis
         i = 0
-        nz = len( self.ulazni_znakovi ) + 1
+        nz = len( self.abeceda ) + 1
+        
         while not neobradjena.jest_prazan():
+            # test ispisi
             print()
             print( i, neobradjena.duljina )
             i += 1
-            stanje_za_obradu = neobradjena.dohvati_vrh()
+            
+            index_stanja_za_obradu = neobradjena.dohvati_vrh()
             neobradjena.skini()
             
+            stanje_za_obradu = stanja_dka[ index_stanja_za_obradu ]
+            
             j=0
-            for z in (self.ulazni_znakovi | set(['<<!>>'])):
+            for z in (self.abeceda | set(['<<!>>'])):
                 
-                novo_stanje = set()
+                novo_stanje = set() # postaje set intova (indexa stavki)
                 
+                # test ispisi
                 print( j, '/', nz, len(stanje_za_obradu) )
                 j+=1
-                for stavka in stanje_za_obradu:
-                    
-                    #nka prijelaz od (stavka, z)
-                    nka_prijelaz = self.prijelaz_za_niz( stavka, [z] )
-                    novo_stanje |= nka_prijelaz
+                
+                for index_stavke in stanje_za_obradu:
+                    novo_stanje.update( self.prijelaz_za_niz( index_stavke, [z] ) )
                 
                 novo_stanje = frozenset( novo_stanje )
                 
                 if novo_stanje:
                     
-                    if novo_stanje not in stanja_dka:
-                        neobradjena.stavi( novo_stanje )
-                        stanja_dka.add( novo_stanje )
+                    try:
+                        index_novog = stanja_dka.index( novo_stanje )
                     
-                    prijelazi_dka[ (frozenset(stanje_za_obradu), z) ] = novo_stanje
+                    except:
+                        index_novog = len( stanja_dka )
+                        neobradjena.stavi( index_novog )
+                        stanja_dka.append( novo_stanje )
+                    
+                    prijelazi_dka.dodaj( index_stanja_za_obradu, z, index_novog )
                 
                 else:
                     postoji_neprihvatljivo = True
-                    prijelazi_dka[ (frozenset(stanje_za_obradu), z) ] = frozenset([None])
-        
-        F = stanja_dka.copy()
-        
-        if postoji_neprihvatljivo:
-            stanja_dka.add( frozenset([None]) )
+                    prijelazi_dka.dodaj( index_stanja_za_obradu, z, -1 )
         
         print( 'stvaram dka')
         
-        return DKA (stanja_dka, self.ulazni_znakovi, dka_pocetno, F, prijelazi_dka)
-    
-    
-    def kreiraj_nka( self ):
-        '''vraca instancu NKA
-        MAK
-        '''
-        from datetime import datetime
-        t1 = datetime.now()
-        
-        prijelaziNka = dict()
-        z = 0
-        for stanje in self.stanja:
-            if z % 101 == 0:
-                print( z, datetime.now() - t1 )
-            z += 1
-            for znak in self.ulazni_znakovi:
-                klj = (stanje, znak)
-                
-                # MAK
-                '''
-                novaStanja = self._epsilon_okruzenje(stanje)
-                novaStanja = self._prijelaz_za_skup(novaStanja, znak)
-                
-                if novaStanja:
-                    prijelaziNka[klj] = novaStanja.union(self._eps_okruzenje_set(novaStanja))
-                '''
-                
-                # IVAN
-                if klj not in prijelaziNka:
-                    prijelaziNka[klj] = self.prijelaz_za_niz( stanje, [znak] )
-                else:
-                    prijelaziNka[klj] |= self.prijelaz_za_niz( stanje, [znak] )
-        
-        
-        if self._pocetni_prosiriv_do_prihvatljivih():
-            prihvatljivaNka = self.prihvatljiva.union({ self.pocetno_stanje })
-        else:
-            prihvatljivaNka = self.prihvatljiva.copy()
-        
-        nka = NKA (self.stanja, self.ulazni_znakovi,
-                    self._epsilon_okruzenje( self.pocetno_stanje ),
-                   prihvatljivaNka, prijelaziNka)
-        
-        return nka
-        
-        '''napomena: imam pseudo; u knjizi utr-a str 37'''
-        #pass
-    
-    
-    def _pocetni_prosiriv_do_prihvatljivih( self ):
-        '''vraca boolan
-        vrati true ako je prihvatljivo stanje u epsilon okruzenju pocetnog
-        treba za kreiranje NKA
-        
-        MAK
-        '''
-        for epsPoc in self._epsilon_okruzenje(self.pocetno_stanje):
-            if epsPoc in self.prihvatljiva:
-                return True
-        
-        return False
+        return DKA( self.stanja, stanja_dka, self.abeceda, prijelazi_dka )
     
     
     def _epsilon_okruzenje( self, stanje ):
         '''postoji kod za ovo u prvom labosu, u analizatoru; mozda treba
         prilagoditi tipove i neke detalje, nisam gledao
+        
+        dodatno: vraca se skup indexa na stavke
         
         MAK
         '''
@@ -180,12 +129,14 @@ class ENKA:
         
         return frozenset( trSt )
     
+    
     def _eps_okruzenje_set (self, stanja):
         novaStanja = set()
         for stanje in stanja:
             novaStanja = novaStanja.union (self._epsilon_okruzenje(stanje))
         
         return frozenset( novaStanja )
+    
     
     def _prijelaz (self, stanje, znak):
         stanja = self.prijelazi.get ((stanje, znak), set())
@@ -199,12 +150,14 @@ class ENKA:
         # vraca prazni set ako na su na pocetku stanja duljine 0
         return stanjaN
     
+    
     def _prijelaz_za_skup (self, stanja, znak):
         novaStanja = set ()
         for s in stanja:
             novaStanja = novaStanja.union(self._prijelaz(s, znak))
         
         return frozenset( novaStanja )
+    
     
     def prijelaz_za_niz( self, stanje, niz ):
         '''delta s kapicom, kako je to bilo oznacavano u utr-u
@@ -228,26 +181,3 @@ class ENKA:
             P |= self.prijelazi.get( (estanje, znak), set() )
         
         return self._eps_okruzenje_set( P )
-        """
-        #stanja = self._epsilon_okruzenje(stanje)
-        
-        #stanjaN = set ()
-        
-        '''
-        for st in stanja:
-            for znak in niz:
-                stanjaN = stanjaN.union (self._prijelaz(st, znak))
-        '''
-        
-        #for znak in niz:
-            #stanja = self._prijelaz_za_skup( stanja, znak )
-        
-        '''
-        if stanjaN == []:
-            return stanja
-        
-        return stanjaN
-        '''
-        #return frozenset( stanja )
-        """
-        
