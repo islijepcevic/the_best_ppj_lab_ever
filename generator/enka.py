@@ -1,6 +1,7 @@
 '''epsilon nka model'''
 
 from generator.nka import NKA
+from generator.dka import DKA
 from analizator.zajednicki.stog import Stog
 
 class ENKA:
@@ -33,12 +34,71 @@ class ENKA:
         prokuziti da li da se doda dodatno neprihvatljivo stanje i kad/gdje'''
     
     
+    def kreiraj_dka( self ):
+        
+        dka_pocetno = self._epsilon_okruzenje( self.pocetno_stanje )
+        
+        stanja_dka = set()
+        stanja_dka.add( dka_pocetno )
+        
+        postoji_neprihvatljivo = False
+        
+        neobradjena = Stog( dka_pocetno )
+        
+        prijelazi_dka = dict()
+        i = 0
+        nz = len( self.ulazni_znakovi ) + 1
+        while not neobradjena.jest_prazan():
+            print()
+            print( i, neobradjena.duljina )
+            i += 1
+            stanje_za_obradu = neobradjena.dohvati_vrh()
+            neobradjena.skini()
+            
+            j=0
+            for z in (self.ulazni_znakovi | set(['<<!>>'])):
+                
+                novo_stanje = set()
+                
+                print( j, '/', nz, len(stanje_za_obradu) )
+                j+=1
+                for stavka in stanje_za_obradu:
+                    
+                    #nka prijelaz od (stavka, z)
+                    nka_prijelaz = self.prijelaz_za_niz( stavka, [z] )
+                    novo_stanje |= nka_prijelaz
+                
+                novo_stanje = frozenset( novo_stanje )
+                
+                if novo_stanje:
+                    
+                    if novo_stanje not in stanja_dka:
+                        neobradjena.stavi( novo_stanje )
+                        stanja_dka.add( novo_stanje )
+                    
+                    prijelazi_dka[ (frozenset(stanje_za_obradu), z) ] = novo_stanje
+                
+                else:
+                    postoji_neprihvatljivo = True
+                    prijelazi_dka[ (frozenset(stanje_za_obradu), z) ] = frozenset([None])
+        
+        F = stanja_dka.copy()
+        
+        if postoji_neprihvatljivo:
+            stanja_dka.add( frozenset([None]) )
+        
+        print( 'stvaram dka')
+        
+        return DKA (stanja_dka, self.ulazni_znakovi, dka_pocetno, F, prijelazi_dka)
+    
+    
     def kreiraj_nka( self ):
         '''vraca instancu NKA
         MAK
         '''
         from datetime import datetime
         t1 = datetime.now()
+        
         prijelaziNka = dict()
         z = 0
         for stanje in self.stanja:
@@ -113,28 +173,6 @@ class ENKA:
             S.skini()
             L = self.prijelazi.get( (t, '$'), set() )  # skup stanja
             
-            
-            '''
-            bla = len(trSt)
-            print(bla)
-            
-            if bla == 407 :
-                print( 407 )
-                print( L )
-                print()
-            
-            if bla == 408:
-                print( 408 )
-                print( L )
-                hehe = True
-                print()
-            
-            if bla == 1 and hehe:
-                print( 1 )
-                print( trSt )
-                print()
-                #raise BaseException
-            '''
             for v in L:
                 if v not in trSt:
                     trSt.add(v)
@@ -175,6 +213,22 @@ class ENKA:
         
         MAK
         '''
+        # AKO NE BUDE RADILO: ALGORITAM EKVIVALENTAN UDZBENIKU UTR:
+        # IVAN
+        
+        if not niz:
+            return frozenset( self._epsilon_okruzenje( stanje ) )
+        
+        znak = niz[-1]
+        
+        eP = self.prijelaz_za_niz( stanje, niz[:-1] )   # za niz duljine 1, niz[:1]==[]
+        
+        P = set()
+        
+        for estanje in eP:
+            P |= self.prijelazi.get( (estanje, znak), set() )
+        
+        return self._eps_okruzenje_set( P )
         """
         #stanja = self._epsilon_okruzenje(stanje)
         
@@ -197,19 +251,4 @@ class ENKA:
         '''
         #return frozenset( stanja )
         """
-        # AKO NE BUDE RADILO: ALGORITAM EKVIVALENTAN UDZBENIKU UTR:
-        # IVAN
         
-        if not niz:
-            return frozenset( self._epsilon_okruzenje( stanje ) )
-        
-        znak = niz[-1]
-        
-        eP = self.prijelaz_za_niz( stanje, niz[:-1] )   # za niz duljine 1, niz[:1]==[]
-        
-        P = set()
-        
-        for estanje in eP:
-            P |= self.prijelazi.get( (estanje, znak), set() )
-        
-        return self._eps_okruzenje_set( P )

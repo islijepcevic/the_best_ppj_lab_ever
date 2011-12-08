@@ -79,8 +79,9 @@ class ModelAnalizatora:
         '''
         
         enka = self._kreiraj_enka()
-        nka = enka.kreiraj_nka()
-        dka = nka.kreiraj_dka()
+        #nka = enka.kreiraj_nka()
+        #dka = nka.kreiraj_dka()
+        dka = enka.kreiraj_dka()
         
         self.automat = dka
     

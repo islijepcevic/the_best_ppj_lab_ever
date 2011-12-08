@@ -62,6 +62,7 @@ class Stog2():
     
     def __init__( self, pocetna_vrijednost ):
         
+        self.duljina = 1
         self.vrh = Element( pocetna_vrijednost, None )
     
     
@@ -69,6 +70,7 @@ class Stog2():
         
         novi = Element( element, self.vrh )
         self.vrh = novi
+        self.duljina += 1
     
     
     def skini( self ):
@@ -77,6 +79,7 @@ class Stog2():
             raise GreskaNaStogu( 'pokusaj skidanja sa praznog stoga' )
         
         self.vrh = self.vrh.sljedeci
+        self.duljina -= 1
     
     
     def dohvati_vrh( self ):

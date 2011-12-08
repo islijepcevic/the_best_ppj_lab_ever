@@ -63,10 +63,10 @@ class LR1Stavka:
     
     def __hash__( self ):
         
-        za_hash = self.lijeva_strana
-        za_hash += ':' + self._dodaj_u_string_za_hash( self.desno_prije_tocke )
-        za_hash += ':' + self._dodaj_u_string_za_hash( self.desno_poslije_tocke )
-        za_hash += ':' + self._dodaj_u_string_za_hash( self.skup_zapocinje )
+        za_hash = self.lijeva_strana + \
+        ':' + self._dodaj_u_string_za_hash( self.desno_prije_tocke ) + \
+        ':' + self._dodaj_u_string_za_hash( self.desno_poslije_tocke ) + \
+        ':' + self._dodaj_u_string_za_hash( self.skup_zapocinje )
         
         return hash( za_hash ) + len( self.skup_zapocinje )
     
