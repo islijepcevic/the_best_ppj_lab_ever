@@ -34,9 +34,11 @@ def pronadji_index( niz, vrijednost ):
 
 class DKA:
     
-    def __init__( self, stanja, ulazni_znakovi, pocetno_stanje, prihvatljiva,
+    def __init__( self, stavke, stanja, ulazni_znakovi, prihvatljiva,
                 prijelazi ):
         
+        '''
+        # OLD VERSION
         self.stanja = stanja    # skup skupova LR1Stavki (i ako treba nesto dodatno za neprihvatljivo stanje)
                                 # nako minimizacije stanja, ova varijabla postaje
                                 # niz skupova LR1Stavki, a svugdje drugdje se za
@@ -47,6 +49,14 @@ class DKA:
         self.pocetno_stanje = pocetno_stanje    # LR1Stavka
         self.prijelazi = prijelazi      # rjecnik: kljuc = par (skup LR1Stavki, string)
                                         # vrijednost = skup LR1Stavki ->(ovdje to predstavlja jedno stanje)
+        '''
+        
+        self.stavke = stavke    # niz LR1Stavki
+        
+        self.stanja = stanja    # niz setova indexa na stavke; prvo je pocetno
+        self.abeceda = ulazni_znakovi
+        self.prijelazi = prijelazi  # niz dictova; key=znak s ulaza; val=index stanja
+        
         
         #self._minimiziraj()
         self._pretvori_stanja_u_brojeve()

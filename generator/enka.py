@@ -6,8 +6,7 @@ from analizator.zajednicki.stog import Stog
 
 class ENKA:
     
-    def __init__( self, stanja, ulazni_znakovi, pocetno_stanje, prihvatljiva,
-                prijelazi ):
+    def __init__( self, stanja, ulazni_znakovi, prihvatljiva, prijelazi ):
         
         '''
         # OLD VERSION
@@ -19,7 +18,7 @@ class ENKA:
                                                             # vrijednost = skup LR1Stavki
         '''
         
-        self.stanja = stanja        # niz LRStavki - sva prihvatljiva
+        self.stanja = stanja        # niz LRStavki - sva prihvatljiva; prvo pocetno
         self.prijelazi = prijelazi  # niz dictova; key=znak s ulaza; value=set indexa stanja
         self.abeceda = ulazni_znakovi   # set stringova
         

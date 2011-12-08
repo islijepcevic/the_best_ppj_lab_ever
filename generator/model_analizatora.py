@@ -91,22 +91,24 @@ class ModelAnalizatora:
         ovdje ide algoritam sa strane 148
         '''
         
-        abeceda = self.gramatika.nezavrsni_znakovi.union( 
-                            self.gramatika.zavrsni_znakovi )
+        abeceda = self.gramatika.nezavrsni_znakovi.union(
+                                                self.gramatika.zavrsni_znakovi )
         
         pocetno_stanje = LR1Stavka( self.gramatika.pocetni_nezavrsni, [],
                                     self.gramatika.produkcije[-1].desna_strana,
                                     frozenset([ '<<!>>' ]) )
         
-        skup_stanja = set([ pocetno_stanje ])
-        prijelazi = {}  # rjecnik: kljuc = par (LR1Stavka, string)
+        skup_stanja = set([ pocetno_stanje ])   # treba zbog brzine pronalaska stanja u ovom algoritmu
+        niz_stanja = [ pocetno_stanje ]     # ovo ce se predavati
+        prijelazi = [ {} ]  # rjecnik: kljuc = par (LR1Stavka, string)
                         # vrijednost = skup LR1Stavki
         
-        neobradjena_stanja = skup_stanja.copy()
+        neobradjena_stanja = set( 0 )   # index u niz stanja
         
         while( len( neobradjena_stanja ) > 0 ):
             
-            trenutno_stanje = neobradjena_stanja.pop()  # tip: LR1Stavka
+            trenutno_stanje_index = neobradjena_stanja.pop()
+            trenutno_stanje = niz_stanja[ trenutno_stanje_index ]   # tip: LR1Stavka
             
             # potpuna stavka
             if trenutno_stanje.desno_poslije_tocke == "":
@@ -128,15 +130,20 @@ class ModelAnalizatora:
                                     nastavak_beta,
                                     trenutno_stanje.skup_zapocinje )
             
+            index_novog = -1
             if novo_stanje not in skup_stanja:
                 skup_stanja.add( novo_stanje )
+                index_novog = len( niz_stanja )
+                niz_stanja.append( novo_stanje )
                 neobradjena_stanja.add( novo_stanje )
-            
-            kljuc = (trenutno_stanje, znak_poslije_tocke)
-            if kljuc in prijelazi:
-                prijelazi[ kljuc ] |= frozenset([ novo_stanje ])
             else:
-                prijelazi[ kljuc ] = frozenset([ novo_stanje ])
+                index_novog = niz_stanja.index( novo_stanje )
+            
+            #kljuc = (trenutno_stanje, znak_poslije_tocke)
+            if kljuc in prijelazi:
+                prijelazi[ trenutno_stanje_index ][ znak_poslije_tocke ].add( index_novog )
+            else:
+                prijelazi[ trenutno_stanje_index ][ znak_poslije_tocke ] = set( index_novog )
             
             # slucaj iz knjige: 4 c)
             if znak_poslije_tocke in self.gramatika.nezavrsni_znakovi:
@@ -146,6 +153,7 @@ class ModelAnalizatora:
                 for produkcija in self.gramatika.produkcije:
                     if znak_poslije_tocke == produkcija.lijeva_strana:
                         
+                        # T iz knjige, za nastavak LR1Stavke
                         skup_T = self.gramatika.odredi_zapocinje_za_niz(
                                                                 nastavak_beta )
                         
@@ -162,18 +170,22 @@ class ModelAnalizatora:
                 # stavi te sve stavke u prijelaze i stanja (ako nisu u stanjima)
                 for novo_stanje in nova_stanja:
                     
+                    index_novog = -1
                     if novo_stanje not in skup_stanja:
                         skup_stanja.add( novo_stanje )
+                        index_novog = len( niz_stanja )
+                        niz_stanja.append( novo_stanje )
                         neobradjena_stanja.add( novo_stanje )
-                    
-                    kljuc = (trenutno_stanje, '$')
-                    if kljuc in prijelazi:
-                        prijelazi[ kljuc ] |= frozenset([ novo_stanje ])
                     else:
-                        prijelazi[ kljuc ] = frozenset([ novo_stanje ])
+                        index_novog = niz_stanja.index( novo_stanje )
+                    
+                    #kljuc = (trenutno_stanje, '$')
+                    if kljuc in prijelazi:
+                        prijelazi[ trenutno_stanje ][ '$' ].add( index_novog )
+                    else:
+                        prijelazi[ trenutno_stanje ][ '$' ] = set( index_novog )
         
-        return ENKA( skup_stanja, abeceda, pocetno_stanje, skup_stanja.copy(),
-                    prijelazi )
+        return ENKA( niz_stanja, abeceda, prijelazi )
     
     
     def _razrijesi_nejednoznacnosti( self ):
