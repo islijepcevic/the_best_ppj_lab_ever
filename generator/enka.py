@@ -8,14 +8,27 @@ class ENKA:
     def __init__( self, stanja, ulazni_znakovi, pocetno_stanje, prihvatljiva,
                 prijelazi ):
         
-        
+        '''
+        # OLD VERSION
         self.stanja                 = set(stanja)           # skup LR1Stavki
         self.prihvatljiva           = set(prihvatljiva)     # skup LR1Stavki
         self.ulazni_znakovi         = set(ulazni_znakovi)   # skup stringova
         self.pocetno_stanje         = pocetno_stanje        # LR1Stavka
         self.prijelazi              = prijelazi             # rjecnik: kljuc = par (LR1Stavka, string)
                                                             # vrijednost = skup LR1Stavki
-        print( len(self.stanja), len(self.ulazni_znakovi) )
+        '''
+        
+        self.stanja = stanja        # niz LRStavki - sva prihvatljiva
+        self.prijelazi = prijelazi  # niz dictova; key=znak s ulaza; value=set indexa stanja
+        self.abeceda = ulazni_znakovi   # set stringova
+        
+        # ovdje se pamte izracunata epsilon okruzenja
+        # kad jedno okruzenje bude izracunato, vrijednost ovog niza na indexu
+        # zeljenog stanja postaje skup indexa na sva stanja e-okruzenja
+        self._eokruzenja = [None] * len( self.stanja )
+        
+        
+        print( len(self.stanja), len(self.abeceda) )
         '''napomena: u knjizi pise da su sva stanja prihvatljiva, treba jos
         prokuziti da li da se doda dodatno neprihvatljivo stanje i kad/gdje'''
     
