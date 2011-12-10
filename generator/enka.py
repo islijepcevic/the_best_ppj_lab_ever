@@ -20,7 +20,7 @@ class ENKA:
         '''
         
         self.stanja = stanja        # niz LRStavki - sva prihvatljiva; prvo pocetno
-        self.prijelazi = prijelazi  # niz dictova; key=znak s ulaza; value=set indexa stanja
+        self.prijelazi = prijelazi  # objekt Prijelazi
         self.abeceda = ulazni_znakovi   # set stringova
         
         self._pocetno_stanje_index = 0
@@ -37,6 +37,7 @@ class ENKA:
     
     
     def kreiraj_dka( self ):
+        '''stvaranje dka direktno iz enkas'''
         
         # treba vratiti frozenset indexa stanja/stavki
         dka_pocetno = self._epsilon_okruzenje( self._pocetno_stanje_index )
@@ -99,7 +100,7 @@ class ENKA:
         return DKA( self.stanja, stanja_dka, self.abeceda, prijelazi_dka )
     
     
-    def _epsilon_okruzenje( self, stanje ):
+    def _epsilon_okruzenje( self, index_stanja ):
         '''postoji kod za ovo u prvom labosu, u analizatoru; mozda treba
         prilagoditi tipove i neke detalje, nisam gledao
         
@@ -108,32 +109,44 @@ class ENKA:
         MAK
         '''
         
-        trSt = {stanje}
-        #S = [stanje]    #stog
-        S = Stog( stanje )
+        if self._eokruzenja[ index_stanja ] is not None:
+            return self._eokruzenja[ index_stanja ]
         
-        hehe = True
+        #stanje = self.stanja[ index_stanja ]
+        
+        #trSt = {stanje} # set
+        trSt = { index_stanja }
+        
+        #S = [stanje]    #stog
+        S = Stog( index_stanja )
+        
         #while len(S) != 0:
         while not S.jest_prazan():
             
             #t = S.pop()                             #jedno stanje
-            t = S.dohvati_vrh()
+            t_index = S.dohvati_vrh()
             S.skini()
-            L = self.prijelazi.get( (t, '$'), set() )  # skup stanja
             
-            for v in L:
-                if v not in trSt:
-                    trSt.add(v)
+            L = self.prijelazi.dohvati( t_index, '$' )
+            #L = self.prijelazi.get( (t, '$'), set() )  # skup stanja
+            
+            for v_index in L:
+                if v_index not in trSt:
+                    trSt.add(v_index)
                     #S.append(v)
-                    S.stavi( v )
+                    S.stavi( v_index )
         
-        return frozenset( trSt )
+        trSt = frozenset( trSt )
+        
+        self._eokruzenja[ index_stanja ] = trSt
+        
+        return trSt
     
     
-    def _eps_okruzenje_set (self, stanja):
+    def _eps_okruzenje_set (self, stanja_indexi):
         novaStanja = set()
-        for stanje in stanja:
-            novaStanja = novaStanja.union (self._epsilon_okruzenje(stanje))
+        for stanje_index in stanja_indexi:
+            novaStanja = novaStanja.union (self._epsilon_okruzenje(stanje_index))
         
         return frozenset( novaStanja )
     
@@ -159,7 +172,7 @@ class ENKA:
         return frozenset( novaStanja )
     
     
-    def prijelaz_za_niz( self, stanje, niz ):
+    def prijelaz_za_niz( self, index_stanja, niz ):
         '''delta s kapicom, kako je to bilo oznacavano u utr-u
         trebalo bi samo prosirit se po epsilon okruzenju kolko se sjecam
         
@@ -169,15 +182,15 @@ class ENKA:
         # IVAN
         
         if not niz:
-            return frozenset( self._epsilon_okruzenje( stanje ) )
+            return self._epsilon_okruzenje( index_stanja )
         
         znak = niz[-1]
         
-        eP = self.prijelaz_za_niz( stanje, niz[:-1] )   # za niz duljine 1, niz[:1]==[]
+        eP = self.prijelaz_za_niz( index_stanja, niz[:-1] )   # za niz duljine 1, niz[:1]==[]
         
         P = set()
         
-        for estanje in eP:
-            P |= self.prijelazi.get( (estanje, znak), set() )
+        for estanje_index in eP:
+            P.update( self.prijelazi.dohvati( estanje_index, znak ) )
         
         return self._eps_okruzenje_set( P )
