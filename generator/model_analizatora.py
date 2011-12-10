@@ -218,7 +218,7 @@ class ModelAnalizatora:
                         sto_zamijeniti.append( (self.automat.stanja.index( skup_stavki ), stavka1_index, index_nove_stavke) )
                         
                         # poziv ispisa
-                        self._pisi_pr( stavka1, stavka2, ret, self.automat.stanja.index( skup_stavki ) )
+                        self._pisi_pr( stavka1, stavka2, nova_stavka, self.automat.stanja.index( skup_stavki ) )
                     
                     # nadam se da je ovdje zbog mutable u self.automatu sve zabiljezeno i promijenjeno
             
@@ -335,7 +335,7 @@ class ModelAnalizatora:
                 #print( '\t', stavka )
                 
                 stavka = auto.stavke[ stavka_index ]
-                print( stavka_index, stavka )
+                
                 # if-uvjet za 'pomakni'
                 if not stavka.je_li_potpuna():
                     znak_poslije_tocke = stavka.desno_poslije_tocke[0]
