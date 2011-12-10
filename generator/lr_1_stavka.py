@@ -18,7 +18,7 @@ class LR1Stavka:
         vraca maknuti znak ako je maknut, inace None
         '''
         
-        znak_iza_tocke = druga.desno_poslije_tocke
+        znak_iza_tocke = druga.desno_poslije_tocke[ 0 ]
         
         if znak_iza_tocke in self.skup_zapocinje:
             

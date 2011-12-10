@@ -30,7 +30,7 @@ class ENKA:
         # zeljenog stanja postaje skup indexa na sva stanja e-okruzenja
         self._eokruzenja = [None] * len( self.stanja )
         
-        #print( 'enka konstruktor: broj stanja, duljina abecede ' )
+        print( 'enka konstruktor: broj stanja, duljina abecede ' )
         print( len(self.stanja), len(self.abeceda) )
         #print()
         #self.prijelazi.pisi_sve_prijelaze()
@@ -60,6 +60,9 @@ class ENKA:
             
             print( i )
             i += 1
+            #for eo in self._eokruzenja:
+                #print( eo )
+            #print()
             
             index_stanja_za_obradu = neobradjena.dohvati_vrh()
             neobradjena.skini()
@@ -73,6 +76,9 @@ class ENKA:
                 for index_stavke in stanje_za_obradu:
                     novo_stanje.update( self.prijelaz_za_niz( index_stavke, [z] ) )
                 
+                #print( 'novo_stanje:', novo_stanje )
+                #print()
+                
                 novo_stanje = frozenset( novo_stanje )
                 
                 if novo_stanje:
@@ -80,7 +86,7 @@ class ENKA:
                     try:
                         index_novog = stanja_dka.index( novo_stanje )
                     
-                    except:
+                    except ValueError:
                         index_novog = len( stanja_dka )
                         neobradjena.stavi( index_novog )
                         stanja_dka.append( novo_stanje )
@@ -88,7 +94,6 @@ class ENKA:
                     prijelazi_dka.dodaj( index_stanja_za_obradu, z, index_novog )
                 
                 else:
-                    postoji_neprihvatljivo = True
                     prijelazi_dka.dodaj( index_stanja_za_obradu, z, -1 )
         
         #print( 'stvaram dka')
@@ -177,6 +182,9 @@ class ENKA:
         # IVAN
         
         if not niz:
+            #print( 'return iz pzn:', index_stanja, niz )
+            #print( self._epsilon_okruzenje( index_stanja ) )
+            
             return self._epsilon_okruzenje( index_stanja )
         
         znak = niz[-1]
@@ -187,5 +195,9 @@ class ENKA:
         
         for estanje_index in eP:
             P.update( self.prijelazi.dohvati( estanje_index, znak ) )
-        
+        '''
+        print( 'return iz pzn:', index_stanja, niz )
+        print( P )
+        print( self._eps_okruzenje_set( P ) )
+        '''
         return self._eps_okruzenje_set( P )

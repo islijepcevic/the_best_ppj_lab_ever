@@ -54,7 +54,7 @@ class ModelAnalizatora:
         
         zapis = repr( self.akcija ) + '\n'
         zapis += repr( self.novo_stanje ) + '\n'
-        zapis += repr( self.automat.pocetno_stanje )
+        zapis += repr( 0 )
         
         
         tok = open( datoteka, 'w' )
@@ -315,7 +315,7 @@ class ModelAnalizatora:
         
         auto = self.automat
         znaci_za_akcije = self.gramatika.zavrsni_znakovi | set([ '<<!>>' ])
-
+        
         for s in range (len( auto.stanja )):
             
             # zanemari neprihvatljiva stanja
@@ -326,16 +326,16 @@ class ModelAnalizatora:
             #print ( s, auto.stanja[s] )
             
             # tablice su otprije prazni nizovi, dodaj elemente prazne dictove
-            self.akcija = [ {} ] * len( auto.stanja )
-            self.novo_stanje = [ {} ] * len( auto.stanja )
+            self.akcija.append(dict())
+            self.novo_stanje.append(dict())
             
             # petlja za tablicu akcija
             # iteriranje po LR1Stavkama pojedinog stanja DKA
             for stavka_index in auto.stanja[s]:
                 #print( '\t', stavka )
                 
-                stavka = auto.stanvka[ stavka1_index ]
-                
+                stavka = auto.stavke[ stavka_index ]
+                print( stavka_index, stavka )
                 # if-uvjet za 'pomakni'
                 if not stavka.je_li_potpuna():
                     znak_poslije_tocke = stavka.desno_poslije_tocke[0]
@@ -381,7 +381,7 @@ class ModelAnalizatora:
                         else:
                             self.akcija[s][ znak ] = Akcija ('reduciraj',
                             Produkcija( stavka.lijeva_strana, stavka.desno_prije_tocke ))
-                        
+            
             #petlja za tablicu novo stanje
             for znak in auto.abeceda:
                 prijedeno = auto.prijelazi.dohvati( s, znak )
@@ -390,11 +390,48 @@ class ModelAnalizatora:
                     self.novo_stanje[ s ][ znak ] = prijedeno
                 
         '''
+        print( 'STAVKE DKA' )
+        i = 0
+        for s in auto.stanja:
+            print( i, s )
+            i += 1
         print()
+        
+        print( 'STANJA DKA' )
+        i = 0
+        for s in auto.stanja:
+            print( i, s )
+            i += 1
+        print()
+        
+        print( 'PRIJELAZI DKA' )
+        #prijelazi_dka.pisi_sve_prijelaze()
+        print()
+        for i in range( len( auto.stanja ) ):
+            for z in auto.abeceda:
+                print( i, type(i), z, type(z), auto.prijelazi.dohvati( i, z ) )
+        print()
+        
         print( 'AKCIJA' )
-        print( self.akcija )
+        #print( self.akcija )
+        i = 0
+        for s in self.akcija:
+            if not s.keys():
+                print( i, s )
+            for z in s.keys():
+                print( i, ',', z, '=', s[z] )
+                print()
+            i += 1
         print()
+        
         print( 'NOVO STANJE') 
-        print( self.novo_stanje )
+        #print( self.novo_stanje )
+        i = 0
+        for s in self.novo_stanje:
+            if not s.keys():
+                print( i, s )
+            for z in s.keys():
+                print( i, z, s[z] )
+            i += 1
         print()
         '''

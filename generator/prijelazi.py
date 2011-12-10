@@ -46,11 +46,11 @@ class Prijelazi:
     
     def dohvati( self, index_stanja, znak ):
         
-        if index_stanja not in self._prijelazi:
+        if index_stanja not in self._prijelazi.keys():
             self._prijelazi[ index_stanja ] = {}
         
-        if znak not in self._prijelazi[ index_stanja ]:
-            return self._prazno()
+        if znak not in self._prijelazi[ index_stanja ].keys():
+            self._prijelazi[ index_stanja ][ znak ] = self._prazno()
         
         return self._prijelazi[ index_stanja ][ znak ]
     
@@ -60,7 +60,7 @@ class Prijelazi:
         print( 'PRIJELAZI' )
         for index in self._prijelazi.keys():
             for znak in self._prijelazi[ index ].keys():
-                print( index, znak, '==', self._prijelazi[ index ][ znak ] )
+                print( index, type(index), znak, type(znak), '==', self._prijelazi[ index ][ znak ] )
     
     
     def _prazno( self ):

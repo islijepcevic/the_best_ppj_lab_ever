@@ -63,7 +63,7 @@ class DKA:
         
         # neprihvatljivo stanje ne postoji, ali se -1 podrazumijeva kao index neprihvatljivog
         
-        raise BaseException
+        #raise BaseException
         '''
         print( 'PRIJELAZI' )
         for i in range( len( self.stanja ) ):
