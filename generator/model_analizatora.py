@@ -69,7 +69,9 @@ class ModelAnalizatora:
         '''
         
         self._stvori_automat()
+        print( 'stvoren automat, ide se na nejednoznacnosti' )
         self._razrijesi_nejednoznacnosti()
+        print( 'krece izgradnja tablica' )
         self._izgradi_tablice()
         
     
@@ -103,7 +105,7 @@ class ModelAnalizatora:
         niz_stanja = [ pocetno_stanje ]     # ovo ce se predavati
         prijelazi = Prijelazi( type( set() ) ) # dict( stanje: dict( znak: set( index-stavke ) ) )
         
-        neobradjena_stanja = set( 0 )   # index u niz stanja
+        neobradjena_stanja = { 0 }   # index u niz stanja
         
         while( len( neobradjena_stanja ) > 0 ):
             
@@ -139,7 +141,7 @@ class ModelAnalizatora:
             else:
                 index_novog = niz_stanja.index( novo_stanje )
             
-            prijelazi.dodaj( trenutno_stanje, znak_poslije_tocke, index_novog )
+            prijelazi.dodaj( trenutno_stanje_index, znak_poslije_tocke, index_novog )
             
             # slucaj iz knjige: 4 c)
             if znak_poslije_tocke in self.gramatika.nezavrsni_znakovi:
@@ -175,58 +177,68 @@ class ModelAnalizatora:
                     else:
                         index_novog = niz_stanja.index( novo_stanje )
                     
-                    prijelazi.dodaj( trenutno_stanje, '$', index_novog )
+                    prijelazi.dodaj( trenutno_stanje_index, '$', index_novog )
         
         return ENKA( niz_stanja, abeceda, prijelazi )
     
     
     def _razrijesi_nejednoznacnosti( self ):
         
-        for stanje in self.automat.stanja:  # stanja automata su u listi
+        for skup_stavki in self.automat.stanja:  # stanja automata su u listi
             
-            # jedno stanje je skup LR1Stavki
+            
+            # jedno stanje je skup indexa LR1Stavki
             
             # razrijesi pomakni/reduciraj
-            #for i in range( len( stanje ) ):
-            for stavka1 in stanje:
+            sto_zamijeniti = []
+            for stavka1_index in skup_stavki:
                 
+                stavka1 = self.automat.stavke[ stavka1_index ]
                 
                 if not stavka1 or not stavka1.je_li_potpuna():
                     continue
                 
-                for stavka2 in stanje:
+                for stavka2_index in skup_stavki:
                     
-                    if (not stavka2) or (stavka1 == stavka2):
+                    stavka2 = self.automat.stavke[ stavka2_index ]
+                    
+                    #ako rjesavam p/r proturjecje izmedju dvije iste stavke, sigurno ce se nepotrebna maknuti znak
+                    # prva stavka je potpuna pa mi druga ne treba biti za ovo proturjecje
+                    if (not stavka2) or (stavka1 == stavka2) or stavka2.je_li_potpuna():
                         continue
                     
-                    #stavka1 = stanje[i]
-                    #stavka2 = stanje[j]
+                    # proces razrjesavanja
+                    nova_stavka = stavka1.razrijesi_pr( stavka2 )   # vraca novu stavku ili None
                     
-                    ret = stavka1.razrijesi_pr( stavka2 )
+                    if nova_stavka is not None:
+                        index_nove_stavke = len( self.automat.stavke )
+                        self.automat.stavke.append( nova_stavka )
+                        
+                        # dodaje novu stavku iako vec mozda postoji
+                        sto_zamijeniti.append( (self.automat.stanja.index( skup_stavki ), stavka1_index, index_nove_stavke) )
+                        
+                        # poziv ispisa
+                        self._pisi_pr( stavka1, stavka2, ret, self.automat.stanja.index( skup_stavki ) )
                     
-                    if ret:
-                        self._pisi_pr( stavka1, stavka2, ret, self,automat.stanja.index( stanje ) )
-                    
-                    #stanje[i] = stavka1
                     # nadam se da je ovdje zbog mutable u self.automatu sve zabiljezeno i promijenjeno
             
             # razrijesi reduciraj/reduciraj
-            for stavka1 in stanje:
+            for stavka1_index in skup_stavki:
+                
+                stavka1 = self.automat.stavke[ stavka1_index ]
                 
                 if not stavka1 or not stavka1.je_li_potpuna():
                     continue
                 
-                #for j in range( i + 1, len( stanje ) ):
-                for stavka2 in stanje:
+                for stavka2_index in skup_stavki:
+                    
+                    stavka2 = self.automat.stavke[ stavka2_index ]
                     
                     if not stavka2 or not stavka2.je_li_potpuna():
                         continue
                     
                     if stavka1 == stavka2:
                         continue
-                    
-                    #stavka1 = stanje[i]
-                    #stavka2 = stanje[j]
                     
                     skup_za_maknuti = stavka1.skup_zapocinje & stavka2.skup_zapocinje
                     
@@ -239,20 +251,42 @@ class ModelAnalizatora:
                     produkcija2 = Produkcija( stavka2.lijeva_strana, 
                                     stavka2.desno_prije_tocke + stavka2.desno_poslije_tocke )
                     
+                    # pronalazi se prva produkcija kako bi se odlucilo r/r proturjecje
                     for prod_gram in self.gramatika.produkcije:
                         
                         if produkcija1 == prod_gram:
-                            stavka2.skup_zapocinje -= skup_za_maknuti
-                            self._pisi_rr( stavka2, stavka1, skup_za_maknuti, self.automat.stanja.index( stanje ) )
+                            index_nove_stavke = len( self.automat.stavke )
+                            nova_stavka = LR1Stavka( stavka2.lijeva_strana,
+                                                    stavka2.desno_prije_tocke,
+                                                    stavka2.desno_poslije_tocke,
+                                                    stavka2.skup_zapocinje - skup_za_maknuti )
+                            self.automat.stavke.append( nova_stavka )
+                            
+                            sto_zamijeniti.append( (self.automat.stanja.index( skup_stavki ),
+                                                    stavka2_index, index_nove_stavke) )
+                            
+                            self._pisi_rr( stavka2, stavka1, skup_za_maknuti, self.automat.stanja.index( skup_stavki ) )
                             break
                         
                         if produkcija2 == prod_gram:
-                            stavka1.skup_zapocinje -= skup_za_maknuti
-                            self._pisi_rr( stavka1, stavka2, skup_za_maknuti, self.automat.stanja.index( stanje ))
+                            index_nove_stavke = len( self.automat.stavke )
+                            nova_stavka = LR1Stavka( stavka1.lijeva_strana,
+                                                    stavka1.desno_prije_tocke,
+                                                    stavka1.desno_poslije_tocke,
+                                                    stavka1.skup_zapocinje - skup_za_maknuti )
+                            self.automat.stavke.append( nova_stavka )
+                            
+                            sto_zamijeniti.append( (self.automat.stanja.index( skup_stavki ),
+                                                    stavka1_index, index_nove_stavke) )
+                            
+                            self._pisi_rr( stavka1, stavka2, skup_za_maknuti, self.automat.stanja.index( skup_stavki ))
                             break
-                    
-                    #stanje[i] = stavka1
-                    #stanje[j] = stavka2
+        
+        # zamjena stavki u automatu nakon razrjesavanja proturjecja
+        # index-stanja; index-stare-stavke, index-nove-razrijesene-stavke
+        for istanja, istara, inova in sto_zamijeniti:
+            self.automat.stanja[ istanja ].remove( istara )
+            self.automat.stanja[ istanja ].add( inova )
     
     
     def _pisi_pr( self, stavka, druga, maknuto, stanje ):
@@ -278,8 +312,7 @@ class ModelAnalizatora:
     
     
     def _izgradi_tablice( self ):
-
-
+        
         auto = self.automat
         znaci_za_akcije = self.gramatika.zavrsni_znakovi | set([ '<<!>>' ])
 

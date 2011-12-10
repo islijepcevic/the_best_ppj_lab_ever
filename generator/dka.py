@@ -34,8 +34,7 @@ def pronadji_index( niz, vrijednost ):
 
 class DKA:
     
-    def __init__( self, stavke, stanja, ulazni_znakovi, prihvatljiva,
-                prijelazi ):
+    def __init__( self, stavke, stanja, ulazni_znakovi, prijelazi ):
         
         '''
         # OLD VERSION
@@ -49,18 +48,22 @@ class DKA:
         self.pocetno_stanje = pocetno_stanje    # LR1Stavka
         self.prijelazi = prijelazi      # rjecnik: kljuc = par (skup LR1Stavki, string)
                                         # vrijednost = skup LR1Stavki ->(ovdje to predstavlja jedno stanje)
+        
+        #self._minimiziraj()
+        self._pretvori_stanja_u_brojeve()
+        
         '''
         
+        # NEW VERSION
         self.stavke = stavke    # niz LR1Stavki
         
         self.stanja = stanja    # niz setova indexa na stavke; prvo je pocetno
         self.abeceda = ulazni_znakovi
         self.prijelazi = prijelazi  # niz dictova; key=znak s ulaza; val=index stanja
         
+        # neprihvatljivo stanje ne postoji, ali se -1 podrazumijeva kao index neprihvatljivog
         
-        #self._minimiziraj()
-        self._pretvori_stanja_u_brojeve()
-        
+        raise BaseException
         '''
         print( 'PRIJELAZI' )
         for i in range( len( self.stanja ) ):

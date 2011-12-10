@@ -30,8 +30,12 @@ class ENKA:
         # zeljenog stanja postaje skup indexa na sva stanja e-okruzenja
         self._eokruzenja = [None] * len( self.stanja )
         
-        
+        #print( 'enka konstruktor: broj stanja, duljina abecede ' )
         print( len(self.stanja), len(self.abeceda) )
+        #print()
+        #self.prijelazi.pisi_sve_prijelaze()
+        #print()
+        
         '''napomena: u knjizi pise da su sva stanja prihvatljiva, treba jos
         prokuziti da li da se doda dodatno neprihvatljivo stanje i kad/gdje'''
     
@@ -50,14 +54,11 @@ class ENKA:
         
         prijelazi_dka = Prijelazi() # dict( int_stanje: dict( znak: int_stanje ) )
         
-        # varijable samo za test ispis
         i = 0
-        nz = len( self.abeceda ) + 1
-        
         while not neobradjena.jest_prazan():
             # test ispisi
-            print()
-            print( i, neobradjena.duljina )
+            
+            print( i )
             i += 1
             
             index_stanja_za_obradu = neobradjena.dohvati_vrh()
@@ -65,14 +66,9 @@ class ENKA:
             
             stanje_za_obradu = stanja_dka[ index_stanja_za_obradu ]
             
-            j=0
             for z in (self.abeceda | set(['<<!>>'])):
                 
                 novo_stanje = set() # postaje set intova (indexa stavki)
-                
-                # test ispisi
-                print( j, '/', nz, len(stanje_za_obradu) )
-                j+=1
                 
                 for index_stavke in stanje_za_obradu:
                     novo_stanje.update( self.prijelaz_za_niz( index_stavke, [z] ) )
@@ -95,8 +91,7 @@ class ENKA:
                     postoji_neprihvatljivo = True
                     prijelazi_dka.dodaj( index_stanja_za_obradu, z, -1 )
         
-        print( 'stvaram dka')
-        
+        #print( 'stvaram dka')
         return DKA( self.stanja, stanja_dka, self.abeceda, prijelazi_dka )
     
     

@@ -4,7 +4,7 @@ class Prijelazi:
     '''prijelaz za automate, radi i za DKA i za eNKA
     '''
     
-    def __init__( self, tip_iduce = type( int ) ):
+    def __init__( self, tip_iduce = int ):
         '''tip_iduce je tip podataka (ili klasa) za vrijednost prijelaza'''
         
         self._tip_iduce = tip_iduce
@@ -16,11 +16,11 @@ class Prijelazi:
         if index_stanja not in self._prijelazi:
             self._prijelazi[ index_stanja ] = {}
         
-        if type( self._tip_iduce ) == type( int ):
+        if self._tip_iduce == int:
             
-            if type( iduce ) != type( int ):
+            if type( iduce ) != int:
                 raise TypeError( 'krivi tip vrijednosti prijelaza, ocekivan: ' + \
-                            self._tip_iduce + '\tdobiven: ' + type( iduce ) )
+                            str( self._tip_iduce ) + '\tdobiven: ' + str( type( iduce )) )
             
             if znak in self._prijelazi[ index_stanja ]:
                 raise GreskaDka( 'nedeterminizam: pokusaj dodavanja drugog ' + \
@@ -28,15 +28,14 @@ class Prijelazi:
             
             self._prijelazi[ index_stanja ][ znak ] = iduce
         
-        elif type( self._tip_iduce ) == type( set() ) or
-            type( self._tip_iduce ) == type( frozenset() ):
+        elif self._tip_iduce == set or self._tip_iduce == frozenset:
             
-            if type( iduce ) == type( int ):
+            if type( iduce ) == int:
                 
                 if znak not in self._prijelazi[ index_stanja ]:
-                    self._prijelazi[ index_stanja ][ znak ] = self._tip_iduce( iduce )
+                    self._prijelazi[ index_stanja ][ znak ] = self._tip_iduce([ iduce ])
                 else:
-                    self._prijelazi[ index_stanja ][ znak ] |= self._tip_iduce( iduce )
+                    self._prijelazi[ index_stanja ][ znak ] |= self._tip_iduce([ iduce ])
             
             else:   # valjda je predan neki set
                 if znak not in self._prijelazi[ index_stanja ]:
@@ -50,25 +49,31 @@ class Prijelazi:
         if index_stanja not in self._prijelazi:
             self._prijelazi[ index_stanja ] = {}
         
-        if znak not in self._prijelazi[ index_stanja ][ znak ]:
+        if znak not in self._prijelazi[ index_stanja ]:
             return self._prazno()
         
         return self._prijelazi[ index_stanja ][ znak ]
+    
+    
+    def pisi_sve_prijelaze( self ):
+        
+        print( 'PRIJELAZI' )
+        for index in self._prijelazi.keys():
+            for znak in self._prijelazi[ index ].keys():
+                print( index, znak, '==', self._prijelazi[ index ][ znak ] )
     
     
     def _prazno( self ):
         
         tip = self._tip_iduce
         
-        if tip == type( set() ) or tip == type( [] ) or tip == type( {} ) or
-            tip == type( frozenset() ):
-            
+        if tip == set or tip == list or tip == dict or tip == frozenset:
             return tip()
         
-        if tip == type( int ):
+        if tip == int:
             return -1
         
-        if tip == type( str ):
+        if tip == str:
             return ''
         
         return None

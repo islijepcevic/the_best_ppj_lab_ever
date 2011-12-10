@@ -11,10 +11,25 @@ class LR1Stavka:
     
     
     def razrijesi_pr( self, druga ):
+        '''rjesava pomakni/reduciraj proturjecje druge stavke prema sebi
+        odnosno mice znak poslije tocke iz druge stavke iz svog skupa zapocinje
+        (ako taj znak tamo postoji)
+        
+        vraca maknuti znak ako je maknut, inace None
+        '''
         
         znak_iza_tocke = druga.desno_poslije_tocke
-        skup_za_maknuti = set()
         
+        if znak_iza_tocke in self.skup_zapocinje:
+            
+            return LR1Stavka( self.lijeva_strana, self.desno_prije_tocke,
+                            self.desno_poslije_tocke,
+                            self.skup_zapocinje - { znak_iza_tocke } )
+            
+        return None
+        
+        '''
+        # OVO MI SE CINI NEEFIKASNO, ALI JE TOCNO RADILO. ZATO TO JOS NECU POBRISATI
         for znak in self.skup_zapocinje:
             if znak == znak_iza_tocke:
                 skup_za_maknuti |= znak
@@ -22,6 +37,7 @@ class LR1Stavka:
         self.skup_zapocinje -= skup_za_maknuti
         
         return skup_za_maknuti
+        '''
     
     
     def je_li_potpuna( self ):
