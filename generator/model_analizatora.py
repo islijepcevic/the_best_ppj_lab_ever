@@ -319,15 +319,16 @@ class ModelAnalizatora:
         for s in range (len( auto.stanja )):
             
             # zanemari neprihvatljiva stanja
-            if auto.stanja[s] not in auto.prihvatljiva:
-                continue
+            # PO NOVOM SVA SU PRIHVATLJIVA, NEPRIHVATLJIVO IMA INDEX -1
+            #if auto.stanja[s] not in auto.prihvatljiva:
+                #continue
             
             #print ( s, auto.stanja[s] )
             
-            # tablice su otprije prazni nizovi, dodaj element prazni dict
-            self.akcija.append(dict())
-            self.novo_stanje.append(dict())
-
+            # tablice su otprije prazni nizovi, dodaj elemente prazne dictove
+            self.akcija = [ {} ] * len( auto.stanja )
+            self.novo_stanje = [ {} ] * len( auto.stanja )
+            
             # petlja za tablicu akcija
             # iteriranje po LR1Stavkama pojedinog stanja DKA
             for stavka in auto.stanja[s]:
@@ -378,11 +379,12 @@ class ModelAnalizatora:
                             Produkcija( stavka.lijeva_strana, stavka.desno_prije_tocke ))
                         
             #petlja za tablicu novo stanje
-            for znak in auto.ulazni_znakovi:
-                if ((s, znak) in auto.prijelazi) and \
-                    znak in self.gramatika.nezavrsni_znakovi:
-                    
-                    self.novo_stanje[s][ znak ] = auto.prijelazi[(s, znak )]
+            for znak in auto.abeceda:
+                prijedeno = auto.prijelazi.dohvati( s, znak )
+                
+                if prijedeno != -1 and znak in self.gramatika.nezavrsni_znakovi:
+                    self.novo_stanje[ s ][ znak ] = prijedeno
+                
         '''
         print()
         print( 'AKCIJA' )
