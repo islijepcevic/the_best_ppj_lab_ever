@@ -7,7 +7,7 @@ class LR1Stavka:
         self.lijeva_strana = lijevo         # string
         self.desno_prije_tocke = prije      # niz stringova
         self.desno_poslije_tocke = poslije  # niz stringova
-        self.skup_zapocinje = zapocinje     # skup stringova
+        self.skup_zapocinje = frozenset( zapocinje )    # skup stringova
     
     
     def razrijesi_pr( self, druga ):

@@ -331,8 +331,10 @@ class ModelAnalizatora:
             
             # petlja za tablicu akcija
             # iteriranje po LR1Stavkama pojedinog stanja DKA
-            for stavka in auto.stanja[s]:
+            for stavka_index in auto.stanja[s]:
                 #print( '\t', stavka )
+                
+                stavka = auto.stanvka[ stavka1_index ]
                 
                 # if-uvjet za 'pomakni'
                 if not stavka.je_li_potpuna():
@@ -340,27 +342,29 @@ class ModelAnalizatora:
                 
                     #print( '\t', znak_poslije_tocke )
                     
+                    prijedeno_stanje_index = auto.prijelazi.dohvati( s, znak_poslije_tocke )
+                    
                     # dodatni uvjet za pomakni (onaj pravi)
-                    if ( ( s, znak_poslije_tocke) in auto.prijelazi ) \
-                        and (znak_poslije_tocke in znaci_za_akcije ):
+                    if prijedeno_stanje_index != -1 and znak_poslije_tocke in znaci_za_akcije:
                         
-                        self.akcija[s][ znak_poslije_tocke ] = \
-                            Akcija ('pomakni', auto.prijelazi[ (s, znak_poslije_tocke) ] )
+                        self.akcija[ s ][ znak_poslije_tocke ] = \
+                                    Akcija ('pomakni', prijedeno_stanje_index )
                 
-                # if-uvjet za 'prihvati' i 'reduciraj'
-                if stavka.je_li_potpuna():
+                # uvjet za 'prihvati' i 'reduciraj': stavka jest potpuna
+                else:
                     
                     # if-uvjet samo za 'prihvati' - bitniji od 'reduciraj'
                     if stavka.lijeva_strana == '<<novi_nezavrsni_znak>>':
                         
                         if stavka.skup_zapocinje == frozenset([ '<<!>>' ]):
                             
-                            self.akcija[s][ '<<!>>' ] = Akcija( 'prihvati' )
+                            self.akcija[ s ][ '<<!>>' ] = Akcija( 'prihvati' )
                             
                             continue
                         
                         else:
-                            raise GreskaIzgradnjeTablice( 'postoji stavka s novim nezavrsnim znakom, ' + \
+                            raise GreskaIzgradnjeTablice( 'postoji stavka s novim ' + \
+                                'nezavrsnim znakom na lijevoj strani, ' + \
                                 'kojoj je skup zapocinje jednak: ' + str( stavka.skup_zapocinje ) )
                     
                     # petlja za 'reduciraj'
