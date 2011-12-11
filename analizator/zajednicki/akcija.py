@@ -16,7 +16,7 @@ class Akcija:
         ako je tip 'reduciraj' - ocekuje se objekt Produkcije
         '''
         
-        self.tip_akcije = self.vrijednost = None
+        self.tip = self.vrijednost = None
         
         tocan_input = False
         

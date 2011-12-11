@@ -174,13 +174,16 @@ class SintaksniAnalizator():
             
             linija_analiziranog_koda = self._dohvati_liniju( redak_greske )
             
-            from functools import reduce
+            #from functools import reduce
             #ocekivani_string = reduce( lambda x, y: str(x) + ', ' + str(y),
             #                            ocekivani_znakovi )
             
             ispis = 'Greska u retku ' + str( redak_greske ) + ':\n'
             ispis += linija_analiziranog_koda + '\n'
             ispis += 'dobiven znak: ' + procitani_znak + '\n'
+            ispis += 'ocekivani uniformni znak(ovi):\t'
+            for znak in ocekivani_znakovi:
+                ispis += znak + '\t'
             #ispis += 'ocekivani znak(ovi): ' + ocekivani_string + '\n'
             ispis += '\n'
         
@@ -189,12 +192,15 @@ class SintaksniAnalizator():
             ocekivani_znakovi = list( self.tablica_akcija[
                                     self._stog.dohvati_vrh() ].keys() )
             
-            from functools import reduce
+            #from functools import reduce
             #ocekivani_string = reduce( lambda x, y: str(x) + ', ' + str(y),
             #                            ocekivani_znakovi )
             
             ispis = 'Sintaksna analiza je dosla do kraja\n'
             #spis += 'ocekivani znak(ovi): ' + ocekivani_string + '\n'
+            ispis += 'ocekivani uniformni znak(ovi):\t'
+            for znak in ocekivani_znakovi:
+                ispis += znak + '\t'
             ispis += '\n'
         
         self._tok_za_greske.write( ispis )
@@ -204,17 +210,19 @@ class SintaksniAnalizator():
         
         prvi = zadnji = self._index_parsiranja
         
-        while self._ulazni_niz[ prvi ].redak == redak:
+        while prvi >= 0 and self._ulazni_niz[ prvi - 1 ].redak == redak:
             prvi -= 1
         
-        while self._ulazni_niz[ zadnji ].redak == redak:
+        while zadnji < len( self._ulazni_niz ) and \
+            self._ulazni_niz[ zadnji + 1 ].redak == redak:
+            
             zadnji += 1
         
         linija = ''
         kazaljka = prvi
         while kazaljka <= zadnji:
             
-            linija += self._ulazni_niz[ kazaljka ].leksicka_jedinka
+            linija += self._ulazni_niz[ kazaljka ].leksicka_jedinka + ' '
             kazaljka += 1
         
         return linija
@@ -239,12 +247,13 @@ class SintaksniAnalizator():
                 # ne postoji generativno stablo
                 return False
         
+        sinkronizacijski_znak = self._ulazni_niz[ self._index_parsiranja ]
+        
         while True:
             
             stanje = self._stog.dohvati_vrh()
-            sinkronizacijski_znak = self._ulazni_niz[ self._index_parsiranja ]
             
-            akcija = self._dohvati_akciju( stanje, sinkronizacijski_znak )
+            akcija = self._dohvati_akciju( stanje, sinkronizacijski_znak.uniformni_znak )
             
             if akcija.tip != 'odbaci':
                 break
