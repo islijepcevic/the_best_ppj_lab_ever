@@ -116,19 +116,12 @@ class ENKA:
         okruzenje = okolina.copy()
         okruzenje.add( index_stanja )
         
-        if index_stanja == 4:
-            print( 'okolina', okolina )
-            print( 'posjeceno', posjecena )
-            print( 'okruzenje', okruzenje )
-        
         for novo_stanje in okolina:
-            
             if novo_stanje not in posjecena:
-                novo_okruzenje = self._epsilon_okruzenje_rekurzivno( novo_stanje, posjecena )
-                okruzenje |= novo_okruzenje
+                okruzenje.update( self._epsilon_okruzenje_rekurzivno( novo_stanje, posjecena ) )
         
         self._eokruzenja[ index_stanja ] = okruzenje
-        #print( self._eokruzenja )
+        
         return okruzenje
     
     
