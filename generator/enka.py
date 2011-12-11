@@ -44,7 +44,8 @@ class ENKA:
         '''stvaranje dka direktno iz enkas'''
         
         # treba vratiti frozenset indexa stanja/stavki
-        dka_pocetno = self._epsilon_okruzenje( self._pocetno_stanje_index )
+        #dka_pocetno = self._epsilon_okruzenje( self._pocetno_stanje_index )
+        dka_pocetno = self._epsilon_okruzenje_rekurzivno( self._pocetno_stanje_index, None )
         
         stanja_dka = [ dka_pocetno  ]
         
@@ -100,6 +101,37 @@ class ENKA:
         return DKA( self.stanja, stanja_dka, self.abeceda, prijelazi_dka )
     
     
+    def _epsilon_okruzenje_rekurzivno( self, index_stanja, posjecena ):
+        
+        if posjecena == None:
+            posjecena = set()
+        
+        posjecena.add( index_stanja )
+        
+        if self._eokruzenja[ index_stanja ] is not None:
+            return self._eokruzenja[ index_stanja ]
+        
+        okolina = self.prijelazi.dohvati( index_stanja, '$' )
+        
+        okruzenje = okolina.copy()
+        okruzenje.add( index_stanja )
+        
+        if index_stanja == 4:
+            print( 'okolina', okolina )
+            print( 'posjeceno', posjecena )
+            print( 'okruzenje', okruzenje )
+        
+        for novo_stanje in okolina:
+            
+            if novo_stanje not in posjecena:
+                novo_okruzenje = self._epsilon_okruzenje_rekurzivno( novo_stanje, posjecena )
+                okruzenje |= novo_okruzenje
+        
+        self._eokruzenja[ index_stanja ] = okruzenje
+        #print( self._eokruzenja )
+        return okruzenje
+    
+    
     def _epsilon_okruzenje( self, index_stanja ):
         '''postoji kod za ovo u prvom labosu, u analizatoru; mozda treba
         prilagoditi tipove i neke detalje, nisam gledao
@@ -146,7 +178,8 @@ class ENKA:
     def _eps_okruzenje_set (self, stanja_indexi):
         novaStanja = set()
         for stanje_index in stanja_indexi:
-            novaStanja = novaStanja.union (self._epsilon_okruzenje(stanje_index))
+            #novaStanja = novaStanja.union (self._epsilon_okruzenje(stanje_index))
+            novaStanja = novaStanja.union( self._epsilon_okruzenje_rekurzivno( stanje_index, None ) )
         
         return frozenset( novaStanja )
     
@@ -158,7 +191,8 @@ class ENKA:
         if len( stanja ) != 0:
             for st in stanja:
                 stanjaN.add (st)
-                stanjaN = stanjaN.union(self._epsilon_okruzenje(st))
+                #stanjaN = stanjaN.union(self._epsilon_okruzenje(st))
+                stanjaN = stanjaN.union( self._epsilon_okruzenje_rekurzivno( st, None ) )
         
         # vraca prazni set ako na su na pocetku stanja duljine 0
         return stanjaN
@@ -185,7 +219,7 @@ class ENKA:
             #print( 'return iz pzn:', index_stanja, niz )
             #print( self._epsilon_okruzenje( index_stanja ) )
             
-            return self._epsilon_okruzenje( index_stanja )
+            return self._epsilon_okruzenje_rekurzivno( index_stanja, None )
         
         znak = niz[-1]
         
