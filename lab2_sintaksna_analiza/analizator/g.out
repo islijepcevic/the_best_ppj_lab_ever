@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "SA.py", line 16, in <module>
+    automat = parser.parsiraj()
+  File "/media/data/DOCUMENTS/FER/5_SEMESTAR/PPJ/lab/src/analizator/parser_analizatora.py", line 26, in parsiraj
+    (akcija, novo_stanje, poc_stog) = self._ucitaj_tablice()
+  File "/media/data/DOCUMENTS/FER/5_SEMESTAR/PPJ/lab/src/analizator/parser_analizatora.py", line 40, in _ucitaj_tablice
+    akcija = eval( dat[0] )
+  File "<string>", line 1
+    [{'a': Akcija("reduciraj","Produkcija("<B>","['b']")"), 'b': Akcija("reduciraj","Produkcija("<B>","['b']")"), '<<!>>': Akcija("reduciraj","Produkcija("<B>","['b']")")}, {'a': Akcija("reduciraj","Produkcija("<B>","['a', '<B>']")"), 'b': Akcija("reduciraj","Produkcija("<B>","['a', '<B>']")"), '<<!>>': Akcija("reduciraj","Produkcija("<B>","['a', '<B>']")")}, {'a': Akcija("pomakni","4"), 'b': Akcija("pomakni","0"), '<<!>>': Akcija("reduciraj","Produkcija("<A>","[]")")}, {'<<!>>': Akcija("reduciraj","Produkcija("<A>","['<B>', '<A>']")")}, {'a': Akcija("pomakni","4"), 'b': Akcija("pomakni","0")}, {'a': Akcija("pomakni","4"), 'b': Akcija("pomakni","0"), '<<!>>': Akcija("reduciraj","Produkcija("<A>","[]")")}, {'<B>': Akcija("prihvati","None")}]
+                                                        ^
+SyntaxError: invalid syntax

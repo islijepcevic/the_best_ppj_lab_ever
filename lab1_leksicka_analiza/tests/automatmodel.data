@@ -1,0 +1,11 @@
+# ZA TESTIRANJE
+
+# definicije automata kao u Ulaznoj Datoteci
+# svaki automat mora imati redom linije koje pocinju sa D, S, L, P
+# definicije, stanja, lex jedinke, prijelazi
+# prazne linije se zanemaruju, kao i komentari koji pocinju s #
+
+D {}
+S []
+L []
+P {}
