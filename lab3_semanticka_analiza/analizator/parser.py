@@ -2,14 +2,16 @@
 
 import sys
 
-from analizator.nezarvsni_znak import NezavrsniZnak
+from analizator.nezavrsni_znak import NezavrsniZnak
 from analizator.leksicka_jedinka import LeksickaJedinka
 
 class Parser:
     
     def __init__( self, ulazni_tok, tok_za_greske = sys.stderr ):
         
-        self._ispisano_stablo = ulazni_tok.read().replace( '\r', '' ).split('\n')
+        self._ispisano_stablo = ulazni_tok.read() \
+                                        .replace( '\r', '' ) \
+                                        .split('\n')
         
         self._citani_redak = -1
         
@@ -40,6 +42,10 @@ class Parser:
         while True:
             self._citani_redak += 1
             
+            if self._zadnji_redak():
+                self._citani_redak -= 1
+                return NezavrsniZnak( ime_cvora, djeca )
+            
             dubina_sljedeci = self._dohvati_dubinu()
             
             if dubina_sljedeci == dubina_trenutni + 1:
@@ -48,7 +54,7 @@ class Parser:
                 
                 # je li zavrsni?
                 if len( element.split(' ') ) > 1:
-                    leksicka_jedinka = self._stvori_leksicku()
+                    leksicka_jedinka = self._stvori_leksicku( element )
                     djeca.append( leksicka_jedinka )
                 
                 # nezavrsni znak ili '$'
@@ -59,17 +65,29 @@ class Parser:
                         continue
                     
                     # slucaj nezavrsni znak
-                    nezavrsni_ispod = self._obradi( ime_cvora, dubina_sljedeci )
+                    nezavrsni_ispod = self._obradi( element, dubina_sljedeci )
                     djeca.append( nezavrsni_ispod )
                     
             else:
                 
                 if dubina_sljedeci > dubina_trenutni:
-                    ispis = 'greska pri parsiranju stabla:\t'
-                    ispis += 'preveliki skok medu granama'
+                    ispis = 'greska pri parsiranju stabla:  '
+                    ispis += 'preveliki skok medu granama\n'
+                    
+                    ispis += 'redak u ispisu generativnog stabla: '
+                    ispis += str( self._citani_redak ) + '\n'
+                    
+                    ispis += 'trenutni:: dubina: ' + str( dubina_trenutni ) + ' '
+                    ispis += 'cvor: ' + ime_cvora + '\n'
+                    ispis += 'sljedeci:: dubina: ' + str( dubina_sljedeci ) + ' '
+                    ispis += 'redak: ' + self._ispisano_stablo[ self._citani_redak ] + '\n'
+                    
+                    ispis += '\n'
+                    
                     self._tok_za_greske.write( ispis )
                     break
                 
+                self._citani_redak -= 1
                 return NezavrsniZnak( ime_cvora, djeca )
         
         return NezavrsniZnak( ime_cvora, djeca + ['ERROR'] )
@@ -97,7 +115,9 @@ class Parser:
     
     
     def _stvori_leksicku( self, element ):
-        '''stvara leksicku jedinku iz linije stabla sa ulaza'''
+        '''stvara leksicku jedinku iz linije stabla sa ulaza
+        element je linija u ispisu stabla bez pocetnih razmaka
+        '''
         
         dijelovi = element.split(' ')
         
@@ -110,3 +130,12 @@ class Parser:
                 jedinka += ' ' + dio
         
         return LeksickaJedinka( uniformni_znak, redak, jedinka )
+    
+    
+    def _zadnji_redak( self ):
+        '''vraca True ako je trenutno citani redak zadnji'''
+        
+        if self._ispisano_stablo[ self._citani_redak ] == '':
+            return True
+        
+        return False
