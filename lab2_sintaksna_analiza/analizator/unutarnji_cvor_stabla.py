@@ -12,6 +12,7 @@ class UnutarnjiCvorStabla():
     def __repr__( self ):
         return '(' + self.nezavrsni_znak + ')'
     
+    
     def __str__( self ):
         return '(' + self.nezavrsni_znak + ')'
     
