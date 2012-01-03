@@ -1,15 +1,19 @@
 '''parser generativnog stabla'''
 
+import sys
+
 from analizator.nezarvsni_znak import NezavrsniZnak
 from analizator.leksicka_jedinka import LeksickaJedinka
 
 class Parser:
     
-    def __init__( self, ulazni_tok ):
+    def __init__( self, ulazni_tok, tok_za_greske = sys.stderr ):
         
         self._ispisano_stablo = ulazni_tok.read().replace( '\r', '' ).split('\n')
         
         self._citani_redak = -1
+        
+        self._tok_za_greske = tok_za_greske
     
     
     def parsiraj( self ):
@@ -17,12 +21,17 @@ class Parser:
         
         self._citani_redak = 0
         
+        dubina = self._dohvati_dubinu()
+        ime = self._dohvati_element()
         
+        korijen = self._obradi( ime, dubina )
+        
+        return korijen
     
     
-    def _obradi( self, dubina_trenutni ):
+    def _obradi( self, ime_cvora, dubina_trenutni ):
         '''
-        vraca djecu obradivanog cvora
+        vraca obradivani nezavrsni znak
         index citanog retka se nalazi na retku trenutnog nezavrsnog znaka
         '''
         
@@ -42,16 +51,28 @@ class Parser:
                     leksicka_jedinka = self._stvori_leksicku()
                     djeca.append( leksicka_jedinka )
                 
-                # nije zavrsni znak -> cvor stabla
+                # nezavrsni znak ili '$'
                 else:
-                    #obradi cvor ( dubina_sljedeci )
+                    # slucaj epsilon produkcija
+                    if element == '$':
+                        djeca.append( LeksickaJedinka( element ) )
+                        continue
                     
-            #elif dubina_sljedeci > dubina: NEPOTREBNO
-                #obradi(sljedeci, dubina_sljedeci)
-            #else
-                #return djeca
+                    # slucaj nezavrsni znak
+                    nezavrsni_ispod = self._obradi( ime_cvora, dubina_sljedeci )
+                    djeca.append( nezavrsni_ispod )
+                    
+            else:
+                
+                if dubina_sljedeci > dubina_trenutni:
+                    ispis = 'greska pri parsiranju stabla:\t'
+                    ispis += 'preveliki skok medu granama'
+                    self._tok_za_greske.write( ispis )
+                    break
+                
+                return NezavrsniZnak( ime_cvora, djeca )
         
-        #return djeca
+        return NezavrsniZnak( ime_cvora, djeca + ['ERROR'] )
     
     
     def _dohvati_dubinu( self, odmak = 0 ):
@@ -59,7 +80,14 @@ class Parser:
         ako se zeli neka linija dalje, zadaje se odmak od trenutnog citanog 
         retka
         '''
-        pass
+        
+        brojac = 0
+        redak = self._ispisano_stablo[ self._citani_redak ]
+        
+        while redak[ brojac ] == ' ':
+            brojac += 1
+        
+        return brojac
     
     
     def _dohvati_element( self ):
