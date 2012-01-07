@@ -45,6 +45,11 @@ class JednostavniTip( TipPodatka ):
         return False
     
     
+    def je_li_l_izraz( self ):
+        '''vraca true ako tip moze biti l-izraz'''
+        return not self.je_li_void() and not self.je_li_const()
+    
+    
     def __eq__( self, tip ):
         
         if type( tip ) != JednostavniTip:
@@ -107,6 +112,11 @@ class TipFunkcija( TipPodatka ):
     def je_li_domena_void( self ):
         if type( self.domena ) == JednostavniTip and self.domena.je_li_void():
             return True
+        return False
+    
+    
+    def je_li_l_izraz( self ):
+        '''vraca true ako tip moze biti l-izraz'''
         return False
     
     
@@ -176,8 +186,14 @@ class TipNiz( TipPodatka ):
     
     
     def je_li_svodivo( self, tip ):
+        '''moze li se self.tip svesti na tip?'''
         # TODO
         return True
+    
+    
+    def je_li_l_izraz( self ):
+        '''vraca true ako tip moze biti l-izraz'''
+        return not self.je_li_const()
     
     
     def __eq__( self, tip ):
@@ -195,3 +211,7 @@ class TipNiz( TipPodatka ):
     def __hash__( self ):
         
         return hash( self.tip ) + 5
+    
+    
+    def __repr__( self ):
+        return 'niz( ' + repr( self.tip ) + ' )'

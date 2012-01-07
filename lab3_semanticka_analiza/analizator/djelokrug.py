@@ -2,7 +2,7 @@
 
 class Djelokrug:
     
-    def __init__( self, nad_djelokrug ):
+    def __init__( self, nad_djelokrug = None ):
         
         self.nad_djelokrug = nad_djelokrug
         
@@ -39,11 +39,37 @@ class Djelokrug:
         return False
     
     
+    def je_li_deklarirano( self, ime ):
+        '''provjerava postoji li ime deklarirano, pocevsi od lokalnog djelokruga
+        i provjeravati sve do globalnog'''
+        
+        if ime in self.tablica:
+            return True
+        
+        if self.nad_djelokrug is None:
+            return False
+        
+        return self.nad_djelokrug.je_li_deklarirano( ime )
+    
+    
+    def dohvati_tip( self, ime ):
+        '''dohvaca tip iz lokalnog ili sireg djelokruga
+        
+        pretpostavlja se da je provjereno da je ime deklarirano
+            pomocu funkcije self.je_li_deklarirano()
+        '''
+        if self.nad_djelokrug is not None:
+            return self.tablica.get( ime,
+                                    self.nad_djelokrug.dohvati_tip( ime ) )
+        
+        return self.tablica.get( ime, False )
+    
+    
     def __repr__( self ):
         
         ispis = '{\n'
         for ime in self.tablica.keys():
-            ispis += ime + ': ' + self.tablica[ime] + '\n'
+            ispis += ime + ': ' + repr( self.tablica[ime] ) + '\n'
         ispis += '}\n'
         
         return ispis

@@ -1,5 +1,7 @@
 '''glavni kod i klasa semantickog analizatora'''
 
+from curses import ascii
+
 from analizator.nezavrsni_znak import NezavrsniZnak
 from analizator.leksicka_jedinka import LeksickaJedinka
 
@@ -26,7 +28,7 @@ class SemantickiAnalizator:
     def analiziraj( self ):
         
         # inicijaliziraj globalni djelokrug
-        globalni_djelokrug = Djelokrug( None )
+        globalni_djelokrug = Djelokrug()
         
         # ako je korijen pocetni nezavrsni:
             # pozovi self.prijevodna_jedinica()
@@ -68,6 +70,11 @@ class SemantickiAnalizator:
         return
     
     
+    def pisi( self, predmet ):
+        
+        self.tok_za_greske.write( repr( predmet ) + '\n' )
+    
+    
     '''
     povratna vrijednost svih funkcija rekurzivnog spusta:
         True ako nema greske
@@ -82,6 +89,242 @@ class SemantickiAnalizator:
     ############################################################################
     ############################### IZRAZI #####################################
     ############################################################################
+    
+    
+    def primarni_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        prva_jedinka = cvor.djeca[0]
+        
+        if prva_jedinka.uniformni_znak == 'IDN':
+            
+            ime = prva_jedinka.leksicka_jedinka
+            
+            if not djelokrug.je_li_deklarirano( ime ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            tip = djelokrug.dohvati_tip( ime )
+            l_izraz = tip.je_li_l_izraz()
+        
+        elif prva_jedinka.uniformni_znak == 'BROJ':
+            
+            vrijednost = int( prva_jedinka.leksicka_jedinka )
+            
+            if vrijednost < (- 2 ** 31 ) or vrijednost > ( 2 ** 31 - 1 ):
+                self.tok_za_greske.write( 'sto pise: ' + \
+                                            prva_jedinka.leksicka_jedinka + \
+                                            '\n' )
+                self.tok_za_greske.write( 'sto se dobilo: ' + \
+                                            str( vrijednost ) + '\n' )
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            l_izraz = False
+        
+        elif prva_jedinka.uniformni_znak == 'ZNAK':
+            
+            znak = prva_jedinka.leksicka_jedinka
+            
+            if len( znak ) > 3:
+                prefiksirani = znak[2]
+                
+                dozvoljeni = { 't', 'n', '0', '\'', '"', '\\' }
+                
+                if prefiksirani not in dozvoljeni:
+                    self.ispisi_produkciju( cvor )
+                    return False
+            
+            if not ascii.isprint( znak[1] ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            tip = JednostavniTip( 'char' )
+            l_izraz = False
+        
+        elif prva_jedinka.uniformni_znak == 'NIZ_ZNAKOVA':
+            
+            niz = prva_jedinka.leksicka_jedinka
+            
+            prefiksirano = False
+            
+            specijalni = { 't': '\t', 'n': '\n', '\'': '\'', '"': '\"', \
+                            '\\': '\\' }
+            
+            for znak in niz[1:-1]:
+                
+                if prefiksirano:
+                    prefiksirano = False
+                    
+                    prefiksirani_znak = specijalni.get( znak )
+                    
+                    if prefiksirani_znak is None:
+                        self.ispisi_produkciju( cvor )
+                        return False
+                
+                else:
+                    
+                    if znak == '\\':
+                        prefiksirano = True
+                    
+                    else:
+                        if not ascii.isprint( znak ):
+                            self.ispisi_produkciju( cvor )
+                            return False
+            
+            if prefiksirano:
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            tip = TipNiz( JednostavniTip( 'char', True ) )
+            l_izraz = False
+        
+        else:   # (<izraz>)
+            
+            svojstva_izraz = {}
+            if not self.izraz( cvor.djeca[1], djelokrug, svojstva_izraz ):
+                return False
+            
+            tip = svojstva_izraz['tip']
+            l_izraz = svojstva_izraz['l-izraz']
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def postfiks_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        self.pisi( 'postfiks' )
+        # primarni_izraz
+        if len( cvor.djeca ) == 1:
+            
+            svojstva_primarni = {}
+            if not self.primarni_izraz( cvor.djeca[0], djelokrug,
+                                        svojstva_primarni ):
+                return False
+            
+            tip = svojstva_primarni['tip']
+            l_izraz = svojstva_primarni['l-izraz']
+        
+        else:
+            
+            svojstva_postfiks = {}
+            if not self.postfiks_izraz( cvor.djeca[0], djelokrug,
+                                        svojstva_postfiks ):
+                return False
+        
+            # OP_INC / OP_DEC
+            if len( cvor.djeca ) == 2:
+                
+                tip = JednostavniTip( 'int' )
+                
+                if not svojstva_postfiks['l-izraz'] or \
+                    not svojstva_postfiks['tip'].je_li_svodivo( tip ):
+                    
+                    self.ispisi_produkciju( cvor )
+                    return False
+                
+                l_izraz = False
+            
+            # funkcija s void domenom
+            elif len( cvor.djeca ) == 3:
+                
+                if type( svojstva_postfiks['tip'] ) != TipFunkcija or \
+                    not svojstva_postfiks['tip'].domena.je_li_void():
+                    
+                    self.ispisi_produkciju( cvor )
+                    return False
+                
+                tip = svojstva_postfiks['tip'].kodomena
+                l_izraz = False
+            
+            # funkcija s listom parametara
+            elif cvor.djeca[1].uniformni_znak == 'L_ZAGRADA':
+                
+                svojstva_argumenti = {}
+                if not self.lista_argumenata( cvor.djeca[2], djelokrug,
+                                            svojstva_argumenti ):
+                    return False
+                
+                if type( svojstva_postfiks['tip'] ) != TipFunkcija or \
+                    svojstva_postfiks['tip'].domena.je_li_void():
+                    
+                    self.ispisi_produkciju( cvor )
+                    return False
+                
+                tipovi_parametara = svojstva_postfiks['tip'].domena
+                tipovi_argumenata = svojstva_argumenti['tipovi']
+                
+                if len( tipovi_parametara ) != len( tipovi_argumenata ):
+                    self.ispisi_produkciju( cvor )
+                    return False
+                
+                for tip_parametra, tip_argumenta in zip( tipovi_parametara,
+                                                        tipovi_argumenata):
+                    
+                    if not tip_argumenta.je_li_svodivo( tip_parametra ):
+                        self.ispisi_produkciju( cvor )
+                        return False
+                
+                tip = svojstva_postfiks['tip'].kodomena
+                l_izraz = False
+            
+            # indeksiranje nizova
+            else:
+                
+                if type( svojstva_postfiks['tip'] ) != TipNiz:
+                    self.ispisi_produkciju( cvor )
+                    return False
+                
+                svojstva_izraz = {}
+                if not self.izraz( cvor.djeca[2], djelokrug, svojstva_izraz ):
+                    return False
+                
+                if not svojstva_izraz.je_li_svodivo( JednostavniTip( 'int' ) ):
+                    self.ispisi_produkciju( cvor )
+                    return False
+                
+                # dohvati jednostavni tip niza
+                tip = svojstva_postfiks['tip'].tip
+                l_izraz = not tip.je_li_const
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def lista_argumenata( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tipovi = []
+        
+        cvor_pridruzivanje = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_pridruzivanje = cvor.djeca[2]
+            
+            svojstva_argumenti = {}
+            if not self.lista_argumenata( cvor.djeca[0], djelokrug,
+                                        svojstva_argumenti ):
+                return False
+            
+            tipovi = svojstva_argumenti['tipovi']
+        
+        svojstva_pridruzivanje = {}
+        if not self.izraz_pridruzivanja( cvor_pridruzivanje, djelokrug,
+                                        svojstva_pridruzivanje ):
+            return False
+        
+        tipovi.append( svojstva_pridruzivanje['tip'] )
+        
+        izvedena_svojstva['tipovi'] = tipovi
+        return True
     
     
     def ime_tipa( self, cvor, izvedena_svojstva = {} ):
@@ -128,8 +371,80 @@ class SemantickiAnalizator:
         return True
     
     
-    def izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+    def log_ili_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
         pass
+    
+    
+    def izraz_pridruzivanja( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        if len( cvor.djeca ) == 1:
+            
+            svojstva_log_ili = {}
+            if not self.log_ili_izraz( cvor.djeca[0], djelokrug,
+                                        svojstva_log_ili ):
+                return False
+            
+            tip = svojstva_log_ili['tip']
+            l_izraz = svojstva_log_ili['l-izraz']
+        
+        else:
+            
+            svojstva_postfiks = {}
+            if not self.postfiks_izraz( cvor.djeca[0], djelokrug,
+                                        svojstva_postfiks ):
+                return False
+            
+            if not svojstva_postfiks['l-izraz']:
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            tip = svojstva_postfiks['tip']
+            
+            svojstva_pridruzivanje = {}
+            if not self.izraz_pridruzivanja( cvor.djeca[2], djelokrug,
+                                            svojstva_pridruzivanje ):
+                return False
+            
+            if not tip.je_li_svodivo( svojstva_pridruzivanje['tip'] ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = 0
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        cvor_pridruzivanje = cvor.djeca[0]
+        l_izraz = None
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_pridruzivanje = cvor.djeca[2]
+            
+            l_izraz = False
+            
+            svojstva_izraz = {}
+            if not self.izraz( cvor.djeca[0], djelokrug, svojstva_izraz ):
+                return False
+        
+        svojstva_pridruzivanje = {}
+        if not self.izraz_pridruzivanja( cvor_pridruzivanje, djelokrug,
+                                        svojstva_pridruzivanje ):
+            return False
+        
+        if l_izraz is None:
+            l_izraz = svojstva_pridruzivanje['l-izraz']
+        
+        izvedena_svojstva['tip'] = svojstva_pridruzivanje['tip']
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
     
     
     ############################################################################
