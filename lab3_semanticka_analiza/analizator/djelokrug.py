@@ -15,13 +15,35 @@ class Djelokrug:
     
     
     def provjeri_funkciju( self, ime, tip ):
-        '''ako postoji deklaracija ovog imena u ovom (globalnom) djelokrugu onda
-        je pripadni tip te deklaracije tip (ovaj parametar)
+        '''ako postoji deklaracija ovog imena u ovom djelokrugu onda
+        je pripadni tip te deklaracije (ovaj parametar) tip
         
         vraca true ako u OVOM djelokrugu postoji deklarirana FUNKCIJA s ovim
         imenom i ISTIM tipom (za tip funkcija postoji __eq__())
+        
+        takoder vraca true ako u OVOM djelokrugu ne postoji deklaracija ovog
+        imena
         '''
-        # TODO
-        return True
+        
+        if not ime in self.tablica.keys():
+            return True
+        
+        return self.tablica[ ime ] == tip
     
     
+    def postoji_li_ime_lokalno( self, ime ):
+        '''provjerava je li ime deklarirano u lokalnom (trenutnom) djelokrugu'''
+        
+        if ime in self.tablica.keys():
+            return True
+        return False
+    
+    
+    def __repr__( self ):
+        
+        ispis = '{\n'
+        for ime in self.tablica.keys():
+            ispis += ime + ': ' + self.tablica[ime] + '\n'
+        ispis += '}\n'
+        
+        return ispis

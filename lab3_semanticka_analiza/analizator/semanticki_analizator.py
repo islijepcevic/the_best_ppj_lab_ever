@@ -18,7 +18,7 @@ class SemantickiAnalizator:
         # popis funkcija s definicijom, k: ime, v: tip
         self.definirane_funkcije = {}
         
-        # za provjere nakon obilaska stabla, k: ime, v: tip
+        # za provjere nakon obilaska stabla, k: ime, v: set( tip )
         self.funkcije_bez_definicije = {}
         self.mainPostoji = False
     
@@ -303,10 +303,12 @@ class SemantickiAnalizator:
             return False
         
         # makni funkciju iz popisa nedefiniranih funkcija
-        if ime in self.funkcije_bez_definicije.keys() and \
-            tip_funkcije == self.funkcije_bez_definicije[ ime ]:
+        if ime in self.funkcije_bez_definicije.keys():
             
-            del self.funkcije_bez_definicije[ ime ]
+            self.funkcije_bez_definicije[ ime ].discard( tip_funkcije )
+            
+            if len( self.funkcije_bez_definicije[ ime ] ) == 0:
+                del self.funkcije_bez_definicije[ ime ]
         
         #zabiljezi definiciju i deklaraciju
         self.definirane_funkcije[ ime ] = tip_funkcije
@@ -407,7 +409,7 @@ class SemantickiAnalizator:
                                         svojstva_tip['tip'] )
     
     
-    def lista_init_deklaratora( cvor, djelokrug, ntip ):
+    def lista_init_deklaratora( self, cvor, djelokrug, ntip ):
         '''ntip je nasljedno svojstvo'''
         
         cvor_deklarator = cvor.djeca[0]
@@ -423,7 +425,7 @@ class SemantickiAnalizator:
         return self.init_deklarator( cvor_deklarator, djelokrug, ntip )
     
     
-    def init_deklarator( cvor, djelokrug, ntip ):
+    def init_deklarator( self, cvor, djelokrug, ntip ):
         '''ntip je nasljedno svojstvo'''
         
         svojstva_izravni = {}
@@ -443,15 +445,91 @@ class SemantickiAnalizator:
                                         svojstva_inicijalizator ):
                 return False
             
-            # provjere tipova inicijalizatora
+            # TODO provjere tipova inicijalizatora
         
         return True
     
     
-    def izravni_deklarator( cvor, djelokrug, ntip, izvedena_svojstva = {} ):
+    def izravni_deklarator( self, cvor, djelokrug, ntip,
+                            izvedena_svojstva = {} ):
         '''ntip je nasljedno svojstvo'''
-        pass
+        
+        ime = cvor.djeca[0].leksicka_jedinka
+        
+        # brojevni tip
+        if len( cvor.djeca ) == 1:
+            
+            if ntip.je_li_void():
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            if djelokrug.postoji_li_ime_lokalno( ime ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            djelokrug.dodaj( ime, ntip )
+            izvedena_svojstva['tip'] = ntip
+            return True
+        
+        # niz
+        elif cvor.djeca[1].uniformni_znak == 'L_UGL_ZAGRADA':
+            
+            if ntip.je_li_void():
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            if djelokrug.postoji_li_ime_lokalno( ime ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            broj_elemenata = int( cvor.djeca[2].leksicka_jedinka )
+            
+            if broj_elemenata <= 0 or broj_elemenata > 1024:
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            tip = TipNiz( ntip )
+            
+            djelokrug.dodaj( ime, tip )
+            izvedena_svojstva['tip'] = tip
+            izvedena_svojstva['br-elem'] = broj_elemenata
+            return True
+        
+        # funkcija
+        
+        domena = JednostavniTip( 'void' )
+        
+        if type( cvor.djeca[2] ) == NezavrsniZnak:
+            
+            svojstva_parametri = {}
+            if not self.lista_parametara( cvor.djeca[2], svojstva_parametri ):
+                return False
+            
+            domena = svojstva_parametri['tipovi']
+        
+        tip_funkcije = TipFunkcija( domena, ntip )
+        
+        # ako ima deklaracija ovog imena, je li to funkcija istog tipa?
+        if not djelokrug.provjeri_funkciju( ime, tip_funkcije ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        # ako nema deklaracija, dodaj ju
+        if not djelokrug.postoji_li_ime_lokalno( ime ):
+            djelokrug.dodaj( ime, tip_funkcije )
+        
+        # provjere za definicije funkcija: ako ne postoji definicija, zabiljezi
+        if ( ime not in self.definirane_funkcije.keys() ) or \
+            ( tip_funkcije != self.definirane_funkcije[ ime ] ):
+            
+            if ime not in self.funkcije_bez_definicije.keys():
+                self.funkcije_bez_definicije[ ime ] = { tip_funkcije }
+            else:
+                self.funkcije_bez_definicije[ ime ].add( tip )
+        
+        izvedena_svojstva['tip'] = tip_funkcije
+        return True
     
     
-    def inicijalizator( cvor, djelokrug, izvedena_svojstva = {} ):
+    def inicijalizator( self, cvor, djelokrug, izvedena_svojstva = {} ):
         pass

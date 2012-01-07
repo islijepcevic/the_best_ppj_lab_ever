@@ -64,9 +64,24 @@ class JednostavniTip( TipPodatka ):
         return not self.__eq__( tip )
     
     
+    def __hash__( self ):
+        
+        totalni_hash = 0
+        
+        if self.tip == 'char':
+            totalni_hash = 1
+        elif self.tip == 'int':
+            totalni_hash = 2
+        
+        if self.je_li_const():
+            totalni_hash += 2
+        
+        return totalni_hash
+    
+    
     def __repr__( self ):
         ispis = self.tip
-        if self.const_kvalificiran:
+        if self.je_li_const:
             ispis = 'const(' + ispis + ')'
         
         return ispis
@@ -127,6 +142,22 @@ class TipFunkcija( TipPodatka ):
         return not self.__eq__( tip )
     
     
+    def __hash__( self ):
+        
+        totalni_hash = hash( self.kodomena )
+        
+        prim = 13
+        i = 0
+        
+        if type( self.domena ) == list:
+            
+            for tip in self.domena:
+                i += 1
+                totalni_hash += i * prim + hash( tip )
+        
+        return totalni_hash
+    
+    
     def __repr__( self ):
         return repr( self.domena ) + ' -> ' + repr( self.kodomena )
 
@@ -159,3 +190,8 @@ class TipNiz( TipPodatka ):
     
     def __ne__( self, tip ):
         return not self.__eq__( tip )
+    
+    
+    def __hash__( self ):
+        
+        return hash( self.tip ) + 5
