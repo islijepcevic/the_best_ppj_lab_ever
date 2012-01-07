@@ -1,5 +1,13 @@
 import sys
 
+
+def logicka_ekvivalencija( a, b ):
+    
+    if ( a and b ) or ( not a and not b ):
+        return True
+    return False
+
+
 class TipPodatka:
     
     def __init__( self, const_kvalificiran = False ):
@@ -37,6 +45,25 @@ class JednostavniTip( TipPodatka ):
         return False
     
     
+    def __eq__( self, tip ):
+        
+        if type( tip ) != JednostavniTip:
+            return False
+        
+        if self.je_li_void and tip.je_li_void:
+            return True
+        
+        if self.tip == tip.tip:
+            return logicka_ekvivalencija( self.const_kvalificiran,
+                                        tip.const_kvalificiran )
+        
+        return False
+    
+    
+    def __ne__( self, tip ):
+        return not self.__eq__( tip )
+    
+    
     def __repr__( self ):
         ispis = self.tip
         if self.const_kvalificiran:
@@ -57,7 +84,7 @@ class TipFunkcija( TipPodatka ):
     
     
     def je_li_svodivo( self, funkcija ):
-        
+        # mozda nepotrebno
         # TODO
         return True
     
@@ -70,8 +97,34 @@ class TipFunkcija( TipPodatka ):
     
     def __eq__( self, tip ):
         '''pazit na domenu (void ili lista parametara)'''
-        # TODO
+        
+        if type( tip ) != TipFunkcija:
+            return False
+        
+        if self.kodomena != tip.kodomena:
+            return False
+        
+        if type( self.domena ) != type( tip.domena ):
+            return False
+        
+        # void se ne treba usporedivati zasebno jer ako je domena void, onda je
+        # dovoljno znati da su obje domene istog tipa (inace su lista tipova)
+        if type( self.domena ) != list:
+            return True
+        
+        # sada je domena zasigurno lista
+        if len( self.domena ) != len( tip.domena ):
+            return False
+        
+        for svoj, tudi in zip( self.domena, tip.domena ):
+            if svoj != tudi:
+                return False
+        
         return True
+    
+    
+    def __ne__( self, tip ):
+        return not self.__eq__( tip )
     
     
     def __repr__( self ):
@@ -89,3 +142,20 @@ class TipNiz( TipPodatka ):
         TipPodatka.__init__( self, tip.const_kvalificiran )
         
         self.tip = tip
+    
+    
+    def je_li_svodivo( self, tip ):
+        # TODO
+        return True
+    
+    
+    def __eq__( self, tip ):
+        
+        if type( tip ) != TipNiz:
+            return False
+        
+        return self.tip == tip.tip
+    
+    
+    def __ne__( self, tip ):
+        return not self.__eq__( tip )

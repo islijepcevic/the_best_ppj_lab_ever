@@ -384,8 +384,74 @@ class SemantickiAnalizator:
     
     
     def lista_deklaracija( self, cvor, djelokrug ):
-        pass
+        
+        cvor_deklaracija = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_deklaracija = cvor.djeca[1]
+            
+            if not self.lista_deklaracija( cvor.djeca[0], djelokrug ):
+                return False
+        
+        return self.deklaracija( cvor_deklaracija, djelokrug )
     
     
     def deklaracija( self, cvor, djelokrug ):
+        
+        svojstva_tip = {}
+        if not self.ime_tipa( cvor.djeca[0], svojstva_tip ):
+            return False
+        
+        return self.lista_init_deklaratora( cvor.djeca[1], djelokrug,
+                                        svojstva_tip['tip'] )
+    
+    
+    def lista_init_deklaratora( cvor, djelokrug, ntip ):
+        '''ntip je nasljedno svojstvo'''
+        
+        cvor_deklarator = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_deklarator = cvor.djeca[2]
+            
+            if not self.lista_init_deklaratora( cvor.djeca[0], djelokrug,
+                                                ntip ):
+                return False
+        
+        return self.init_deklarator( cvor_deklarator, djelokrug, ntip )
+    
+    
+    def init_deklarator( cvor, djelokrug, ntip ):
+        '''ntip je nasljedno svojstvo'''
+        
+        svojstva_izravni = {}
+        if not self.izravni_deklarator( cvor.djeca[0], djelokrug, ntip,
+                                    svojstva_izravni ):
+            return False
+        
+        if len( cvor.djeca ) == 1:
+            if svojstva_izravni['tip'].je_li_const():
+                return False
+        
+        # slucaj sa inicijalizatorom
+        else:
+            
+            svojstva_inicijalizator = {}
+            if not self.inicijalizator( cvor.djeca[2], djelokrug,
+                                        svojstva_inicijalizator ):
+                return False
+            
+            # provjere tipova inicijalizatora
+        
+        return True
+    
+    
+    def izravni_deklarator( cvor, djelokrug, ntip, izvedena_svojstva = {} ):
+        '''ntip je nasljedno svojstvo'''
+        pass
+    
+    
+    def inicijalizator( cvor, djelokrug, izvedena_svojstva = {} ):
         pass

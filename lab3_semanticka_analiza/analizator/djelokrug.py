@@ -16,7 +16,7 @@ class Djelokrug:
     
     def provjeri_funkciju( self, ime, tip ):
         '''ako postoji deklaracija ovog imena u ovom (globalnom) djelokrugu onda
-        je pripadni tip te deklaracije tip
+        je pripadni tip te deklaracije tip (ovaj parametar)
         
         vraca true ako u OVOM djelokrugu postoji deklarirana FUNKCIJA s ovim
         imenom i ISTIM tipom (za tip funkcija postoji __eq__())
