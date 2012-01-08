@@ -286,7 +286,8 @@ class SemantickiAnalizator:
                 if not self.izraz( cvor.djeca[2], djelokrug, svojstva_izraz ):
                     return False
                 
-                if not svojstva_izraz.je_li_svodivo( JednostavniTip( 'int' ) ):
+                if not svojstva_izraz['tip'].je_li_svodivo(
+                                                    JednostavniTip( 'int' ) ):
                     self.ispisi_produkciju( cvor )
                     return False
                 
@@ -757,7 +758,7 @@ class SemantickiAnalizator:
             cvor_bin_ili = cvor.djeca[2]
             
             svojstva_i = {}
-            if not self.log_ili_izraz( cvor.djeca[0], djelokrug, svojstva_i ):
+            if not self.log_i_izraz( cvor.djeca[0], djelokrug, svojstva_i ):
                 return False
             
             tip = JednostavniTip( 'int' )
