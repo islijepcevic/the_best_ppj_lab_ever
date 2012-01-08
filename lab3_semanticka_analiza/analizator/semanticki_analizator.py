@@ -253,7 +253,7 @@ class SemantickiAnalizator:
                     return False
                 
                 if type( svojstva_postfiks['tip'] ) != TipFunkcija or \
-                    svojstva_postfiks['tip'].domena.je_li_void():
+                    not type( svojstva_postfiks['tip'].domena ) == list:
                     
                     self.ispisi_produkciju( cvor )
                     return False
@@ -391,7 +391,7 @@ class SemantickiAnalizator:
         else:
             
             svojstva_ime_tipa = {}
-            if not self.ime_tipa( cvor.djeca[1], djelokrug, svojstva_ime_tipa ):
+            if not self.ime_tipa( cvor.djeca[1], svojstva_ime_tipa ):
                 return False
             
             svojstva_cast = {}
@@ -430,7 +430,7 @@ class SemantickiAnalizator:
                 self.ispisi_produkciju( cvor )
                 return False
             
-            tip = JednostavniTip( svojstva_spec_tipa['tip'], True )
+            tip = JednostavniTip( svojstva_spec_tipa['tip'].tip, True )
         
         izvedena_svojstva['tip'] = tip
         return True
@@ -685,7 +685,7 @@ class SemantickiAnalizator:
             l_izraz = False
         
         svojstva_bi = {}
-        if not self.bin_i_izraz( cvor_log_i, djelokrug, svojstva_bi ):
+        if not self.bin_i_izraz( cvor_bin_i, djelokrug, svojstva_bi ):
             return False
         
         if l_izraz is None:
@@ -949,7 +949,8 @@ class SemantickiAnalizator:
         cvor_znak = cvor.djeca[0].nezavrsni_znak
         
         if cvor_znak == '<slozena_naredba>':
-            return self.slozena_naredba( cvor.djeca[0], djelokrug, petlja )
+            return self.slozena_naredba( cvor.djeca[0], djelokrug,
+                                        petlja = petlja )
             
         elif cvor_znak == '<izraz_naredba>':
             return self.izraz_naredba( cvor.djeca[0], djelokrug )
@@ -1317,7 +1318,40 @@ class SemantickiAnalizator:
                                         svojstva_inicijalizator ):
                 return False
             
-            # TODO provjere tipova inicijalizatora
+            if type( svojstva_izravni['tip'] ) == JednostavniTip:
+                
+                if not 'tip' in svojstva_inicijalizator.keys() or \
+                    not svojstva_inicijalizator['tip'].je_li_svodivo(
+                        svojstva_izravni['tip'] ):
+                    
+                    self.ispisi_produkciju( cvor )
+                    return False
+                
+            elif type( svojstva_izravni['tip'] ) == TipNiz:
+                
+                if not 'tipovi' in svojstva_inicijalizator.keys() or \
+                    not 'br-elem' in svojstva_inicijalizator.keys():
+                    
+                    self.ispisi_produkciju( cvor )
+                    return False
+                
+                if svojstva_inicijalizator['br-elem'] > \
+                    svojstva_izravni['br-elem']:
+                    
+                    self.ispisi_produkciju( cvor )
+                    return False
+                
+                tip_niza = svojstva_izravni['tip'].tip
+                
+                for trenutni_tip in svojstva_inicijalizator['tipovi']:
+                    
+                    if not trenutni_tip.je_li_svodivo( tip_niza ):
+                        self.ispisi_produkciju( cvor )
+                        return False
+            
+            else:
+                self.ispisi_produkciju( cvor )
+                return false
         
         return True
     
@@ -1397,7 +1431,7 @@ class SemantickiAnalizator:
             if ime not in self.funkcije_bez_definicije.keys():
                 self.funkcije_bez_definicije[ ime ] = { tip_funkcije }
             else:
-                self.funkcije_bez_definicije[ ime ].add( tip )
+                self.funkcije_bez_definicije[ ime ].add( tip_funkcije )
         
         izvedena_svojstva['tip'] = tip_funkcije
         return True
@@ -1413,8 +1447,6 @@ class SemantickiAnalizator:
                 return False
             
             listovi = self.dohvati_listove( cvor.djeca[0] )
-            
-            self.pisi( listovi )
             
             if len( listovi ) == 1 and \
                 listovi[0].uniformni_znak == 'NIZ_ZNAKOVA':
@@ -1489,7 +1521,7 @@ class SemantickiAnalizator:
                 listovi.append( dijete )
             
             else:
-                listovi.append( self.dohvati_listove( dijete ) )
+                listovi += self.dohvati_listove( dijete )
         
         return listovi
     

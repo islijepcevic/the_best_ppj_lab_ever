@@ -13,8 +13,10 @@ class LeksickaJedinka:
     
     
     def __str__( self ):
-        return '(' + self.uniformni_znak + ', ' + self.leksicka_jedinka + ')'
+        return '(' + self.uniformni_znak + ', ' + self.redak + ', ' + \
+                    self.leksicka_jedinka + ')'
     
     
     def __repr__( self ):
-        return '(' + self.uniformni_znak + ', ' + self.leksicka_jedinka + ')'
+        return '(' + self.uniformni_znak + ', ' + self.redak + ', ' + \
+                    self.leksicka_jedinka + ')'
