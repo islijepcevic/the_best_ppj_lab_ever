@@ -39,6 +39,11 @@ class JednostavniTip( TipPodatka ):
         return True
     
     
+    def je_li_svodivo_eksplicitno( self, tip ):
+        # TODO
+        return True
+    
+    
     def je_li_void( self ):
         if self.tip == 'void':
             return True
@@ -105,6 +110,11 @@ class TipFunkcija( TipPodatka ):
     
     def je_li_svodivo( self, funkcija ):
         # mozda nepotrebno
+        # TODO
+        return True
+    
+    
+    def je_li_svodivo_eksplicitno( self, tip ):
         # TODO
         return True
     
@@ -187,6 +197,11 @@ class TipNiz( TipPodatka ):
     
     def je_li_svodivo( self, tip ):
         '''moze li se self.tip svesti na tip?'''
+        # TODO
+        return True
+    
+    
+    def je_li_svodivo_eksplicitno( self, tip ):
         # TODO
         return True
     

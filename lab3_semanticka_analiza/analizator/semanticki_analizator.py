@@ -327,6 +327,88 @@ class SemantickiAnalizator:
         return True
     
     
+    def unarni_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = JednostavniTip( 'int' )
+        l_izraz = False
+        
+        if len( cvor.djeca ) == 1:
+            
+            svojstva_postfiks = {}
+            if not self.postfiks_izraz( cvor.djeca[0], djelokrug,
+                                        svojstva_postfiks ):
+                return False
+            
+            tip = svojstva_postfiks['tip']
+            l_izraz = svojstva_postfiks['l-izraz']
+        
+        elif cvor.djeca[1].nezavrsni_znak == '<unarni_izraz>':
+            
+            svojstva_unarni = {}
+            if not self.unarni_izraz( cvor.djeca[1], djelokrug,
+                                    svojstva_unarni ):
+                return False
+            
+            if not svojstva_unarni['l-izraz'] or \
+                not svojstva_unarni['tip'].je_li_svodivo( tip ):
+                
+                self.ispisi_produkciju( cvor )
+                return False
+        
+        else:
+            
+            # u ovom slucaju cvor.djeca[0] je nezavrsni znak <unarni_operator>
+            # njega ne treba provjeravati u semantickoj analizi
+            
+            svojstva_cast = {}
+            if not self.cast_izraz( cvor.djeca[1], djelokrug, svojstva_cast ):
+                return False
+            
+            if not svojstva_cast['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def cast_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        if len( cvor.djeca ) == 1:
+            
+            svojstva_unarni = {}
+            if not self.unarni_izraz( cvor.djeca[0], djelokrug,
+                                    svojstva_unarni ):
+                return False
+            
+            tip = svojstva_unarni['tip']
+            l_izraz = svojstva_unarni['l-izraz']
+        
+        else:
+            
+            svojstva_ime_tipa = {}
+            if not self.ime_tipa( cvor.djeca[1], djelokrug, svojstva_ime_tipa ):
+                return False
+            
+            svojstva_cast = {}
+            if not self.cast_izraz( cvor.djeca[3], djelokrug, svojstva_cast ):
+                return False
+            
+            if not svojstva_cast['tip'].je_li_svodivo_eksplicitno( 
+                svojstva_ime_tipa['tip'] ):
+                
+                self.ispisi_produkciju( cvor )
+                return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
     def ime_tipa( self, cvor, izvedena_svojstva = {} ):
         
         svojstva_spec_tipa = {}
@@ -371,8 +453,372 @@ class SemantickiAnalizator:
         return True
     
     
+    def multiplikativni_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        cvor_cast = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_cast = cvor.djeca[2]
+            
+            svojstva_multiplikativni = {}
+            if not self.multiplikativni_izraz( cvor.djeca[0], djelokrug,
+                                                svojstva_multiplikativni ):
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            
+            if not svojstva_multiplikativni['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = False
+        
+        svojstva_cast = {}
+        if not self.cast_izraz( cvor_cast, djelokrug, svojstva_cast ):
+            return False
+        
+        if l_izraz is None:
+            tip = svojstva_cast['tip']
+            l_izraz = svojstva_cast['l-izraz']
+        
+        elif not svojstva_cast['tip'].je_li_svodivo( tip ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def aditivni_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        cvor_multiplikativni = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_multiplikativni = cvor.djeca[2]
+            
+            svojstva_aditivni = {}
+            if not self.aditivni_izraz( cvor.djeca[0], djelokrug,
+                                        svojstva_aditivni ):
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            
+            if not svojstva_aditivni['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = False
+        
+        svojstva_multiplikativni = {}
+        if not self.multiplikativni_izraz( cvor_multiplikativni, djelokrug,
+                                            svojstva_multiplikativni ):
+            return False
+        
+        if l_izraz is None:
+            tip = svojstva_multiplikativni['tip']
+            l_izraz = svojstva_multiplikativni['l-izraz']
+        
+        elif not svojstva_multiplikativni['tip'].je_li_svodivo( tip ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def odnosni_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        cvor_aditivni = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_aditivni = cvor.djeca[2]
+            
+            svojstva_odnosni = {}
+            if not self.odnosni_izraz( cvor.djeca[0], djelokrug,
+                                        svojstva_odnosni ):
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            
+            if not svojstva_odnosni['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = False
+        
+        svojstva_aditivni = {}
+        if not self.aditivni_izraz( cvor_aditivni, djelokrug,
+                                    svojstva_aditivni ):
+            return False
+        
+        if l_izraz is None:
+            tip = svojstva_aditivni['tip']
+            l_izraz = svojstva_aditivni['l-izraz']
+        
+        elif not svojstva_aditivni['tip'].je_li_svodivo( tip ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def jednakosni_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        cvor_odnosni = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_odnosni = cvor.djeca[2]
+            
+            svojstva_jednakosni = {}
+            if not self.jednakosni_izraz( cvor.djeca[0], djelokrug,
+                                        svojstva_jednakosni ):
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            
+            if not svojstva_jednakosni['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = False
+        
+        svojstva_odnosni = {}
+        if not self.odnosni_izraz( cvor_odnosni, djelokrug, svojstva_odnosni ):
+            return False
+        
+        if l_izraz is None:
+            tip = svojstva_odnosni['tip']
+            l_izraz = svojstva_odnosni['l-izraz']
+        
+        elif not svojstva_odnosni['tip'].je_li_svodivo( tip ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def bin_i_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        cvor_jednakosni = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_jednakosni = cvor.djeca[2]
+            
+            svojstva_bi = {}
+            if not self.bin_i_izraz( cvor.djeca[0], djelokrug, svojstva_bi ):
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            
+            if not svojstva_bi['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = False
+        
+        svojstva_jednakosni = {}
+        if not self.jednakosni_izraz( cvor_jednakosni, djelokrug,
+                                    svojstva_jednakosni ):
+            return False
+        
+        if l_izraz is None:
+            tip = svojstva_jednakosni['tip']
+            l_izraz = svojstva_jednakosni['l-izraz']
+        
+        elif not svojstva_jednakosni['tip'].je_li_svodivo( tip ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def bin_xili_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        cvor_bin_i = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_bin_i = cvor.djeca[2]
+            
+            svojstva_xili = {}
+            if not self.bin_xili_izraz( cvor.djeca[0], djelokrug,
+                                        svojstva_xili ):
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            
+            if not svojstva_xili['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = False
+        
+        svojstva_bi = {}
+        if not self.bin_i_izraz( cvor_log_i, djelokrug, svojstva_bi ):
+            return False
+        
+        if l_izraz is None:
+            tip = svojstva_bi['tip']
+            l_izraz = svojstva_bi['l-izraz']
+        
+        elif not svojstva_bi['tip'].je_li_svodivo( tip ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def bin_ili_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        cvor_bin_xi = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_bin_xi = cvor.djeca[2]
+            
+            svojstva_ili = {}
+            if not self.bin_ili_izraz( cvor.djeca[0], djelokrug, svojstva_ili ):
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            
+            if not svojstva_ili['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = False
+        
+        svojstva_bxi = {}
+        if not self.bin_xili_izraz( cvor_bin_xi, djelokrug, svojstva_bxi ):
+            return False
+        
+        if l_izraz is None:
+            tip = svojstva_bxi['tip']
+            l_izraz = svojstva_bxi['l-izraz']
+        
+        elif not svojstva_bxi['tip'].je_li_svodivo( tip ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
+    def log_i_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
+        
+        tip = None
+        l_izraz = None
+        
+        cvor_bin_ili = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_bin_ili = cvor.djeca[2]
+            
+            svojstva_i = {}
+            if not self.log_ili_izraz( cvor.djeca[0], djelokrug, svojstva_i ):
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            
+            if not svojstva_i['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = False
+        
+        svojstva_bili = {}
+        if not self.bin_ili_izraz( cvor_bin_ili, djelokrug, svojstva_bili ):
+            return False
+        
+        if l_izraz is None:
+            tip = svojstva_bili['tip']
+            l_izraz = svojstva_bili['l-izraz']
+        
+        elif not svojstva_bili['tip'].je_li_svodivo( tip ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
+    
+    
     def log_ili_izraz( self, cvor, djelokrug, izvedena_svojstva = {} ):
-        pass
+        
+        tip = None
+        l_izraz = None
+        
+        cvor_log_i = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_log_i = cvor.djeca[2]
+            
+            svojstva_ili = {}
+            if not self.log_ili_izraz( cvor.djeca[0], djelokrug, svojstva_ili ):
+                return False
+            
+            tip = JednostavniTip( 'int' )
+            
+            if not svojstva_ili['tip'].je_li_svodivo( tip ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            l_izraz = False
+        
+        svojstva_i = {}
+        if not self.log_i_izraz( cvor_log_i, djelokrug, svojstva_i ):
+            return False
+        
+        if l_izraz is None:
+            tip = svojstva_i['tip']
+            l_izraz = svojstva_i['l-izraz']
+        
+        elif not svojstva_i['tip'].je_li_svodivo( tip ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        izvedena_svojstva['tip'] = tip
+        izvedena_svojstva['l-izraz'] = l_izraz
+        return True
     
     
     def izraz_pridruzivanja( self, cvor, djelokrug, izvedena_svojstva = {} ):
