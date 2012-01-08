@@ -40,11 +40,11 @@ class SemantickiAnalizator:
                 return False
         
         if not self.mainPostoji:
-            self.tok_za_ispis.write( 'main' )
+            self.tok_za_ispis.write( 'main\n' )
             return False
         
         if len( self.funkcije_bez_definicije.keys() ) > 0:
-            self.tok_za_ispis.write( 'funkcija' )
+            self.tok_za_ispis.write( 'funkcija\n' )
             return False
         
         return True
