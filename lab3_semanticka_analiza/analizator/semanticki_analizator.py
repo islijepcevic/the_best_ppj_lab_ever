@@ -248,8 +248,11 @@ class SemantickiAnalizator:
             # funkcija s void domenom
             elif len( cvor.djeca ) == 3:
                 
+                tip_domena = svojstva_postfiks['tip']
+                
                 if type( svojstva_postfiks['tip'] ) != TipFunkcija or \
-                    not svojstva_postfiks['tip'].domena.je_li_void():
+                    type( tip_domena ) != JednostavniTip or \
+                    not tip_domena.je_li_void():
                     
                     self.ispisi_produkciju( cvor )
                     return False
