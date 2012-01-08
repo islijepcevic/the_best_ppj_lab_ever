@@ -1359,4 +1359,112 @@ class SemantickiAnalizator:
     
     
     def inicijalizator( self, cvor, djelokrug, izvedena_svojstva = {} ):
-        pass
+        
+        if len( cvor.djeca ) == 1:
+            
+            svojstva_pridruzivanje = {}
+            if not self.izraz_pridruzivanja( cvor.djeca[0], djelokrug,
+                                            svojstva_pridruzivanje ):
+                return False
+            
+            listovi = self.dohvati_listove( cvor.djeca[0] )
+            
+            self.pisi( listovi )
+            
+            if len( listovi ) == 1 and \
+                listovi[0].uniformni_znak == 'NIZ_ZNAKOVA':
+                
+                br_elem = self.izbroji_znakove( listovi[0].leksicka_jedinka )
+                br_elem += 1 # ZA ZAVRSNI '\0' ZNAK
+                
+                tipovi = [ JednostavniTip( 'char' ) ] * br_elem
+                
+                izvedena_svojstva['br-elem'] = br_elem
+                izvedena_svojstva['tipovi'] = tipovi
+            
+            else:
+                izvedena_svojstva['tip'] = svojstva_pridruzivanje['tip']
+        
+        else:
+            
+            svojstva_lista = {}
+            if not self.lista_izraza_pridruzivanja( cvor.djeca[1], djelokrug,
+                                                    svojstva_lista ):
+                return False
+            
+            izvedena_svojstva['br-elem'] = svojstva_lista['br-elem']
+            izvedena_svojstva['tipovi'] = svojstva_lista['tipovi']
+        
+        return True
+    
+    
+    def lista_izraza_pridruzivanja( self, cvor, djelokrug,
+                                    izvedena_svojstva = {} ):
+        
+        tipovi = []
+        br_elem = 0
+        
+        cvor_pridruzivanje = cvor.djeca[0]
+        
+        if len( cvor.djeca ) > 1:
+            
+            cvor_pridruzivanje = cvor.djeca[2]
+            
+            svojstva_lista = {}
+            if not self.lista_izraza_pridruzivanja( cvor.djeca[0], djelokrug,
+                                                    svojstva_lista ):
+                return False
+            
+            tipovi = svojstva_lista['tipovi']
+            br_elem = svojstva_lista['br-elem']
+        
+        svojstva_pridruzivanje = {}
+        if not self.izraz_pridruzivanja( cvor_pridruzivanje, djelokrug,
+                                        svojstva_pridruzivanje ):
+            return False
+        
+        tipovi.append( svojstva_pridruzivanje['tip'] )
+        br_elem += 1
+        
+        izvedena_svojstva['tipovi'] = tipovi
+        izvedena_svojstva['br-elem'] = br_elem
+        return True
+    
+    
+    ######################### DODATNE POMOCNE METODE ###########################
+    
+    
+    def dohvati_listove( self, cvor ):
+        
+        listovi = []
+        
+        for dijete in cvor.djeca:
+            
+            if type( dijete ) == LeksickaJedinka:
+                listovi.append( dijete )
+            
+            else:
+                listovi.append( self.dohvati_listove( dijete ) )
+        
+        return listovi
+    
+    
+    def izbroji_znakove( self, niz_znakova ):
+        
+        prefiksirano = False
+        broj = 0
+        
+        for znak in niz_znakova[1:-1]:
+            
+            if prefiksirano:
+                prefiksirano = False
+                
+                broj += 1
+            
+            else:
+                if znak == '\\':
+                    prefiksirano = True
+                else:
+                    broj += 1
+        
+        return broj
