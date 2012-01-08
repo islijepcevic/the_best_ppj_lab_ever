@@ -899,16 +899,27 @@ class SemantickiAnalizator:
     
     
     def slozena_naredba( self, cvor, djelokrug, tip_funkcije = None,
-                        imena_parametara = None ):
+                        imena_parametara = None, petlja = False ):
         
         cvor_naredbe = cvor.djeca[1]
-        lokalni_djelokrug = Djelokrug( djelokrug )
+        lokalni_djelokrug = None
         
         # prebacivanje parametara funkcije u lokalni djelokrug
-        if tip_funkcije is not None and not tip_funkcije.je_li_domena_void():
+        if tip_funkcije is not None:
             
-            for tip, ime in zip( tip_funkcije.domena, imena_parametara ):
-                lokalni_djelokrug.dodaj( ime, tip )
+            # stvori novi lokalni djelokrug, zapamti povratni tip
+            lokalni_djelokrug = Djelokrug( djelokrug,
+                                            povrat = tip_funkcije.kodomena )
+            
+            # dodaj parametre funkcije kao varijable lokalnog djelokruga
+            if not tip_funkcije.je_li_domena_void():
+                for tip, ime in zip( tip_funkcije.domena, imena_parametara ):
+                    lokalni_djelokrug.dodaj( ime, tip )
+        
+        # nije tijelo funkcije
+        else:
+            # stvori novi lokalni "obicni" djelokrug
+            lokalni_djelokrug = Djelokrug( djelokrug, petlja )
         
         if cvor.djeca[1].nezavrsni_znak == '<lista_deklaracija>':
             
@@ -933,18 +944,18 @@ class SemantickiAnalizator:
         return self.naredba( cvor_naredba, djelokrug )
     
     
-    def naredba( self, cvor, djelokrug ):
+    def naredba( self, cvor, djelokrug, petlja = False ):
         
         cvor_znak = cvor.djeca[0].nezavrsni_znak
         
         if cvor_znak == '<slozena_naredba>':
-            return self.slozena_naredba( cvor.djeca[0], djelokrug )
+            return self.slozena_naredba( cvor.djeca[0], djelokrug, petlja )
             
         elif cvor_znak == '<izraz_naredba>':
             return self.izraz_naredba( cvor.djeca[0], djelokrug )
             
         elif cvor_znak == '<naredba_grananja>':
-            return self.naredba_grananja( cvor.djeca[0], djelokrug )
+            return self.naredba_grananja( cvor.djeca[0], djelokrug, petlja )
             
         elif cvor_znak == '<naredba_petlje>':
             return self.naredba_petlje( cvor.djeca[0], djelokrug )
@@ -969,7 +980,7 @@ class SemantickiAnalizator:
         return True
     
     
-    def naredba_grananja( self, cvor, djelokrug ):
+    def naredba_grananja( self, cvor, djelokrug, petlja = False ):
         
         tip_int = JednostavniTip( 'int' )
         
@@ -982,13 +993,13 @@ class SemantickiAnalizator:
             return False
         
         # naredba prije eventualnog else
-        if not self.naredba( cvor.djeca[4], djelokrug ):
+        if not self.naredba( cvor.djeca[4], djelokrug, petlja ):
             return False
             
         # slucaj else
         if len( cvor.djeca ) == 7:
             
-            if not self.naredba( cvor.djeca[6], djelokrug ):
+            if not self.naredba( cvor.djeca[6], djelokrug, petlja ):
                 return False
         
         return True
@@ -1009,7 +1020,7 @@ class SemantickiAnalizator:
                 self.ispisi_produkciju( cvor )
                 return False
             
-            if not self.naredba( cvor.djeca[4], djelokrug ):
+            if not self.naredba( cvor.djeca[4], djelokrug, True ):
                 return False
         
         # for petlja kraca verzija
@@ -1036,14 +1047,48 @@ class SemantickiAnalizator:
                 if not self.izraz( cvor.djeca[4], djelokrug ):
                     return False
             
-            if not self.naredba( cvor_naredba, djelokrug ):
+            if not self.naredba( cvor_naredba, djelokrug, True ):
                 return False
         
         return True
     
     
     def naredba_skoka( self, cvor, djelokrug ):
-        # TODO
+        
+        skok = cvor.djeca[0]
+        
+        # break ili continue
+        if skok.uniformni_znak == 'KR_CONTINUE' or \
+            skok.uniformni_znak == 'KR_BREAK':
+            
+            if not djelokrug.unutar_petlje():
+                self.ispisi_produkciju( cvor )
+                return False
+        
+        # return bez izraza
+        elif len( cvor.djeca ) == 2:
+            
+            povratni_tip = djelokrug.dohvati_povratni_tip()
+            
+            if povratni_tip is None or not povratni_tip.je_li_void():
+                self.ispisi_produkciju( cvor )
+                return False
+            
+        # return s izrazom
+        else:
+            
+            svojstva_izraz = {}
+            if not self.izraz( cvor.djeca[1], djelokrug, svojstva_izraz ):
+                return False
+            
+            povratni_tip = djelokrug.dohvati_povratni_tip() 
+            
+            if povratni_tip is None or \
+                not svojstva_izraz['tip'].je_li_svodivo( povratni_tip ):
+                
+                self.ispisi_produkciju( cvor )
+                return False
+        
         return True
     
     

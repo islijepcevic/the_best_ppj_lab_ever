@@ -2,11 +2,20 @@
 
 class Djelokrug:
     
-    def __init__( self, nad_djelokrug = None ):
+    def __init__( self, nad_djelokrug = None, petlja = False, povrat = None ):
         
         self.nad_djelokrug = nad_djelokrug
         
         self.tablica = {}   # k: ime, v: tip
+        
+        # True ako je djelokrug direktno unutar neke petlje,
+        # pretrazivati rekurzivno
+        self.petlja = petlja
+        
+        # ako je blok tijelo neke funkcije
+        # onda je povrat tip povratnog parametra (kodomena), inace None
+        # pretrazivati rekurzivno
+        self.povrat = povrat
     
     
     def dodaj( self, ime, tip ):
@@ -63,6 +72,29 @@ class Djelokrug:
                                     self.nad_djelokrug.dohvati_tip( ime ) )
         
         return self.tablica.get( ime, False )
+    
+    
+    def unutar_petlje( self ):
+        
+        if self.petlja:
+            return True
+        
+        if self.nad_djelokrug is None:
+            return False
+        
+        return self.nad_djelokrug.unutar_petlje()
+    
+    
+    def dohvati_povratni_tip( self ):
+        '''dohvaca rekurzivno do globalnog djelokruga povratni tip funkcije'''
+        
+        if self.povrat is not None:
+            return self.povrat
+        
+        if self.nad_djelokrug is None:
+            return None
+        
+        return self.nad_djelokrug.dohvati_povratni_tip()
     
     
     def __repr__( self ):
