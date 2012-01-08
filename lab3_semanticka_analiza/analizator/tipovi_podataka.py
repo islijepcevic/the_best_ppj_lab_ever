@@ -35,12 +35,31 @@ class JednostavniTip( TipPodatka ):
     
     def je_li_svodivo( self, tip ):
         
-        # TODO
+        if type( tip ) != JednostavniTip:
+            return False
+        
+        # jedina moguca razlika u const; to je svodivo
+        if self.tip == tip.tip:
+            return True
+        
+        # void moze ostati samo void, int ne ide u nista nize
+        elif self.tip == 'void' or self.tip == 'int':
+            return False
+        
         return True
     
     
     def je_li_svodivo_eksplicitno( self, tip ):
-        # TODO
+        
+        if type( tip ) != JednostavniTip:
+            return False
+        
+        if self.tip == tip.tip:
+            return True
+        
+        if tip.tip == 'void':
+            return False
+        
         return True
     
     
@@ -109,14 +128,35 @@ class TipFunkcija( TipPodatka ):
     
     
     def je_li_svodivo( self, funkcija ):
-        # mozda nepotrebno
-        # TODO
+        '''mislim da se ovo nikad ne poziva, ipak ovdje je logika'''
+        
+        if type( funkcija ) != TipFunkcija:
+            return False
+        
+        # mislim da je ovaj uvjet nepotreban, mozda ga treba maknuti
+        if not self.kodomena.je_li_svodivo( funkcija.kodomena ):
+            return False
+        
+        if len( self.domena ) != len( funkcija.domena ):
+            return False
+        
+        for svoj, tudi in zip( self.domena, funkcija.domena ):
+            
+            if not svoj.je_li_svodivo( tudi ):
+                return False
+        
         return True
     
     
     def je_li_svodivo_eksplicitno( self, tip ):
-        # TODO
-        return True
+        
+        #if type( tip ) != JednostavniTip:
+            #return False
+        
+        #return self.kodomena.je_li_svodivo_eksplicitno( tip )
+        
+        # ako sam shvatio upute, onda je ovo tocno
+        return False
     
     
     def je_li_domena_void( self ):
@@ -197,13 +237,19 @@ class TipNiz( TipPodatka ):
     
     def je_li_svodivo( self, tip ):
         '''moze li se self.tip svesti na tip?'''
-        # TODO
-        return True
+        
+        if type( tip ) != TipNiz:
+            return False
+        
+        if self.je_li_const() and not tip.je_li_const():
+            return False
+        
+        return self.tip.je_li_svodivo( tip.tip )
     
     
     def je_li_svodivo_eksplicitno( self, tip ):
-        # TODO
-        return True
+        '''po uputi, ovo se ne smije'''
+        return False
     
     
     def je_li_l_izraz( self ):

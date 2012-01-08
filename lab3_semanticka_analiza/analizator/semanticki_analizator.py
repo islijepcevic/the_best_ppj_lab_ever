@@ -200,7 +200,7 @@ class SemantickiAnalizator:
         
         tip = None
         l_izraz = None
-        self.pisi( 'postfiks' )
+        
         # primarni_izraz
         if len( cvor.djeca ) == 1:
             
