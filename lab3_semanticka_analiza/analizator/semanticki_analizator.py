@@ -403,9 +403,13 @@ class SemantickiAnalizator:
                 
                 self.ispisi_produkciju( cvor )
                 return False
+            
+            tip = svojstva_ime_tipa['tip']
+            l_izraz = False
         
         izvedena_svojstva['tip'] = tip
         izvedena_svojstva['l-izraz'] = l_izraz
+        
         return True
     
     
