@@ -111,7 +111,20 @@ class SemantickiAnalizator:
         
         elif prva_jedinka.uniformni_znak == 'BROJ':
             
-            vrijednost = int( prva_jedinka.leksicka_jedinka, 0 )
+            vrijednost = prva_jedinka.leksicka_jedinka
+            
+            try:
+                vrijednost = int( vrijednost, 0 )
+            except:
+                vrijednost = int( vrijednost, 8 )
+            
+            '''if len( vrijednost ) == 1:
+                vrijednost = int( vrijednost )
+            
+            if vrijednost[0] == '0' and vrijednost[1].upper() != 'X':
+                vrijednost = int( vrijednost, 8 )
+            else:
+                vrijednost = int( vrijednost, 0 )'''
             
             if vrijednost < (- 2 ** 31 ) or vrijednost > ( 2 ** 31 - 1 ):
                 self.tok_za_greske.write( 'sto pise: ' + \
