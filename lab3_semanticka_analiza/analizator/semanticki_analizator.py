@@ -971,22 +971,80 @@ class SemantickiAnalizator:
     
     def naredba_grananja( self, cvor, djelokrug ):
         
-        # slucaj bez else
-        if len( cvor.djeca ) == 5:
+        tip_int = JednostavniTip( 'int' )
+        
+        svojstva_izraz = {}
+        if not self.izraz( cvor.djeca[2], djelokrug, svojstva_izraz ):
+            return False
+        
+        if not svojstva_izraz['tip'].je_li_svodivo( tip_int ):
+            self.ispisi_produkciju( cvor )
+            return False
+        
+        # naredba prije eventualnog else
+        if not self.naredba( cvor.djeca[4], djelokrug ):
+            return False
             
-            pass
+        # slucaj else
+        if len( cvor.djeca ) == 7:
             
-        # slucaj sa else
-        else:
-            pass
+            if not self.naredba( cvor.djeca[6], djelokrug ):
+                return False
+        
+        return True
     
     
     def naredba_petlje( self, cvor, djelokrug ):
-        pass
+        
+        tip_int = JednostavniTip( 'int' )
+        
+        # while petlja
+        if cvor.djeca[0].uniformni_znak == 'KR_WHILE':
+            
+            svojstva_izraz = {}
+            if not self.izraz( cvor.djeca[2], djelokrug, svojstva_izraz ):
+                return False
+            
+            if not svojstva_izraz['tip'].je_li_svodivo( tip_int ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            if not self.naredba( cvor.djeca[4], djelokrug ):
+                return False
+        
+        # for petlja kraca verzija
+        else:
+            
+            if not self.izraz_naredba( cvor.djeca[2], djelokrug ):
+                return False
+            
+            svojstva2 = {}
+            if not self.izraz_naredba( cvor.djeca[3], djelokrug, svojstva2 ):
+                return False
+            
+            if not svojstva2['tip'].je_li_svodivo( tip_int ):
+                self.ispisi_produkciju( cvor )
+                return False
+            
+            cvor_naredba = cvor.djeca[5]
+            
+            # for sa izrazom na trecem mjestu
+            if len( cvor.djeca ) == 7:
+                
+                cvor_naredba = cvor.djeca[6]
+                
+                if not self.izraz( cvor.djeca[4], djelokrug ):
+                    return False
+            
+            if not self.naredba( cvor_naredba, djelokrug ):
+                return False
+        
+        return True
     
     
     def naredba_skoka( self, cvor, djelokrug ):
-        pass
+        # TODO
+        return True
     
     
     def prijevodna_jedinica( self, cvor, djelokrug ):
