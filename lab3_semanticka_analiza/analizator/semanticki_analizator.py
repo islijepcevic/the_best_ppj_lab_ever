@@ -970,7 +970,15 @@ class SemantickiAnalizator:
     
     
     def naredba_grananja( self, cvor, djelokrug ):
-        pass
+        
+        # slucaj bez else
+        if len( cvor.djeca ) == 5:
+            
+            pass
+            
+        # slucaj sa else
+        else:
+            pass
     
     
     def naredba_petlje( self, cvor, djelokrug ):
