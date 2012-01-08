@@ -111,7 +111,7 @@ class SemantickiAnalizator:
         
         elif prva_jedinka.uniformni_znak == 'BROJ':
             
-            vrijednost = int( prva_jedinka.leksicka_jedinka )
+            vrijednost = int( prva_jedinka.leksicka_jedinka, 0 )
             
             if vrijednost < (- 2 ** 31 ) or vrijednost > ( 2 ** 31 - 1 ):
                 self.tok_za_greske.write( 'sto pise: ' + \
@@ -972,7 +972,7 @@ class SemantickiAnalizator:
     
     def izraz_naredba( self, cvor, djelokrug, izvedena_svojstva = {} ):
         
-        tip = 'int'
+        tip = JednostavniTip( 'int' )
         
         if len( cvor.djeca ) > 1:
             
