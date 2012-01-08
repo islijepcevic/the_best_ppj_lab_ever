@@ -248,7 +248,7 @@ class SemantickiAnalizator:
             # funkcija s void domenom
             elif len( cvor.djeca ) == 3:
                 
-                tip_domena = svojstva_postfiks['tip']
+                tip_domena = svojstva_postfiks['tip'].domena
                 
                 if type( svojstva_postfiks['tip'] ) != TipFunkcija or \
                     type( tip_domena ) != JednostavniTip or \
@@ -309,7 +309,7 @@ class SemantickiAnalizator:
                 
                 # dohvati jednostavni tip niza
                 tip = svojstva_postfiks['tip'].tip
-                l_izraz = not tip.je_li_const
+                l_izraz = not tip.je_li_const()
         
         izvedena_svojstva['tip'] = tip
         izvedena_svojstva['l-izraz'] = l_izraz
@@ -875,7 +875,7 @@ class SemantickiAnalizator:
                                             svojstva_pridruzivanje ):
                 return False
             
-            if not tip.je_li_svodivo( svojstva_pridruzivanje['tip'] ):
+            if not svojstva_pridruzivanje['tip'].je_li_svodivo( tip ):
                 self.ispisi_produkciju( cvor )
                 return False
             
@@ -983,7 +983,7 @@ class SemantickiAnalizator:
             return self.naredba_petlje( cvor.djeca[0], djelokrug )
         
         # zadnji slucaj: cvor_znak == '<naredba_skoka>'
-        return self.naredba_skoka( cvor.djeca[0], djelokrug )
+        return self.naredba_skoka( cvor.djeca[0], djelokrug, petlja )
     
     
     def izraz_naredba( self, cvor, djelokrug, izvedena_svojstva = {} ):
@@ -1075,7 +1075,10 @@ class SemantickiAnalizator:
         return True
     
     
-    def naredba_skoka( self, cvor, djelokrug ):
+    def naredba_skoka( self, cvor, djelokrug, petlja = False ):
+        '''parametar petlja je ovdje za slucaj kad je u programskoj petlji
+        ovo jedina naredba (dakle nema bloka naredbi kao <slozena_naredba> )
+        '''
         
         skok = cvor.djeca[0]
         
@@ -1083,7 +1086,7 @@ class SemantickiAnalizator:
         if skok.uniformni_znak == 'KR_CONTINUE' or \
             skok.uniformni_znak == 'KR_BREAK':
             
-            if not djelokrug.unutar_petlje():
+            if not petlja and not djelokrug.unutar_petlje():
                 self.ispisi_produkciju( cvor )
                 return False
         
@@ -1121,14 +1124,18 @@ class SemantickiAnalizator:
         
         if cvor.djeca[0].nezavrsni_znak == '<vanjska_deklaracija>':
             
-            povratak = self.vanjska_deklaracija( cvor.djeca[0], djelokrug )
+            if not self.vanjska_deklaracija( cvor.djeca[0], djelokrug ):
+                return False
         
         else:
             
-            povratak = self.prijevodna_jedinica( cvor.djeca[0], djelokrug )
-            povratak = self.vanjska_deklaracija( cvor.djeca[1], djelokrug )
+            if not self.prijevodna_jedinica( cvor.djeca[0], djelokrug ):
+                return False
             
-        return povratak
+            if not self.vanjska_deklaracija( cvor.djeca[1], djelokrug ):
+                return False
+        
+        return True
     
     
     def vanjska_deklaracija( self, cvor, djelokrug ):

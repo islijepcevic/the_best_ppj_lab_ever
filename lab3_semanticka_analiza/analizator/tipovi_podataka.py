@@ -110,7 +110,7 @@ class JednostavniTip( TipPodatka ):
     
     def __repr__( self ):
         ispis = self.tip
-        if self.je_li_const:
+        if self.je_li_const():
             ispis = 'const(' + ispis + ')'
         
         return ispis
