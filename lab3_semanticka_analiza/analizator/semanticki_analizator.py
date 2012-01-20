@@ -17,6 +17,8 @@ class SemantickiAnalizator:
         self.tok_za_ispis = tok_za_ispis
         self.tok_za_greske = tok_za_greske
         
+        self.semanticki_ispravno = True
+        
         # popis funkcija s definicijom, k: ime, v: tip
         self.definirane_funkcije = {}
         
@@ -41,13 +43,15 @@ class SemantickiAnalizator:
         
         if not self.mainPostoji:
             self.tok_za_ispis.write( 'main\n' )
+            self.semanticki_ispravno = False
             return False
         
         if len( self.funkcije_bez_definicije.keys() ) > 0:
             self.tok_za_ispis.write( 'funkcija\n' )
+            self.semanticki_ispravno = False
             return False
         
-        return True
+        return self.semanticki_ispravno
     
     
     def ispisi_produkciju( self, cvor ):
@@ -67,6 +71,7 @@ class SemantickiAnalizator:
         ispis += '\n'
         
         self.tok_za_ispis.write( ispis )
+        self.semanticki_ispravno = False
         return
     
     
@@ -127,11 +132,12 @@ class SemantickiAnalizator:
                 vrijednost = int( vrijednost, 0 )'''
             
             if vrijednost < (- 2 ** 31 ) or vrijednost > ( 2 ** 31 - 1 ):
-                self.tok_za_greske.write( 'sto pise: ' + \
+                '''self.tok_za_greske.write( 'sto pise: ' + \
                                             prva_jedinka.leksicka_jedinka + \
                                             '\n' )
                 self.tok_za_greske.write( 'sto se dobilo: ' + \
                                             str( vrijednost ) + '\n' )
+                '''
                 self.ispisi_produkciju( cvor )
                 return False
             
@@ -151,6 +157,10 @@ class SemantickiAnalizator:
                     self.ispisi_produkciju( cvor )
                     return False
             
+            elif znak[1] == '\\':
+                self.ispisi_produkciju( cvor )
+                return False
+            
             if not ascii.isprint( znak[1] ):
                 self.ispisi_produkciju( cvor )
                 return False
@@ -164,12 +174,14 @@ class SemantickiAnalizator:
             
             prefiksirano = False
             
-            specijalni = { 't': '\t', 'n': '\n', '\'': '\'', '"': '\"', \
-                            '\\': '\\' }
+            specijalni = { 't': '\t', 'n': '\n', '0': '\0', '\'': '\'', \
+                            '"': '\"', '\\': '\\' }
+            zadnji = ''
             
             for znak in niz[1:-1]:
                 
                 if prefiksirano:
+                    zadnji = ''
                     prefiksirano = False
                     
                     prefiksirani_znak = specijalni.get( znak )
@@ -179,6 +191,7 @@ class SemantickiAnalizator:
                         return False
                 
                 else:
+                    zadnji = znak
                     
                     if znak == '\\':
                         prefiksirano = True
@@ -188,7 +201,7 @@ class SemantickiAnalizator:
                             self.ispisi_produkciju( cvor )
                             return False
             
-            if prefiksirano:
+            if prefiksirano or zadnji == '"':
                 self.ispisi_produkciju( cvor )
                 return False
             
@@ -1336,6 +1349,7 @@ class SemantickiAnalizator:
         
         if len( cvor.djeca ) == 1:
             if svojstva_izravni['tip'].je_li_const():
+                self.ispisi_produkciju( cvor )
                 return False
         
         # slucaj sa inicijalizatorom

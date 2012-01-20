@@ -5,12 +5,14 @@ Ivan Slijepcevic
 '''
 
 import sys
+import os
 from lexycalanalyzer import LexycalAnalyzer
 from automatparser import AutomatParser
 
 if __name__ == '__main__':
     
-    upute = 'analizator.upute'
+    src = os.path.dirname( os.path.realpath( __file__ ) ) + '/'
+    upute = src + 'analizator.upute'
     
     parser = AutomatParser( upute, sys.stdin )
     

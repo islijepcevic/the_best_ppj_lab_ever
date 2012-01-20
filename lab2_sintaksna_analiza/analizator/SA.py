@@ -1,11 +1,14 @@
 '''main sintaksnog analizatora'''
 
 import sys
+import os
 
 from parser_analizatora import ParserAnalizatora
 
-datoteka_tablice = 'tablice.upute'
-datoteka_sinkronizacijski = 'sinkronizacijski.upute'
+src = os.path.dirname( os.path.realpath( __file__ ) ) + '/'
+
+datoteka_tablice = src + 'tablice.upute'
+datoteka_sinkronizacijski = src + 'sinkronizacijski.upute'
 
 if __name__ == '__main__':
     

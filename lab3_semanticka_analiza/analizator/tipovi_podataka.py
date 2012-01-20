@@ -43,8 +43,9 @@ class JednostavniTip( TipPodatka ):
             return True
         
         # void moze ostati samo void, int ne ide u nista nize
-        elif self.tip == 'void' or self.tip == 'int':
+        elif self.tip == 'void' or tip.tip == 'void' or self.tip == 'int':
             return False
+        
         
         return True
     
@@ -79,7 +80,7 @@ class JednostavniTip( TipPodatka ):
         if type( tip ) != JednostavniTip:
             return False
         
-        if self.je_li_void and tip.je_li_void:
+        if self.je_li_void() and tip.je_li_void():
             return True
         
         if self.tip == tip.tip:
@@ -254,7 +255,7 @@ class TipNiz( TipPodatka ):
     
     def je_li_l_izraz( self ):
         '''vraca true ako tip moze biti l-izraz'''
-        return not self.je_li_const()
+        return False
     
     
     def __eq__( self, tip ):
