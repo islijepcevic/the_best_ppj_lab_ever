@@ -22,7 +22,7 @@ class Parser:
         '''vraca korijen stabla'''
         
         self._citani_redak = 0
-        
+        #print( 'OVO JE ISPISANO GENERICKO STABLO', self._ispisano_stablo )
         dubina = self._dohvati_dubinu()
         ime = self._dohvati_element()
         
